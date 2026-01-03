@@ -1,0 +1,7 @@
+[formatter.nix]
+# Vi bruger alejandra (hurtig og kompromisløs) eller nixpkgs-fmt
+command = "alejandra"
+includes = ["*.nix"]
+
+# Undgå at formatere filer Git ignorerer
+walk = "git"
