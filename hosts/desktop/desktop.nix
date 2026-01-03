@@ -7,30 +7,29 @@
   inputs,
   ...
 }: {
-  imports = [
-    inputs.impermanence.nixosModules.impermanence
-  ];
-
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
       "/var/log"
+      "/var/lib/nixos"
       "/etc/NetworkManager/system-connections"
-      { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
+      {
+        directory = "/var/lib/colord";
+        user = "colord";
+        group = "colord";
+        mode = "u=rwx,g=rx,o=";
+      }
     ];
 
     files = [
       "/etc/machine-id"
-      { file = "/var/keys/age.key"; parentDirectory = { mode = "u=rwx,g=,o="; }; }
+      {
+        file = "/var/keys/age.key";
+        parentDirectory = {mode = "u=rwx,g=,o=";};
+      }
     ];
-
-    users.munkien = {
-      directories = [
-        "nixos"
-      ];
-    };
   };
-
+  programs.fuse.userAllowOther = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
   security.sudo.wheelNeedsPassword = false;
 
@@ -65,9 +64,7 @@
   };
 
   # Monitor HDD/SSDs
-  services.smartd = {
-    enable = true;
-  };
+  services.smartd.enable = !config.virtualisation.hypervGuest.enable;
 
   # Configure OOMd
   systemd.oomd = {
@@ -98,7 +95,7 @@
     enable = true;
     clean.enable = true;
     clean.dates = "daily";
-    clean.extraArgs = "--keep-since 30d --keep 3";
+    clean.extraArgs = "--keep-since 30d --keep 10";
     flake = "/home/munkien/nixos";
   };
 
@@ -213,6 +210,7 @@
     tuned
     deadnix
     pre-commit
+    nil
     nvd
     quickemu
   ];

@@ -13,9 +13,10 @@
   home.stateVersion = "25.11";
 
   home.persistence."/persist/home/munkien" = {
+    allowOther = true;
     directories = [
-      "nixos"
-      ".mozilla"
+      ".mozilla/firefox/munkien"
+      ".local/share/tor-browser"
       ".local/share/direnv"
       ".local/share/kate"
       ".config/discord"
@@ -48,6 +49,9 @@
     enable = true;
     profiles.munkien = {
       isDefault = true;
+      name = "munkien";
+      id = 0;
+      path = "munkien";
     };
   };
 
