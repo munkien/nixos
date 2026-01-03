@@ -20,7 +20,7 @@
     self,
     nixpkgs-unstable,
     home-manager-unstable,
-    impermanence
+    impermanence,
     ...
   } @ inputs: {
     nixosConfigurations = {

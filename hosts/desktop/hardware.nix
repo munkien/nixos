@@ -17,6 +17,9 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   virtualisation.hypervGuest.enable = true;
-  services.xrdp.enable = true;
-  services.xrdp.defaultWindowManager = "hyprland";
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true; # Absolut nødvendigt for Steam
+  };
 }

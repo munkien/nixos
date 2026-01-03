@@ -15,19 +15,14 @@
   };
 
   programs.steam = {
-  enable = true;
-  remotePlay.openFirewall = true; # Åbner porte til Steam Remote Play
-  dedicatedServer.openFirewall = true; # Åbner porte til Source Dedicated Server
-  localNetworkGameTransfers.openFirewall = true; # Hurtig overførsel mellem PC'er
-};
+    enable = true;
+    remotePlay.openFirewall = true; # Åbner porte til Steam Remote Play
+    dedicatedServer.openFirewall = true; # Åbner porte til Source Dedicated Server
+    localNetworkGameTransfers.openFirewall = true; # Hurtig overførsel mellem PC'er
+  };
 
-# Hjælpeservice: GameMode (forbedrer performance ved at prioritere CPU/GPU)
-programs.gamemode.enable = true;
-
-hardware.graphics = {
-  enable = true;
-  enable32Bit = true; # Absolut nødvendigt for Steam
-};
+  # Hjælpeservice: GameMode (forbedrer performance ved at prioritere CPU/GPU)
+  programs.gamemode.enable = true;
 
   programs.nh = {
     enable = true;
@@ -72,7 +67,6 @@ hardware.graphics = {
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
-  # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
@@ -96,12 +90,6 @@ hardware.graphics = {
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -150,6 +138,12 @@ hardware.graphics = {
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  programs.ssh = {
+    startAgent = true;
+    extraConfig = ''
+      AddKeysToAgent yes
+    '';
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

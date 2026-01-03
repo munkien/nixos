@@ -10,11 +10,6 @@
 
   home.packages = with pkgs; [
     firefox
-    kitty
-    wofi
-    waybar
-    grim
-    slurp
     cliphist
     wl-clipboard
   ];
@@ -22,14 +17,6 @@
   # Det er god stil at aktivere disse specifikt
   programs.bash.enable = true;
   programs.kitty.enable = true;
-
-  programs.ssh = {
-    enable = true;
-    startAgent = true;
-    extraConfig = ''
-      AddKeysToAgent yes
-    '';
-  };
 
   programs.git = {
     enable = true;
