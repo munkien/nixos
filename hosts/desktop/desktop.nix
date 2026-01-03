@@ -21,12 +21,59 @@
     localNetworkGameTransfers.openFirewall = true; # Hurtig overførsel mellem PC'er
   };
 
+  # Time, Dr. Freeman?
+  services.timesyncd = {
+    enable = true;
+    servers = [
+      "pool.ntp.org"
+    ];
+    fallbackServers = [
+      "time.google.com"
+    ];
+  };
+
+  # Secret config
+  sops.defaultSopsFile = ./nixos/secrets/common.yaml;
+  sops.age = {
+    sshKeyPaths = ["~/.ssh/ssh_host_ed25519_key"];
+    keyFile = "~/sops-nix-key.txt";
+    generateKey = true;
+  };
+
+  # Monitor HDD/SSDs
+  services.smartd = {
+    enable = true;
+  };
+
+  # Configure OOMd
+  systemd.oomd = {
+    enable = true;
+    enableRootSlice = true;
+    enableUserSlices = true;
+    enableSystemSlice = true;
+  };
+
+  # Configure builds and store
+  nix.settings.auto-optimise-store = true;
+  nix.settings.max-jobs = "auto";
+  nix.settings.cores = 0;
+
+  # Sandbox
+  nix.settings.sandbox = true;
+
+  # Configure tuned
+  services.tuned = {
+    enable = true;
+    settings.dynamic_tuning = true;
+  };
+
   # Hjælpeservice: GameMode (forbedrer performance ved at prioritere CPU/GPU)
   programs.gamemode.enable = true;
 
   programs.nh = {
     enable = true;
     clean.enable = true;
+    clean.dates = "daily";
     clean.extraArgs = "--keep-since 30d --keep 3";
     flake = "/home/munkien/nixos";
   };
@@ -34,6 +81,7 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.memtest86.enable = true;
 
   networking.hostName = "desktop"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -47,6 +95,18 @@
 
   # Set your time zone.
   time.timeZone = "Europe/Copenhagen";
+
+  # Auto upgrade
+  system.autoUpgrade = {
+    enable = true;
+    dates = "daily";
+    allowReboot = true;
+    randomizedDelaySec = "1hr";
+    rebootWindow = {
+      lower = "23:00";
+      upper = "06:00";
+    };
+  };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";
@@ -124,6 +184,17 @@
     home-manager
     protonup-qt
     gamescope
+    wget
+    git
+    age
+    pwgen
+    lsof
+    sops
+    tuned
+    deadnix
+    pre-commit
+    nvd
+    quickemu
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
