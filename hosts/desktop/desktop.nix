@@ -7,6 +7,30 @@
   inputs,
   ...
 }: {
+  imports = [
+    inputs.impermanence.nixosModules.impermanence
+  ];
+
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/var/log"
+      "/etc/NetworkManager/system-connections"
+      { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
+    ];
+
+    files = [
+      "/etc/machine-id"
+      { file = "/var/keys/age.key"; parentDirectory = { mode = "u=rwx,g=,o="; }; }
+    ];
+
+    users.munkien = {
+      directories = [
+        "nixos"
+      ];
+    };
+  };
+
   nix.settings.experimental-features = ["nix-command" "flakes"];
   security.sudo.wheelNeedsPassword = false;
 
@@ -82,6 +106,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.memtest86.enable = true;
+  boot.initrd.systemd.enable = true;
 
   networking.hostName = "desktop"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -169,7 +194,7 @@
 
   programs.nix-ld.enable = true;
   nixpkgs.config.allowUnfree = true;
-
+  home-manager.backupFileExtension = "backup";
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
