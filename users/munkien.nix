@@ -14,6 +14,20 @@
     wl-clipboard
   ];
 
+  home.persistence."/persist/home/munkien" = {
+    allowOther = true;
+    directories = [
+      "nixos"              # ~/nixos -> /persist/home/munkien/nixos
+      ".local/share/kate"  # Gemmer dine Kate-indstillinger
+      { directory = ".ssh"; mode = "0700"; } # Din personlige SSH med de rigtige rettigheder
+    ];
+    files = [
+      ".config/katerc"
+      ".config/katemetainfos"
+      ".config/kateschemarc"
+    ];
+  };
+
   # Det er god stil at aktivere disse specifikt
   programs.bash.enable = true;
   programs.kitty.enable = true;
