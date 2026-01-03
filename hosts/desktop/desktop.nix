@@ -14,6 +14,21 @@
     enable = true;
   };
 
+  programs.steam = {
+  enable = true;
+  remotePlay.openFirewall = true; # Åbner porte til Steam Remote Play
+  dedicatedServer.openFirewall = true; # Åbner porte til Source Dedicated Server
+  localNetworkGameTransfers.openFirewall = true; # Hurtig overførsel mellem PC'er
+};
+
+# Hjælpeservice: GameMode (forbedrer performance ved at prioritere CPU/GPU)
+programs.gamemode.enable = true;
+
+hardware.graphics = {
+  enable = true;
+  enable32Bit = true; # Absolut nødvendigt for Steam
+};
+
   programs.nh = {
     enable = true;
     clean.enable = true;
@@ -119,6 +134,8 @@
     treefmt
     alejandra
     home-manager
+    protonup-qt
+    gamescope
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -132,7 +149,7 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

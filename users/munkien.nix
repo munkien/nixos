@@ -15,10 +15,9 @@
     waybar
     grim
     slurp
+    cliphist
     wl-clipboard
   ];
-
-
 
   # Det er god stil at aktivere disse specifikt
   programs.bash.enable = true;
