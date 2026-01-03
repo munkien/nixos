@@ -13,12 +13,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
+    impermanence.url = "github:nix-community/impermanence";
   };
 
   outputs = {
     self,
     nixpkgs-unstable,
     home-manager-unstable,
+    impermanence
     ...
   } @ inputs: {
     nixosConfigurations = {
@@ -30,6 +32,7 @@
           ./hosts/desktop/hardware.nix
           ./hosts/desktop/storage.nix
 
+          impermanence.nixosModules.impermanence
           home-manager-unstable.nixosModules.home-manager
 
           {

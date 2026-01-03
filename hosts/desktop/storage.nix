@@ -23,5 +23,9 @@
     options = ["fmask=0077" "dmask=0077"];
   };
 
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+  };
   swapDevices = [];
 }
