@@ -1,11 +1,11 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   nix.settings.experimental-features = ["nix-command" "flakes"];
   security.sudo.wheelNeedsPassword = false;
 
@@ -29,14 +29,13 @@
       "/var/log"
       "/var/lib/nixos"
       ".local/share/Steam"
-  ".steam"
-  ".local/share/applications"
+      ".steam"
+      ".local/share/applications"
     ];
     files = [
       "/etc/machine-id"
     ];
   };
-
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -113,7 +112,7 @@
   users.users.munkien = {
     isNormalUser = true;
     description = "Anders";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = ["networkmanager" "wheel"];
     packages = with pkgs; [
       kdePackages.kate
       git
@@ -129,8 +128,8 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -159,5 +158,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.11"; # Did you read the comment?
-
 }

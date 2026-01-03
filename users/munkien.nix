@@ -4,6 +4,8 @@
   inputs,
   ...
 }: {
+imports = [ inputs.impermanence.nixosModules.home-manager.impermanence ];
+
   home.username = "munkien";
   home.homeDirectory = "/home/munkien";
   home.stateVersion = "25.11";
@@ -12,19 +14,24 @@
     firefox
     cliphist
     wl-clipboard
+    btrfs-assistant
   ];
 
   home.persistence."/persist/home/munkien" = {
     allowOther = true;
     directories = [
-      "nixos"              # ~/nixos -> /persist/home/munkien/nixos
-      ".local/share/kate"  # Gemmer dine Kate-indstillinger
-      { directory = ".ssh"; mode = "0700"; } # Din personlige SSH med de rigtige rettigheder
+      "nixos"
+      ".mozilla"
+      ".local/share/direnv"
+      ".local/share/kate"
+      ".ssh"
     ];
     files = [
       ".config/katerc"
+      ".config/katevirc"
       ".config/katemetainfos"
       ".config/kateschemarc"
+      ".bash_history"
     ];
   };
 
