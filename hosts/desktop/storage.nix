@@ -19,6 +19,12 @@
     options = ["subvol=@" "compress=zstd" "noatime" "discard=async"];
   };
 
+  fileSystems."/.snapshots" = {
+    device = "/dev/disk/by-uuid/861a7672-36cc-4b08-9871-045de2aea527";
+    fsType = "btrfs";
+    options = ["subvol=@snapshots" "compress=zstd" "noatime" "discard=async"];
+  };
+
   /*
   fileSystems."/nix" = {
     device = "/dev/disk/by-uuid/861a7672-36cc-4b08-9871-045de2aea527";
@@ -74,7 +80,7 @@
   # Snapper!
   services.snapper.configs = {
     persist = {
-      SUBVOLUME = "/persist";
+      SUBVOLUME = "/.snapshots";
       ALLOW_USERS = ["munkien"];
       TIMELINE_CREATE = true;
       TIMELINE_CLEANUP = true;

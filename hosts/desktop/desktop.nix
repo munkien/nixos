@@ -16,9 +16,9 @@
 
   programs.steam = {
     enable = true;
-    remotePlay.openFirewall = true; # Åbner porte til Steam Remote Play
-    dedicatedServer.openFirewall = true; # Åbner porte til Source Dedicated Server
-    localNetworkGameTransfers.openFirewall = true; # Hurtig overførsel mellem PC'er
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
   };
 
   # Time, Dr. Freeman?
@@ -168,11 +168,6 @@
   };
 
   programs.nix-ld.enable = true;
-
-  # Install firefox.
-  programs.firefox.enable = true;
-
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
