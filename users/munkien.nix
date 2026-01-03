@@ -23,6 +23,14 @@
   programs.bash.enable = true;
   programs.kitty.enable = true;
 
+  programs.ssh = {
+    enable = true;
+    startAgent = true;
+    extraConfig = ''
+      AddKeysToAgent yes
+    '';
+  };
+
   programs.git = {
     enable = true;
     settings = {
