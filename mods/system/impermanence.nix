@@ -14,6 +14,7 @@
       "/var/lib/bluetooth"
       "/etc/adjtime"
       "/etc/ssh"
+      "/etc/shadow"
     ];
     files = [
       "/etc/machine-id"
