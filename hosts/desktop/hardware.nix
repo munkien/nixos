@@ -9,12 +9,16 @@
   ...
 }: {
   imports = [];
-
+   boot.initrd.supportedFileSystems = ["btrfs"];
   boot.initrd.availableKernelModules = [
     "sd_mod"
     "sr_mod"
-    "hv_vmbus"       
-    "hv_storvsc"     
+    "hv_vmbus" 
+  "hv_storvsc"  # Denne er kritisk for at se disken
+  "hv_utils" 
+  "hv_netvsc" 
+  "xhci_pci" 
+  "sd_mod"
     "hyperv_keyboard"
   ];
   boot.initrd.kernelModules = [];
