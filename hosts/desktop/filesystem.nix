@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -16,12 +15,6 @@
       "nofail"
     ];
   };
-
-  environment.systemPackages = with pkgs; [
-    mergerfs
-    mergerfs-tools
-    snapraid
-  ];
 
   zramSwap = {
     enable = true;

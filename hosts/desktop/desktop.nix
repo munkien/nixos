@@ -19,6 +19,12 @@
     ../../users/munkien
   ];
 
+  environment.systemPackages = with pkgs; [
+    mergerfs
+    mergerfs-tools
+    snapraid
+  ];
+
   networking.hostName = "desktop";
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
