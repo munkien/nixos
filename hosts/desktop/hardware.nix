@@ -10,7 +10,13 @@
 }: {
   imports = [];
 
-  boot.initrd.availableKernelModules = ["sd_mod" "sr_mod"];
+  boot.initrd.availableKernelModules = [
+    "sd_mod"
+    "sr_mod"
+    "hv_vmbus"       
+    "hv_storvsc"     
+    "hyperv_keyboard"
+  ];
   boot.initrd.kernelModules = [];
   boot.kernelModules = [];
   boot.extraModulePackages = [];
