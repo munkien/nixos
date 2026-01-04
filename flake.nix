@@ -46,7 +46,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.munkien = import ./users/munkien.nix;
+            home-manager.users.munkien = import ./users/munkien/home.nix;
             home-manager.extraSpecialArgs = {inherit inputs;};
           }
         ];
