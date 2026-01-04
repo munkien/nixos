@@ -25,6 +25,47 @@
     snapraid
   ];
 
+  # Swap Config
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    priority = 100;
+  };
+
+  swapDevices = [
+    {
+      device = "/.swap/swapfile";
+      size = 8192;
+      priority = 0;
+    }
+  ];
+
+  # Btrfs Vedligeholdelse
+  services.btrfs = {
+    autoScrub = {
+      enable = true;
+      interval = "weekly";
+      fileSystems = ["/"];
+    };
+  };
+
+  # Snapper Config
+  services.snapper = {
+    configs = {
+      persist = {
+        SUBVOLUME = "/persist";
+        ALLOW_USERS = ["munkien"];
+        TIMELINE_CREATE = true;
+        TIMELINE_CLEANUP = true;
+        TIMELINE_LIMIT_HOURLY = "10";
+        TIMELINE_LIMIT_DAILY = "7";
+        TIMELINE_LIMIT_WEEKLY = "0";
+        TIMELINE_LIMIT_MONTHLY = "0";
+        TIMELINE_LIMIT_YEARLY = "0";
+      };
+    };
+  };
+
   networking.hostName = "desktop";
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;

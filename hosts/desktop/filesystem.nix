@@ -1,70 +1,29 @@
-{
-  config,
-  lib,
-  modulesPath,
-  ...
-}: {
+{lib, ...}: {
+  # Vi behøver ikke pkgs her længere, da pakkerne er flyttet
+
+  # 1. MergerFS Mount (Dette er OK her, da det er et filsystem)
   fileSystems."/storage" = {
     device = "/mnt/storage1:/mnt/storage2";
     fsType = "fuse.mergerfs";
     options = [
       "cache.files=partial"
       "dropcacheonclose=true"
-      "category.create=mfs" # Most Free Space - god til dine SMR diske
+      "category.create=mfs"
       "allow_other"
       "nofail"
     ];
   };
 
-  zramSwap = {
-    enable = true;
-    memoryPercent = 50;
-    priority = 100;
-  };
-  swapDevices = [
-    {
-      device = "/.swap/swapfile";
-      size = 8192;
-      priority = 0;
-    }
-  ];
-
-  services.btrfs = {
-    autoScrub = {
-      enable = true;
-      interval = "weekly";
-      fileSystems = ["/"];
-    };
-  };
-
-  # Snapper!
-  services.snapper = {
-    configs = {
-      persist = {
-        SUBVOLUME = "/persist";
-        ALLOW_USERS = ["munkien"];
-        TIMELINE_CREATE = true;
-        TIMELINE_CLEANUP = true;
-
-        TIMELINE_LIMIT_HOURLY = "10";
-        TIMELINE_LIMIT_DAILY = "7";
-        TIMELINE_LIMIT_WEEKLY = "0";
-        TIMELINE_LIMIT_MONTHLY = "0";
-        TIMELINE_LIMIT_YEARLY = "0";
-      };
-    };
-  };
-
+  # 2. NeededForBoot Overrides (Kritisk for Impermanence)
   fileSystems."/".neededForBoot = true;
   fileSystems."/nix".neededForBoot = true;
   fileSystems."/var/log".neededForBoot = true;
   fileSystems."/persist".neededForBoot = true;
 
+  # 3. Selve Disko Konfigurationen
   disko.devices = {
     disk = {
-      #################################################################
-      # SYSTEM - NVMe RAID1 (sdb og sdd)
-      #################################################################
+      # SYSTEM - NVMe RAID1
       main = {
         device = "/dev/sdb";
         type = "disk";
@@ -143,16 +102,14 @@
               size = "100%";
               content = {
                 type = "btrfs";
-                extraArgs = ["-f" "-L ROOT" "-d raid1" "-m raid1"]; # Samme label og profil
+                extraArgs = ["-f" "-L ROOT" "-d raid1" "-m raid1"];
               };
             };
           };
         };
       };
 
-      #################################################################
-      # STORAGE POOL - Individuelle diske (bedst til SMR)
-      #################################################################
+      # STORAGE POOL
       storage1 = {
         device = "/dev/sda";
         type = "disk";
@@ -164,7 +121,7 @@
               type = "btrfs";
               extraArgs = ["-f" "-L STORAGE1" "-d single" "-m dup"];
               subvolumes."@storage" = {
-                mountpoint = "/mnt/storage1"; # Unikt mountpoint per disk
+                mountpoint = "/mnt/storage1";
                 mountOptions = ["compress=zstd:10" "noatime" "commit=120" "nofail"];
               };
             };
@@ -183,7 +140,7 @@
               type = "btrfs";
               extraArgs = ["-f" "-L STORAGE2" "-d single" "-m dup"];
               subvolumes."@storage" = {
-                mountpoint = "/mnt/storage2"; # Unikt mountpoint per disk
+                mountpoint = "/mnt/storage2";
                 mountOptions = ["compress=zstd:10" "noatime" "commit=120" "nofail"];
               };
             };
