@@ -5,12 +5,24 @@
   modulesPath,
   ...
 }: {
+  environment.systemPackages = with pkgs; [
+    mergerfs
+    mergerfs-tools
+    snapraid
+  ];
+
   services.btrfs = {
     autoScrub = {
       enable = true;
       interval = "weekly";
       fileSystems = ["/"];
     };
+  };
+
+  fileSystems."/storage" = {
+    device = "/dev/disk/by-uuid/91a963ab-bd18-43d2-a410-fc608eac0599";
+    fsType = "btrfs";
+    options = ["subvol=@" "compress=zstd" "noatime" "discard=async"];
   };
 
   fileSystems."/" = {
