@@ -45,7 +45,7 @@
               size = "100%";
               content = {
                 type = "btrfs";
-                extraArgs = ["-f" "-L ROOT" "-d raid1" "-m raid1"];
+                extraArgs = ["-f" "-L ROOT"];
                 subvolumes = {
                   "@" = {
                     mountpoint = "/";
@@ -102,7 +102,7 @@
               size = "100%";
               content = {
                 type = "btrfs";
-                extraArgs = ["-f" "-L ROOT" "-d raid1" "-m raid1"];
+                extraArgs = ["-f" "-L ROOT"];
               };
             };
           };
