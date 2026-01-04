@@ -1,4 +1,10 @@
 {
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
   fileSystems."/storage" = {
     device = "/mnt/storage1:/mnt/storage2";
     fsType = "fuse.mergerfs";
@@ -55,6 +61,11 @@
       };
     };
   };
+
+  fileSystems."/".neededForBoot = true;
+  fileSystems."/nix".neededForBoot = true;
+  fileSystems."/var/log".neededForBoot = true;
+  fileSystems."/persist".neededForBoot = true;
 
   disko.devices = {
     disk = {
