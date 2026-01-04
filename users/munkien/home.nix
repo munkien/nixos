@@ -45,6 +45,14 @@
     btrfs-assistant
   ];
 
+  programs.zsh.initExtra = ''
+    gcp() {
+      git add .
+      git commit -m "$1"
+      git push
+    }
+  '';
+
   programs.firefox = {
     enable = true;
     profiles.munkien = {

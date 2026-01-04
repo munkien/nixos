@@ -1,4 +1,61 @@
 {
+  fileSystems."/storage" = {
+    device = "/mnt/storage1:/mnt/storage2";
+    fsType = "fuse.mergerfs";
+    options = [
+      "cache.files=partial"
+      "dropcacheonclose=true"
+      "category.create=mfs" # Most Free Space - god til dine SMR diske
+      "allow_other"
+      "nofail"
+    ];
+  };
+
+  environment.systemPackages = with pkgs; [
+    mergerfs
+    mergerfs-tools
+    snapraid
+  ];
+
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    priority = 100;
+  };
+  swapDevices = [
+    {
+      device = "/.swap/swapfile";
+      size = 8192;
+      priority = 0;
+    }
+  ];
+
+  services.btrfs = {
+    autoScrub = {
+      enable = true;
+      interval = "weekly";
+      fileSystems = ["/"];
+    };
+  };
+
+  # Snapper!
+  services.snapper = {
+    configs = {
+      persist = {
+        SUBVOLUME = "/persist";
+        ALLOW_USERS = ["munkien"];
+        TIMELINE_CREATE = true;
+        TIMELINE_CLEANUP = true;
+
+        TIMELINE_LIMIT_HOURLY = "10";
+        TIMELINE_LIMIT_DAILY = "7";
+        TIMELINE_LIMIT_WEEKLY = "0";
+        TIMELINE_LIMIT_MONTHLY = "0";
+        TIMELINE_LIMIT_YEARLY = "0";
+      };
+    };
+  };
+
   disko.devices = {
     disk = {
       #################################################################
@@ -25,7 +82,6 @@
               size = "100%";
               content = {
                 type = "btrfs";
-                # Vi bruger kun profil-argumenterne her
                 extraArgs = ["-f" "-L ROOT" "-d raid1" "-m raid1"];
                 subvolumes = {
                   "@" = {

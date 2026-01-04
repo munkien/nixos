@@ -8,6 +8,8 @@
   ...
 }: {
   imports = [
+    ./filesystem.nix
+
     ../common.nix
     ../../mods/system/secrets.nix
     ../../mods/system/home.nix
