@@ -21,7 +21,8 @@
   ];
 
   environment.systemPackages = with pkgs; [
-
+    wireless-tools
+    wpa_supplicant
   ];
 
   boot.kernelParams = [ 
