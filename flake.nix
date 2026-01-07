@@ -24,19 +24,24 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.home-manager.follows = "home-manager-unstable";
+    };
   };
 
   outputs = {
     self,
     nixpkgs-unstable,
     home-manager-unstable,
+    plasma-manager,
     sops-nix,
     disko,
     impermanence,
     ...
   } @ inputs: {
     nixosConfigurations = {
-      
       workstation = nixpkgs-unstable.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs;};
@@ -57,7 +62,5 @@
         ];
       };
     };
-
-
   };
 }

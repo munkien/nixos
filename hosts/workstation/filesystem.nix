@@ -7,7 +7,6 @@
 
   disko.devices = {
     disk = {
-
       # SYSTEM - NVME1
       main = {
         device = "/dev/disk/by-id/XXXXXXXXXXXXX";
@@ -61,15 +60,12 @@
                     mountpoint = "/var/log";
                     mountOptions = ["compress=zstd:1" "noatime" "discard=async" "space_cache=v2"];
                   };
-                  "@blank" = {};
                 };
               };
             };
           };
         };
       };
-
-
     };
   };
 }

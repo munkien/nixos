@@ -5,25 +5,39 @@
   ...
 }: {
   imports = [
-    inputs.impermanence.homeManagerModules.impermanence
+    inputs.plasma-manager.homeModules.plasma-manager
   ];
 
   home.username = "munkien";
   home.homeDirectory = "/home/munkien";
   home.stateVersion = "25.11";
 
-  home.persistence."/persist/home/munkien" = {
-    allowOther = true;
+  home.persistence."/persist" = {
     directories = [
       ".mozilla/firefox/munkien"
       ".local/share/tor-browser"
-      ".local/share/direnv"
       ".local/share/kate"
       ".config/discord"
       ".local/share/discord"
       ".steam"
       ".local/share/Steam"
-      ".local/share/keyrings"
+      {
+        directory = ".gnupg";
+        mode = "0700";
+      }
+      {
+        directory = ".ssh";
+        mode = "0700";
+      }
+      {
+        directory = ".nixops";
+        mode = "0700";
+      }
+      {
+        directory = ".local/share/keyrings";
+        mode = "0700";
+      }
+      ".local/share/direnv"
     ];
 
     files = [
@@ -33,6 +47,39 @@
       ".config/katevirc"
       ".config/katemetainfos"
       ".config/kateschemarc"
+    ];
+  };
+
+  programs.plasma = {
+    enable = true;
+    workspace = {
+    };
+
+    panels = [
+      # Panel på hovedskærmen (0)
+      {
+        location = "bottom";
+        height = 44;
+        screen = 0;
+        widgets = [
+          "org.kde.plasma.kickoff"
+          "org.kde.plasma.icontasks"
+          "org.kde.plasma.systemtray"
+          "org.kde.plasma.digitalclock"
+        ];
+      }
+      # Panel på sekundær skærm (1)
+      {
+        location = "bottom";
+        height = 44;
+        screen = 1;
+        widgets = [
+          "org.kde.plasma.kickoff"
+          "org.kde.plasma.icontasks"
+          "org.kde.plasma.systemtray"
+          "org.kde.plasma.digitalclock"
+        ];
+      }
     ];
   };
 
