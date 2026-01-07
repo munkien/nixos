@@ -58,8 +58,6 @@
         preserve_hour_of_day = "0";
         snapshot_preserve_min = "6h";
         snapshot_preserve = "24h 7d 4w";
-        run_missed_instances = true; 
-
 
         volume."/persist" = {
           snapshot_dir = "/.snapshots/persist";
