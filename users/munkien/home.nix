@@ -37,12 +37,12 @@
   };
 
   home.packages = with pkgs; [
-    firefox
     tor-browser
     cliphist
     wl-clipboard
     discord
     btrfs-assistant
+    vscodium
   ];
 
   programs.zsh.initExtra = ''
@@ -55,6 +55,12 @@
 
   programs.firefox = {
     enable = true;
+    policies.ExtensionSettings = {
+      "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
+        installation_mode = "force_installed";
+      };
+    };
     profiles.munkien = {
       isDefault = true;
       name = "munkien";
@@ -66,6 +72,8 @@
   # Det er god stil at aktivere disse specifikt
   programs.bash.enable = true;
   programs.kitty.enable = true;
+
+  services.ssh-agent.enable = true;
 
   programs.git = {
     enable = true;
