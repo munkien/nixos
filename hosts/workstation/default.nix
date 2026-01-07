@@ -24,6 +24,11 @@
 
   ];
 
+  boot.kernelParams = [ 
+  "nvme.max_host_mem_size_mb=64" 
+  "pcie_aspm=off"
+];
+
   # Swap Config
   zramSwap = {
     enable = true;
@@ -68,5 +73,4 @@
   ];
 
   networking.hostName = "workstation";
-
 }
