@@ -13,10 +13,10 @@
     ];
 
   boot.initrd.availableKernelModules = [ "nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "amdgpu" "kvm-amd" "8814au" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x4au ];
-  #boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.plymouth.enable = true;
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
   boot.kernelParams = [
     "nvme.max_host_mem_size_mb=64"
     "pcie_aspm=off"
@@ -31,4 +31,5 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;
 }
