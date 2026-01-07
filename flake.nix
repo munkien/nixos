@@ -36,11 +36,12 @@
     ...
   } @ inputs: {
     nixosConfigurations = {
-      desktop = nixpkgs-unstable.lib.nixosSystem {
+      
+      workstation = nixpkgs-unstable.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs;};
         modules = [
-          ./hosts/desktop/desktop.nix
+          ./hosts/workstation
 
           disko.nixosModules.disko
           impermanence.nixosModules.impermanence
@@ -56,5 +57,7 @@
         ];
       };
     };
+
+
   };
 }
