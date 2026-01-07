@@ -43,6 +43,8 @@
     discord
     btrfs-assistant
     vscodium
+    headsetcontrol
+    spotify
   ];
 
   programs.zsh.initExtra = ''
