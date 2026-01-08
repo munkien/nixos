@@ -29,6 +29,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager-unstable";
     };
+    stylix.url = "github:danth/stylix";
   };
 
   outputs = {
@@ -39,6 +40,7 @@
     sops-nix,
     disko,
     impermanence,
+    stylix
     ...
   } @ inputs: {
     nixosConfigurations = {
@@ -52,6 +54,7 @@
           impermanence.nixosModules.impermanence
           sops-nix.nixosModules.sops
           home-manager-unstable.nixosModules.home-manager
+          stylix.nixosModules.stylix
 
           {
             home-manager.useGlobalPkgs = true;
