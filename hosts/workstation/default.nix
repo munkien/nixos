@@ -67,7 +67,8 @@
 
   systemd.user.timers.wallpaper-shuffler = {
     Timer = {
-      OnUnitActiveSec = "1h";
+      RandomizedDelaySec = "1h";
+      OnUnitActiveSec = "30m";
       Persistent = true;
     };
     Install.WantedBy = [ "timers.target" ];
