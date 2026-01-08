@@ -10,6 +10,10 @@
   programs.nix-index.enable = true;
   nixpkgs.config.allowUnfree = true;
   programs.git.enable = true;
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
   console.keyMap = "dk-latin1";
 
   # Time, Dr. Freeman?
