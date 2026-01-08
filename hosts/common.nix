@@ -7,6 +7,7 @@
   nix.settings.experimental-features = ["nix-command" "flakes"];
   security.sudo.wheelNeedsPassword = false;
   programs.nix-ld.enable = true;
+  programs.nix-index.enable = true;
   nixpkgs.config.allowUnfree = true;
   programs.git.enable = true;
   console.keyMap = "dk-latin1";
