@@ -22,8 +22,56 @@
   ];
 
   environment.systemPackages = with pkgs; [
-
+    
   ];
+
+  # Style and wallpaper
+  stylix = {
+    enable = true;
+    image = /tmp/current_wallpaper.jpg;
+
+    # https://github.com/tinted-theming/schemes
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+
+    fonts = {
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
+      };
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
+      monospace = {
+        package = pkgs.nerd-fonts.jetbrains-mono; # Ny syntax i unstable
+        name = "JetBrainsMono Nerd Font";
+      };
+    };
+
+    opacity.terminal = 0.9;
+  };
+  systemd.user.services.wallpaper-shuffler = {
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.writeShellScript "download-walls" ''
+        mkdir -p /tmp/wallpapers
+        cd /tmp/wallpapers
+        ${pkgs.curl}/bin/curl -L -J -O "https://images.unsplash.com/photo-1?auto=format&fit=crop&w=3840&q=80&featured=cyberpunk,tech"
+        # Slet gamle filer (bevar de 10 nyeste)
+        ls -t | tail -n +11 | xargs rm -f -- 2>/dev/null
+        ${pkgs.procps}/bin/pkill -HUP wpaperd || true
+      ''}";
+    };
+    Install.WantedBy = [ "default.target" ]; 
+  };
+
+  systemd.user.timers.wallpaper-shuffler = {
+    Timer = {
+      OnUnitActiveSec = "1h";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
 
   # Swap Config
   zramSwap = {
