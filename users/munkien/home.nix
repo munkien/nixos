@@ -6,6 +6,7 @@
 }: {
   imports = [
     inputs.plasma-manager.homeModules.plasma-manager
+    ../../mods/user/apps/steam.nix
   ];
 
   home.username = "munkien";
@@ -14,13 +15,14 @@
 
   home.persistence."/persist" = {
     directories = [
-      ".mozilla/firefox/munkien"
+      ".mozilla/firefox"
       ".local/share/tor-browser"
       ".local/share/kate"
+
       ".config/discord"
-      ".local/share/discord"
-      ".steam"
-      ".local/share/Steam"
+      ".cache/discord"
+
+      ".local/share/kwalletd"
       {
         directory = ".gnupg";
         mode = "0700";
@@ -102,6 +104,8 @@
     }
   '';
 
+  stylix.targets.firefox.profileNames = ["munkien"];
+
   programs.firefox = {
     enable = true;
     policies.ExtensionSettings = {
@@ -118,10 +122,7 @@
     };
   };
 
-  # Det er god stil at aktivere disse specifikt
   programs.bash.enable = true;
-  programs.kitty.enable = true;
-
   services.ssh-agent.enable = true;
 
   programs.git = {

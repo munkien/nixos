@@ -22,13 +22,14 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    
   ];
+
+  services.jotta-cli.enable = true;
 
   # Style and wallpaper
   stylix = {
     enable = true;
-    image = /tmp/current_wallpaper.jpg;
+    image = ./default-wallpaper.jpg;
 
     # https://github.com/tinted-theming/schemes
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
@@ -50,28 +51,39 @@
 
     opacity.terminal = 0.9;
   };
+
   systemd.user.services.wallpaper-shuffler = {
-    Service = {
+    serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.writeShellScript "download-walls" ''
-        mkdir -p /tmp/wallpapers
-        cd /tmp/wallpapers
-        ${pkgs.curl}/bin/curl -L -J -O "https://images.unsplash.com/photo-1?auto=format&fit=crop&w=3840&q=80&featured=cyberpunk,tech"
-        # Slet gamle filer (bevar de 10 nyeste)
-        ls -t | tail -n +11 | xargs rm -f -- 2>/dev/null
+      ExecStart = pkgs.writeShellScript "download-walls" ''
+        set -e
+
+        WALLDIR="$HOME/.cache/wallpapers"
+        mkdir -p "$WALLDIR"
+        cd "$WALLDIR"
+
+        FILE="wallpaper-$(date +%s).jpg"
+
+        ${pkgs.curl}/bin/curl -L \
+          "https://source.unsplash.com/3840x2160/?cyberpunk,technology" \
+          -o "$FILE"
+
+        # Keep only 10 newest wallpapers
+        ls -tp | grep -v '/$' | tail -n +11 | xargs -r rm --
+
+        # Reload wpaperd
         ${pkgs.procps}/bin/pkill -HUP wpaperd || true
-      ''}";
+      '';
     };
-    Install.WantedBy = [ "default.target" ]; 
   };
 
   systemd.user.timers.wallpaper-shuffler = {
-    Timer = {
-      RandomizedDelaySec = "1h";
+    timerConfig = {
       OnUnitActiveSec = "30m";
+      RandomizedDelaySec = "1h";
       Persistent = true;
     };
-    Install.WantedBy = [ "timers.target" ];
+    wantedBy = ["timers.target"];
   };
 
   # Swap Config
@@ -93,7 +105,7 @@
   services.btrbk = {
     ioSchedulingClass = "idle";
     niceness = 19;
-    
+
     instances."local" = {
       onCalendar = "hourly";
       settings = {
@@ -110,7 +122,7 @@
       };
     };
   };
-  
+
   systemd.tmpfiles.rules = [
     "d /.snapshots/persist 0700 root root -"
   ];

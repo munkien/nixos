@@ -8,15 +8,23 @@
   modulesPath,
   ...
 }: {
-  imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+  ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  environment.systemPackages = with pkgs; [
+    bcachefs-tools
+    ntfs3g
+    gparted
+  ];
+
+  boot.supportedFilesystems = ["bcachefs"];
+
+  boot.initrd.availableKernelModules = ["nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod"];
+  boot.initrd.kernelModules = ["amdgpu"];
   boot.plymouth.enable = true;
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
   boot.kernelParams = [
     "nvme.max_host_mem_size_mb=64"
     "pcie_aspm=off"

@@ -21,6 +21,8 @@
     ];
   };
 
+  boot.tmp.useTmpfs = true;
+
   boot.initrd.systemd.services.rollback = {
     description = "Rollback Btrfs root subvolume to a pristine state";
     wantedBy = ["initrd.target"];
