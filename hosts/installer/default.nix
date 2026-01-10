@@ -9,6 +9,7 @@
 {
   imports = [
     <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-graphical.nix>
+    ../common.nix
   ];
 
   ############################################

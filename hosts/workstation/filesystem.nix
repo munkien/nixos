@@ -61,12 +61,20 @@ in {
     options = bcachefs_default_options ++ ["subvol=@home"];
     neededForBoot = true;
   };
+  /*
   fileSystems."/nix" = {
     device = bcachefs_device;
     fsType = "bcachefs";
     options = bcachefs_default_options ++ ["subvol=@nix" "data_replicas=1"];
     neededForBoot = true;
+  };*/
+  fileSystems."/nix" = {
+    device = "/dev/disk/by-id/nvme-WD_BLACK_SN7100_2TB_251124800155";
+    fsType = "btrfs";
+    options = ["subvol=@nix" "compress=zstd:1" "noatime" "discard=async" "space_cache=v2"];
+    neededForBoot = true;
   };
+
 
   system.activationScripts.bcachefs-infrastructure = {
     text = ''
