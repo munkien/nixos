@@ -80,6 +80,9 @@ in {
     text = ''
       TOOL=${pkgs.bcachefs-tools}/bin/bcachefs
       POOL="/mnt/bcachefs"
+
+      $TOOL set-file-option --data_replicas=1 /home/munkien/.local/share/Steam
+
       mkdir -p $POOL
 
       SUBVOLS="@ @nix @persist @log @home @scratch"
