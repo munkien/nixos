@@ -3,25 +3,14 @@
   pkgs,
   ...
 }: let
-  bcachefs_device = "/dev/disk/by-uuid/1185da68-6644-46d3-b0e7-8d0e6cf0ad4f";
+  bcachefs_device = "/dev/disk/by-uuid/fe8de683-7e92-4cc0-ace2-8ce2bccfa296";
   bcachefs_default_options = [
-    "compression=zstd"
-    "foreground_writethrough"
     "noatime"
     "discard"
-    "foreground_target=ssd"
-    "background_target=hdd"
-    "promote_target=ssd"
-    "data_replicas=2"
-    "metadata_replicas=2"
-    "metadata_target=ssd"
-    "errors=ro"
   ];
 in {
-  boot.kernelParams = ["device=UUID=1185da68-6644-46d3-b0e7-8d0e6cf0ad4f"];
-
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/063B-6DAF";
+    device = "/dev/disk/by-uuid/1D9E-C58C";
     fsType = "vfat";
     options = ["fmask=0022" "dmask=0022"];
   };
@@ -34,19 +23,19 @@ in {
   fileSystems."/" = {
     device = bcachefs_device;
     fsType = "bcachefs";
-    options = bcachefs_default_options ++ ["subvol=@" "data_replicas=1"];
+    options = bcachefs_default_options ++ ["subvol=@"];
     neededForBoot = true;
   };
   fileSystems."/var/log" = {
     device = bcachefs_device;
     fsType = "bcachefs";
-    options = bcachefs_default_options ++ ["subvol=@log" "data_replicas=1" "foreground_target=hdd" "promote_target=hdd"];
+    options = bcachefs_default_options ++ ["subvol=@log"];
     neededForBoot = true;
   };
   fileSystems."/scratch" = {
     device = bcachefs_device;
     fsType = "bcachefs";
-    options = bcachefs_default_options ++ ["subvol=@scratch" "data_replicas=1"];
+    options = bcachefs_default_options ++ ["subvol=@scratch"];
     neededForBoot = true;
   };
   fileSystems."/persist" = {
@@ -64,7 +53,7 @@ in {
   fileSystems."/nix" = {
     device = bcachefs_device;
     fsType = "bcachefs";
-    options = bcachefs_default_options ++ ["subvol=@nix" "data_replicas=1"];
+    options = bcachefs_default_options ++ ["subvol=@nix"];
     neededForBoot = true;
   };
 
