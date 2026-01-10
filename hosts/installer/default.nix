@@ -8,7 +8,6 @@
 
 {
   imports = [
-    <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-graphical.nix>
     ../common.nix
   ];
 
@@ -18,9 +17,11 @@
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  boot.supportedFilesystems = [
+  boot.supportedFilesystems = lib.mkForce [
     "bcachefs"
     "btrfs"
+    "vfat"
+    "ext4"
     "ntfs3"
   ];
 
@@ -39,8 +40,6 @@
 
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.initrd.systemd.enable = true;
-
-  boot.plymouth.enable = true;
 
   boot.kernelParams = [
     "nvme.max_host_mem_size_mb=64"
@@ -69,13 +68,32 @@
   ############################################
 
   environment.systemPackages = with pkgs; [
+# --- Installation & Recovery ---
     nixos-install-tools
+    rsync
+    testdisk
+
+    # --- Disk & Filsystemer (Bcachefs fokus) ---
     bcachefs-tools
+    btrfs-progs
+    smartmontools
+    nvme-cli
     gparted
     ntfs3g
+
+    # --- System Info & Overvågning ---
+    pciutils
+    usbutils
+    htop
+    btop
+
+    # --- Editorer & Udvikling ---
     vscodium
     vim
     git
+
+    # --- Netværk ---
+    wireguard-tools
   ];
 
   ############################################
@@ -83,25 +101,35 @@
   ############################################
 
   services.xserver.enable = true;
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma6.enable = true;
+services.desktopManager.plasma6.enable = true;
+  services.displayManager.sddm.enable = true;
 
   ############################################
   # Networking
   ############################################
 
   networking.networkmanager.enable = true;
-
-  ############################################
-  # Locale
-  ############################################
-
-  i18n.defaultLocale = "en_US.UTF-8";
-  time.timeZone = "UTC";
+networking.networkmanager.ensureProfiles.profiles = {
+    home-wifi = {
+      connection = {
+        id = "home-wifi";
+        type = "wifi";
+        autoconnect = true;
+      };
+      wifi = {
+        mode = "infrastructure";
+        ssid = "sild-paa-daase";
+      };
+      wifi-security = {
+        key-mgmt = "wpa-psk";
+        psk = "";
+      };
+    };
+  };
 
   ############################################
   # ISO metadata
   ############################################
 
-  isoImage.isoName = "nixos-bcachefs-installer.iso";
+  image.fileName = "nixos-custom-installer.iso";
 }

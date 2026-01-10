@@ -67,44 +67,20 @@
       };
 
       # Bootable ISO
-      iso = nixpkgs-unstable.lib.nixosSystem {
+      installer = nixpkgs-unstable.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         system = "x86_64-linux";
         modules = [
           "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/installation-cd-graphical-base.nix"
+          ./hosts/installer/default.nix
 
-          ({
-            pkgs,
-            lib,
-            ...
-          }: {
-            boot.supportedFilesystems = lib.mkForce ["bcachefs" "btrfs"];
-            boot.kernelPackages = pkgs.linuxPackages_latest;
-
-            environment.systemPackages = with pkgs; [
-              bcachefs-tools
-              btrfs-progs
-              gparted
-              rsync
-              git
-              vim
-            ];
-
-            networking.networkmanager.enable = true;
-
-            services.desktopManager.plasma6.enable = true;
-            services.displayManager.sddm.enable = true;
-            services.displayManager.defaultSession = "plasma";
-            services.displayManager.autoLogin.enable = true;
-            services.displayManager.autoLogin.user = "nixos";
-
-            # Nødvendigt for at ISO'en ved den skal være bootbar
-            isoImage.makeUsbBootable = true;
-            isoImage.makeEfiBootable = true;
-          })
+          {
+            nixpkgs.config.allowBroken = true;
+            nix.settings.experimental-features = [ "nix-command" "flakes" ];
+            nixpkgs.flake.source = nixpkgs-unstable.outPath;
+          }
         ];
       };
-      #
     };
-    packages.x86_64-linux.iso = self.nixosConfigurations.iso.config.system.build.isoImage;
   };
 }
