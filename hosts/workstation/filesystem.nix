@@ -160,10 +160,35 @@
   };
   */
 
+  fileSystems."/mnt/bcachefs" = {
+    device = "/dev/disk/by-uuid/1185da68-6644-46d3-b0e7-8d0e6cf0ad4f";
+    fsType = "bcachefs";
+    options = [
+      "compression=zstd"
+      "foreground_writethrough"
+      "noatime"
+      "discard"
+      "background_target=hdd"
+      "foreground_target=ssd"
+      "data_replicas=2"
+      "metadata_replicas=2"
+    ];
+  };
+
+  system.activationScripts.bcachefs-tuning = {
+    text = ''
+      TOOL=${pkgs.bcachefs-tools}/bin/bcachefs set-file-option
+      echo "Applying Bcachefs Tuning..."
+
+      $TOOL --data_replicas=1 /scratch
+      $TOOL --foreground_target=hdd /scratch
+    '';
+  };
+
   fileSystems."/".neededForBoot = true;
   fileSystems."/nix".neededForBoot = true;
   fileSystems."/var/log".neededForBoot = true;
-  fileSystems."/persist".neededForBoot = true;
+  fileSystems."/persist".neededForBoot = true;s
 
   disko.devices = {
     disk = {

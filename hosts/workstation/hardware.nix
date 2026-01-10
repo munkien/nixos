@@ -18,7 +18,7 @@
     gparted
   ];
 
-  boot.supportedFilesystems = ["bcachefs"];
+  boot.supportedFilesystems = ["bcachefs" "btrfs"];
 
   boot.initrd.availableKernelModules = ["nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod"];
   boot.initrd.kernelModules = ["amdgpu"];
