@@ -19,9 +19,12 @@
   ];
 
   boot.supportedFilesystems = ["bcachefs" "btrfs"];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   boot.initrd.availableKernelModules = ["nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod"];
+  boot.initrd.supportedFilesystems = ["bcachefs" "btrfs"];
   boot.initrd.kernelModules = ["amdgpu"];
+  boot.initrd.systemd.enable = true;
   boot.plymouth.enable = true;
   boot.kernelModules = ["kvm-amd"];
   boot.extraModulePackages = [];

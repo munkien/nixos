@@ -102,7 +102,8 @@
     };
   };
 
-  services.btrbk = {
+  /*
+     services.btrbk = {
     ioSchedulingClass = "idle";
     niceness = 19;
 
@@ -126,6 +127,7 @@
   systemd.tmpfiles.rules = [
     "d /.snapshots/persist 0700 root root -"
   ];
+  */
 
   networking.hostName = "workstation";
 }
