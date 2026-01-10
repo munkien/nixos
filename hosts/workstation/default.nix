@@ -21,11 +21,11 @@
     ../../users/munkien
   ];
 
-specialisation."rescue".configuration = {
-    system.nixos.tags = [ "panic-mode" ];
-    
+  specialisation."rescue".configuration = {
+    system.nixos.tags = ["panic-mode"];
+
     # Tvinger systemet direkte i en shell uden login
-    boot.kernelParams = [ "init=/bin/sh" ];
+    boot.kernelParams = ["init=/bin/sh"];
   };
 
   environment.systemPackages = with pkgs; [
@@ -108,33 +108,6 @@ specialisation."rescue".configuration = {
       fileSystems = ["/"];
     };
   };
-
-  /*
-     services.btrbk = {
-    ioSchedulingClass = "idle";
-    niceness = 19;
-
-    instances."local" = {
-      onCalendar = "hourly";
-      settings = {
-        timestamp_format = "long-iso";
-        preserve_day_of_week = "monday";
-        preserve_hour_of_day = "0";
-        snapshot_preserve_min = "6h";
-        snapshot_preserve = "24h 7d 4w";
-
-        volume."/persist" = {
-          snapshot_dir = "/.snapshots/persist";
-          subvolume = ".";
-        };
-      };
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /.snapshots/persist 0700 root root -"
-  ];
-  */
 
   networking.hostName = "workstation";
 }

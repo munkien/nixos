@@ -19,6 +19,8 @@
       ".local/share/tor-browser"
       ".local/share/kate"
 
+      ".jottad"
+
       ".config/discord"
       ".cache/discord"
 

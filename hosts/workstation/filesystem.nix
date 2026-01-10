@@ -9,16 +9,23 @@ in {
     device = "/dev/disk/by-uuid/1D9E-C58C";
     fsType = "vfat";
     options = ["fmask=0022" "dmask=0022"];
+    neededForBoot = true;
   };
   fileSystems."/mnt/bcachefs" = {
     device = bcachefs_device;
     fsType = "bcachefs";
     options = ["noatime" "discard"];
+    neededForBoot = true;
   };
   fileSystems."/scratch" = {
     device = "/mnt/bcachefs/@scratch";
     options = ["bind" "nofail"];
     neededForBoot = false;
+  };
+  fileSystems."/persist" = {
+    device = "/mnt/bcachefs/@persist";
+    options = ["bind" "nofail"];
+    neededForBoot = true;
   };
 
   fileSystems."/" = {
@@ -39,13 +46,6 @@ in {
     device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
     fsType = "btrfs";
     options = ["subvol=@home" "compress=zstd" "noatime"];
-    neededForBoot = true;
-  };
-
-  fileSystems."/persist" = {
-    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
-    fsType = "btrfs";
-    options = ["subvol=@persist" "compress=zstd" "noatime"];
     neededForBoot = true;
   };
 
