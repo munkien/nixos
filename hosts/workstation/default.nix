@@ -21,6 +21,17 @@
     ../../users/munkien
   ];
 
+specialisation."rescue".configuration = {
+    system.nixos.tags = [ "panic-mode" ];
+    
+    # Tvinger systemet direkte i en shell uden login
+    boot.kernelParams = [ "init=/bin/sh" ];
+    
+    # Slår grafisk interface fra (ekstra sikkerhed for at boot lykkes)
+    services.xserver.enable = false;
+    services.displayManager.enable = false;
+  };
+
   environment.systemPackages = with pkgs; [
   ];
 
