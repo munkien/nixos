@@ -96,14 +96,6 @@
     spotify
   ];
 
-  programs.zsh.initExtra = ''
-    gcp() {
-      git add .
-      git commit -m "$1"
-      git push
-    }
-  '';
-
   stylix.targets.firefox.profileNames = ["munkien"];
 
   programs.firefox = {
@@ -139,6 +131,7 @@
         rebase = true;
       };
       core.editor = "nano";
+      core.sshCommand = "ssh -i ~/.ssh/id_ed25519 -F /dev/null";
       push.autoSetupRemote = "true";
     };
   };

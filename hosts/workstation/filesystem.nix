@@ -1,4 +1,4 @@
-{lib, ...}: {
+{lib, pkgs, ...}: {
   /*
   disko.devices = {
     disk = {
@@ -177,18 +177,18 @@
 
   system.activationScripts.bcachefs-tuning = {
     text = ''
-      TOOL=${pkgs.bcachefs-tools}/bin/bcachefs set-file-option
+      TOOL=${pkgs.bcachefs-tools}/bin/bcachefs
       echo "Applying Bcachefs Tuning..."
 
-      $TOOL --data_replicas=1 /scratch
-      $TOOL --foreground_target=hdd /scratch
+      $TOOL set-file-option --data_replicas=1 /scratch
+      $TOOL set-file-option --foreground_target=hdd /scratch
     '';
   };
 
   fileSystems."/".neededForBoot = true;
   fileSystems."/nix".neededForBoot = true;
   fileSystems."/var/log".neededForBoot = true;
-  fileSystems."/persist".neededForBoot = true;s
+  fileSystems."/persist".neededForBoot = true;
 
   disko.devices = {
     disk = {
