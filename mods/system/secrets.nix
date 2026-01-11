@@ -5,9 +5,9 @@
   modulesPath,
   ...
 }: {
-  #sops.defaultSopsFile = ./nixos/secrets/common.yaml;
+  sops.defaultSopsFile = ../../secrets.yaml;
   sops.age = {
-    sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
+    sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
     keyFile = "/persist/var/lib/sops-nix/key.txt";
     generateKey = true;
   };

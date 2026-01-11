@@ -15,6 +15,7 @@
     ../../mods/system/desktop.nix
     ../../mods/system/secrets.nix
     ../../mods/system/home.nix
+    ../../mods/system/wifi-gl3.nix
     #../../mods/system/impermanence.nix
     ../../mods/system/gaming.nix
 
@@ -53,6 +54,19 @@
     opacity.terminal = 0.9;
   };
 
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Enable = "Source,Sink,Media,Socket";
+      };
+    };
+  };
+  services.blueman.enable = true;
+
+  # Wallpaper
   systemd.user.services.wallpaper-shuffler = {
     serviceConfig = {
       Type = "oneshot";

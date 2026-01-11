@@ -34,6 +34,11 @@
     "usbcore.autosuspend=-1"
   ];
 
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+  };
+
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
