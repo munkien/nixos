@@ -7,14 +7,10 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     home-manager-stable = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    impermanence = {
-      url = "github:nix-community/impermanence";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -39,7 +35,6 @@
     plasma-manager,
     sops-nix,
     disko,
-    impermanence,
     stylix,
     ...
   } @ inputs: {
@@ -52,7 +47,6 @@
           ./hosts/workstation
 
           disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
           sops-nix.nixosModules.sops
           home-manager-unstable.nixosModules.home-manager
           stylix.nixosModules.stylix
@@ -68,7 +62,7 @@
 
       # Bootable ISO
       installer = nixpkgs-unstable.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = {inherit inputs;};
         system = "x86_64-linux";
         modules = [
           "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/installation-cd-graphical-base.nix"
@@ -76,7 +70,7 @@
 
           {
             nixpkgs.config.allowBroken = true;
-            nix.settings.experimental-features = [ "nix-command" "flakes" ];
+            nix.settings.experimental-features = ["nix-command" "flakes"];
             nixpkgs.flake.source = nixpkgs-unstable.outPath;
           }
         ];

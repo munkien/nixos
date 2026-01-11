@@ -141,6 +141,7 @@
     deadnix
     quickemu
     pre-commit
+    comma
   ];
 
   # This value determines the NixOS release from which the default

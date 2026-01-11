@@ -23,6 +23,8 @@ in {
     options = ["noatime" "discard"];
     neededForBoot = true;
   };
+  services.bcachefs.autoScrub.fileSystems = ["/mnt/bcachefs"];
+  services.bcachefs.autoScrub.interval = "weekly";
   ##########
   # BCACHEFS BIND
   #########
@@ -31,15 +33,15 @@ in {
     fsType = "none";
     options = ["bind" "nofail"];
     neededForBoot = false;
-    dependsOn = ["/mnt/bcachefs"];
+    depends = ["/mnt/bcachefs"];
   };
-  fileSystems."/persist" = {
-    device = "/mnt/bcachefs/@persist";
-    fsType = "none";
-    options = ["bind"];
-    neededForBoot = true;
-    dependsOn = ["/mnt/bcachefs"];
-  };
+#  fileSystems."/persist" = {
+#    device = "/mnt/bcachefs/@persist";
+#    fsType = "none";
+#    options = ["bind"];
+#    neededForBoot = true;
+#    depends = ["/mnt/bcachefs"];
+#  };
 
   ##########
   # BTRFS
@@ -80,6 +82,13 @@ in {
   };
 
   fileSystems."/.swap" = {
+    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
+    fsType = "btrfs";
+    options = ["subvol=@swap" "noatime"];
+    neededForBoot = true;
+  };
+
+  fileSystems."/persist" = {
     device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
     fsType = "btrfs";
     options = ["subvol=@swap" "noatime"];

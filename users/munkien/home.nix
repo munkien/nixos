@@ -6,53 +6,20 @@
 }: {
   imports = [
     inputs.plasma-manager.homeModules.plasma-manager
-    ../../mods/user/apps/steam.nix
   ];
 
   home.username = "munkien";
   home.homeDirectory = "/home/munkien";
   home.stateVersion = "25.11";
 
-  home.persistence."/persist" = {
-    directories = [
-      ".mozilla/firefox"
-      ".local/share/tor-browser"
-      ".local/share/kate"
-
-      ".jottad"
-
-      ".config/discord"
-      ".cache/discord"
-
-      ".local/share/kwalletd"
-      {
-        directory = ".gnupg";
-        mode = "0700";
-      }
-      {
-        directory = ".ssh";
-        mode = "0700";
-      }
-      {
-        directory = ".nixops";
-        mode = "0700";
-      }
-      {
-        directory = ".local/share/keyrings";
-        mode = "0700";
-      }
-      ".local/share/direnv"
-    ];
-
-    files = [
-      ".bash_history"
-      ".screenrc"
-      ".config/katerc"
-      ".config/katevirc"
-      ".config/katemetainfos"
-      ".config/kateschemarc"
-    ];
+  home.sessionVariables = {
+    QUICKEMU_VMDIR = "/scratch/quickemu";
   };
+
+  # Cleaning up
+  systemd.user.tmpfiles.rules = [
+    "e %h/.cache - - - 30d -"
+  ];
 
   programs.plasma = {
     enable = true;
@@ -62,14 +29,34 @@
     panels = [
       # Panel på hovedskærmen (0)
       {
+        location = "top";
+        height = 26;
+        widgets = ["org.kde.plasma.appmenu"];
+      }
+      {
         location = "bottom";
         height = 44;
         screen = 0;
         widgets = [
           "org.kde.plasma.kickoff"
           "org.kde.plasma.icontasks"
+          "org.kde.plasma.marginsseparator"
           "org.kde.plasma.systemtray"
           "org.kde.plasma.digitalclock"
+          {
+            name = "org.kde.plasma.icontasks";
+            config = {
+              General = {
+                launchers = [
+                  "applications:firefox.desktop"
+                  "applications:thunderbird.desktop"
+                  "applications:org.kde.konsole.desktop"
+                  "applications:codium.desktop"
+                  "applications:systemsettings.desktop"
+                ];
+              };
+            };
+          }
         ];
       }
       # Panel på sekundær skærm (1)
@@ -84,6 +71,11 @@
           "org.kde.plasma.digitalclock"
         ];
       }
+      {
+        location = "top";
+        height = 26;
+        widgets = ["org.kde.plasma.appmenu"];
+      }
     ];
   };
 
@@ -96,16 +88,57 @@
     vscodium
     headsetcontrol
     spotify
+    heroic
+    fractal
+  ];
+
+  # Fractal Configuration
+  dconf.settings = {
+    "org/gnome/Fractal" = {
+      "view-sidebar" = true;
+      "window-maximized" = false;
+    };
+  };
+
+  programs.thunderbird = {
+    enable = true;
+    profiles.munkien = {
+      isDefault = true;
+      settings = {
+        "calendar.timezone.useSystemTimezone" = true;
+        "calendar.timezone.local" = "Europe/Copenhagen";
+        "intl.regional_prefs.use_os_locales" = true;
+      };
+    };
+  };
+  home.file.".thunderbird/munkien/feeds.json".text = builtins.toJSON [
+    {
+      url = "https://nixos.org/blogs.xml";
+      title = "NixOS Blog";
+    }
+    {
+      url = "https://news.ycombinator.com/rss";
+      title = "Hacker News";
+    }
   ];
 
   stylix.targets.firefox.profileNames = ["munkien"];
-
   programs.firefox = {
     enable = true;
-    policies.ExtensionSettings = {
-      "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
-        installation_mode = "force_installed";
+    policies = {
+      DisplayBookmarksToolbar = "always";
+      DisableMasterPasswordCreation = true;
+      PasswordManagerEnabled = false;
+      SkipTermsOfUse = true;
+      ShowHomeButton = true;
+      DisableProfileImport = true;
+      DisableTelemetry = true;
+      DefaultDownloadDirectory = "/scratch/download";
+      ExtensionSettings = {
+        "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
+          installation_mode = "force_installed";
+        };
       };
     };
     profiles.munkien = {
@@ -113,6 +146,65 @@
       name = "munkien";
       id = 0;
       path = "munkien";
+
+      search = {
+        force = true;
+        default = "ddg";
+        engines = {
+          "Nix Packages" = {
+            urls = [{template = "https://search.nixos.org/packages?query={searchTerms}";}];
+            icon = "https://nixos.org/favicon.png";
+            updateInterval = 24 * 60 * 60 * 1000; # 24 timer
+            definedAliases = ["@np"];
+          };
+          "GitHub" = {
+            urls = [{template = "https://github.com/search?q={searchTerms}&type=repositories";}];
+            definedAliases = ["@gh"];
+          };
+          "google".metaData.hidden = true;
+        };
+      };
+
+      bookmarks = {
+        force = true;
+        settings = [
+          {
+            name = "AI";
+            toolbar = true;
+            bookmarks = [
+              {
+                name = "Gemini";
+                url = "https://gemini.google.com";
+              }
+            ];
+          }
+          {
+            name = "YouTube";
+            url = "https://youtube.com/";
+            tags = ["entertainment"];
+          }
+          {
+            name = "NixOS Search";
+            url = "https://search.nixos.org/packages";
+            tags = ["nix" "dev"];
+          }
+          {
+            name = "NixOS Plasma Manager Search";
+            url = "https://nix-community.github.io/plasma-manager/options.xhtml";
+            tags = ["nix" "dev"];
+          }
+          {
+            name = "NixOS Home Manager Search";
+            url = "https://home-manager-options.extranix.com/";
+            tags = ["nix" "dev"];
+          }
+          {
+            name = "NixOS Noogle Search";
+            url = "https://noogle.dev/";
+            tags = ["nix" "dev"];
+          }
+        ];
+      };
     };
   };
 

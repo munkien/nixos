@@ -15,19 +15,13 @@
     ../../mods/system/desktop.nix
     ../../mods/system/secrets.nix
     ../../mods/system/home.nix
-    ../../mods/system/impermanence.nix
+    #../../mods/system/impermanence.nix
     ../../mods/system/gaming.nix
 
     ../../users/munkien
   ];
 
-  specialisation."rescue".configuration = {
-    system.nixos.tags = ["panic-mode"];
-
-    # Tvinger systemet direkte i en shell uden login
-    boot.kernelParams = ["init=/bin/sh"];
-  };
-
+  environment.enableDebugInfo = true;
   environment.systemPackages = with pkgs; [
   ];
 
