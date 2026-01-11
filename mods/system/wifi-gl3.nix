@@ -36,7 +36,7 @@
       [connection]
       id=GL3
       type=wifi
-      autoconnect=true
+      autoconnect=false
 
       [wifi]
       ssid=sild-IoT
