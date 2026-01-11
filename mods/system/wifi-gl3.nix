@@ -1,13 +1,14 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: {
   sops.secrets.wifi_password_1 = {};
   sops.secrets.wifi_password_2 = {};
   sops.templates."GL3-5G.nmconnection" = {
     path = "/etc/NetworkManager/system-connections/GL3-5G.nmconnection";
-    mode = "0600";
+    mode = "0400";
     content = ''
       [connection]
       id=GL3-5G
@@ -20,7 +21,7 @@
 
       [wifi-security]
       key-mgmt=wpa-psk
-      psk=${config.sops.secrets.wifi_password_1.placeholder}
+      psk=${config.sops.placeholder.wifi_password_1}
 
       [ipv4]
       method=auto
@@ -44,7 +45,7 @@
 
       [wifi-security]
       key-mgmt=wpa-psk
-      psk=${config.sops.secrets.wifi_password_2.placeholder}
+      psk=${config.sops.placeholder.wifi_password_2}
 
       [ipv4]
       method=auto
