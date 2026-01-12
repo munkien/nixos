@@ -35,13 +35,20 @@ in {
     neededForBoot = false;
     depends = ["/mnt/bcachefs"];
   };
-#  fileSystems."/persist" = {
-#    device = "/mnt/bcachefs/@persist";
-#    fsType = "none";
-#    options = ["bind"];
-#    neededForBoot = true;
-#    depends = ["/mnt/bcachefs"];
-#  };
+  fileSystems."/persist" = {
+    device = "/mnt/bcachefs/@persist";
+    fsType = "none";
+    options = ["bind"];
+    neededForBoot = true;
+    depends = ["/mnt/bcachefs"];
+  };
+  fileSystems."/var/log" = {
+    device = "/mnt/bcachefs/@log";
+    fsType = "none";
+    options = ["bind"];
+    neededForBoot = true;
+    depends = ["/mnt/bcachefs"];
+  };
 
   ##########
   # BTRFS
@@ -68,27 +75,7 @@ in {
     neededForBoot = true;
   };
 
-  fileSystems."/var/log" = {
-    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
-    fsType = "btrfs";
-    options = ["subvol=@logs" "compress=zstd" "noatime"];
-    neededForBoot = true;
-  };
-
-  fileSystems."/.snapshots" = {
-    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
-    fsType = "btrfs";
-    options = ["subvol=@snapshots" "compress=zstd" "noatime"];
-  };
-
   fileSystems."/.swap" = {
-    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
-    fsType = "btrfs";
-    options = ["subvol=@swap" "noatime"];
-    neededForBoot = true;
-  };
-
-  fileSystems."/persist" = {
     device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
     fsType = "btrfs";
     options = ["subvol=@swap" "noatime"];
@@ -99,14 +86,16 @@ in {
     text = ''
       TOOL=${pkgs.bcachefs-tools}/bin/bcachefs
       POOL="/mnt/bcachefs"
-      mkdir -p $POOL/{@scratch,@home,@persist,@nix}
+      mkdir -p $POOL/{@scratch,@home,@persist,@nix,@log}
 
       $TOOL set-fs-option --metadata_target=ssd --metadata_replicas=2 --errors=fix_safe --compression=zstd /dev/sda || true
+
 
       $TOOL set-file-option --data_replicas=1 --promote_target=ssd --foreground_target=hdd --background_target=hdd $POOL/@scratch || true
       $TOOL set-file-option --data_replicas=2 --promote_target=ssd --foreground_target=ssd --background_target=hdd $POOL/@home || true
       $TOOL set-file-option --data_replicas=2 --promote_target=ssd --foreground_target=ssd --background_target=hdd $POOL/@persist || true
-      #$TOOL set-file-option --data_replicas=2 --promote_target=ssd --foreground_target=ssd --background_target=ssd $POOL/@nix || true
+      $TOOL set-file-option --data_replicas=2 --promote_target=ssd --foreground_target=ssd --background_target=ssd $POOL/@nix || true
+      $TOOL set-file-option --data_replicas=1 --foreground_target=hdd --background_target=hdd $POOL/@log || true
     '';
   };
 }
