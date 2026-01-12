@@ -37,6 +37,13 @@
     };
   };
 
+  # Log file cleanup
+  services.journald.extraConfig = ''
+    SystemMaxUse=200M
+    MaxFileSec=14day
+  '';
+
+
   # NH Helper :)
   programs.nh = {
     enable = true;
