@@ -2,8 +2,46 @@
   config,
   pkgs,
   inputs,
+  lib,
   ...
-}: {
+}: let
+  plasmaPanelCommon = {
+    location = "bottom";
+    height = 40;
+    widgets = [
+      "org.kde.plasma.kickoff"
+
+      "org.kde.plasma.panelspacer"
+
+      {
+        name = "org.kde.plasma.icontasks";
+        config.General.launchers = [
+          "applications:codium.desktop"
+          "applications:kitty.desktop"
+          "applications:firefox.desktop"
+          "applications:org.gnome.Fractal.desktop"
+          "applications:systemsettings.desktop"
+        ];
+      }
+
+      "org.kde.plasma.panelspacer"
+
+      {
+        name = "org.kde.plasma.systemmonitor.net";
+        config.General.displayStyle = "org.kde.ksysguard.textonly";
+      }
+
+      {
+        name = "org.kde.plasma.systemmonitor";
+        config.General.sensors = ["cpu/all/usage" "mem/physical/usedpercent"];
+      }
+
+      "org.kde.plasma.clipboard"
+      "org.kde.plasma.systemtray"
+      "org.kde.plasma.digitalclock"
+    ];
+  };
+in {
   imports = [
     inputs.plasma-manager.homeModules.plasma-manager
   ];
@@ -18,66 +56,20 @@
 
   # Cleaning up
   systemd.user.tmpfiles.rules = [
-    "e %h/.cache - - - 30d -"
+    "e %h/.cache - - - 14d -"
   ];
 
   programs.plasma = {
     enable = true;
-    workspace = {
-    };
-
     panels = [
-      # Panel på hovedskærmen (0)
-      {
-        location = "top";
-        height = 26;
-        widgets = ["org.kde.plasma.appmenu"];
-      }
-      {
-        location = "bottom";
-        height = 44;
-        screen = 0;
-        widgets = [
-          "org.kde.plasma.kickoff"
-          "org.kde.plasma.icontasks"
-          "org.kde.plasma.marginsseparator"
-          "org.kde.plasma.systemtray"
-          "org.kde.plasma.digitalclock"
-          {
-            name = "org.kde.plasma.icontasks";
-            config = {
-              General = {
-                launchers = [
-                  "applications:firefox.desktop"
-                  "applications:thunderbird.desktop"
-                  "applications:org.kde.konsole.desktop"
-                  "applications:codium.desktop"
-                  "applications:systemsettings.desktop"
-                ];
-              };
-            };
-          }
-        ];
-      }
-      # Panel på sekundær skærm (1)
-      {
-        location = "bottom";
-        height = 44;
-        screen = 1;
-        widgets = [
-          "org.kde.plasma.kickoff"
-          "org.kde.plasma.icontasks"
-          "org.kde.plasma.systemtray"
-          "org.kde.plasma.digitalclock"
-        ];
-      }
-      {
-        location = "top";
-        height = 26;
-        widgets = ["org.kde.plasma.appmenu"];
-      }
+      (plasmaPanelCommon // {screen = 0;})
+      (plasmaPanelCommon // {screen = 1;})
     ];
   };
+
+  home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    ln -sfn /scratch/battle.net $VERBOSE_ARG /home/munkien/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
+  '';
 
   home.packages = with pkgs; [
     tor-browser
@@ -90,7 +82,59 @@
     spotify
     heroic
     fractal
+    fish
+    nixd
+    nixpkgs-fmt
   ];
+
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscodium;
+    profiles.default = {
+      extensions = with pkgs.vscode-extensions; [
+        jnoortheen.nix-ide
+      ];
+      userSettings = {
+        "nix.enableLanguageServer" = true;
+        "nix.serverPath" = "nixd";
+        "nix.serverSettings" = {
+          "nixd" = {
+            "formatting" = {"command" = ["nixpkgs-fmt"];};
+            "options" = {
+              "nixos" = {
+                "expr" = "(builtins.getFlake \"/home/munkien/nixos\").nixosConfigurations.workstation.options";
+              };
+              "home-manager" = {
+                "expr" = "(builtins.getFlake \"/home/munkien/nixos\").homeConfigurations.munkien.options";
+              };
+            };
+          };
+        };
+        "editor.formatOnSave" = true;
+        "editor.defaultFormatter" = "jnoortheen.nix-ide";
+      };
+    };
+  };
+
+  programs.kitty = {
+    enable = true;
+    themeFile = "tokyo_night_night";
+    shellIntegration.enableFishIntegration = true;
+    enableGitIntegration = true;
+    actionAliases = {
+      "gcp" = "git add . && git commit -m WIP && git push";
+    };
+    settings = {
+      shell = "fish";
+      scrollback_lines = 10000;
+      copy_on_select = "yes";
+      mouse_hide_wait = 0;
+    };
+    keybindings = {
+      "ctrl+c" = "copy_or_interrupt";
+      "ctrl+v" = "paste_from_clipboard";
+    };
+  };
 
   # Fractal Configuration
   dconf.settings = {
@@ -176,32 +220,42 @@
                 name = "Gemini";
                 url = "https://gemini.google.com";
               }
+              {
+                name = "ChatGPT";
+                url = "https://chatgpt.com";
+              }
             ];
           }
           {
-            name = "YouTube";
-            url = "https://youtube.com/";
-            tags = ["entertainment"];
-          }
-          {
-            name = "NixOS Search";
-            url = "https://search.nixos.org/packages";
-            tags = ["nix" "dev"];
-          }
-          {
-            name = "NixOS Plasma Manager Search";
-            url = "https://nix-community.github.io/plasma-manager/options.xhtml";
-            tags = ["nix" "dev"];
-          }
-          {
-            name = "NixOS Home Manager Search";
-            url = "https://home-manager-options.extranix.com/";
-            tags = ["nix" "dev"];
-          }
-          {
-            name = "NixOS Noogle Search";
-            url = "https://noogle.dev/";
-            tags = ["nix" "dev"];
+            name = "Entertainment";
+            toolbar = true;
+            bookmarks = [
+              {
+                name = "YouTube";
+                url = "https://youtube.com/";
+                tags = ["entertainment"];
+              }
+              {
+                name = "NixOS Search";
+                url = "https://search.nixos.org/packages";
+                tags = ["nix" "dev"];
+              }
+              {
+                name = "NixOS Plasma Manager Search";
+                url = "https://nix-community.github.io/plasma-manager/options.xhtml";
+                tags = ["nix" "dev"];
+              }
+              {
+                name = "NixOS Home Manager Search";
+                url = "https://home-manager-options.extranix.com/";
+                tags = ["nix" "dev"];
+              }
+              {
+                name = "NixOS Noogle Search";
+                url = "https://noogle.dev/";
+                tags = ["nix" "dev"];
+              }
+            ];
           }
         ];
       };

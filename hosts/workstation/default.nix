@@ -4,6 +4,7 @@
 {
   config,
   pkgs,
+  lib,
   inputs,
   ...
 }: {
@@ -27,6 +28,59 @@
   ];
 
   services.jotta-cli.enable = true;
+
+  # Vector Konfiguration
+  sops.secrets.ntfy_url = {};
+  systemd.services.vector.serviceConfig = {
+    EnvironmentFile = config.sops.secrets.ntfy_url.path;
+    SupplementaryGroups = ["systemd-journal"];
+    DynamicUser = lib.mkForce false;
+  };
+  services.vector = {
+    enable = true;
+    journaldAccess = true;
+    settings = {
+      sources = {
+        journald.type = "journald";
+      };
+
+      transforms = {
+        filter_errors = {
+          type = "filter";
+          inputs = ["journald"];
+          condition = ''to_int!(.PRIORITY) <= 3 && ._SYSTEMD_UNIT != "vector.service"'';
+        };
+
+        format_toast = {
+          type = "remap";
+          inputs = ["filter_errors"];
+          source = ''
+            message, err = string(.message)
+            if err != null {
+                message = "Ingen besked fundet"
+            }
+            . = "🚨 " + message
+          '';
+        };
+
+        throttle_alerts = {
+          type = "throttle";
+          inputs = ["format_toast"];
+          threshold = 1;
+          window_secs = 60;
+          key_field = ".";
+        };
+      };
+
+      sinks.ntfy_sink = {
+        type = "http";
+        inputs = ["throttle_alerts"];
+        uri = "https://ntfy.sh/xxxxxxxxxxx";
+        method = "post";
+        encoding.codec = "text";
+      };
+    };
+  };
 
   # Style and wallpaper
   stylix = {
@@ -65,41 +119,6 @@
     };
   };
   services.blueman.enable = true;
-
-  # Wallpaper
-  systemd.user.services.wallpaper-shuffler = {
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = pkgs.writeShellScript "download-walls" ''
-        set -e
-
-        WALLDIR="$HOME/.cache/wallpapers"
-        mkdir -p "$WALLDIR"
-        cd "$WALLDIR"
-
-        FILE="wallpaper-$(date +%s).jpg"
-
-        ${pkgs.curl}/bin/curl -L \
-          "https://source.unsplash.com/3840x2160/?cyberpunk,technology" \
-          -o "$FILE"
-
-        # Keep only 10 newest wallpapers
-        ls -tp | grep -v '/$' | tail -n +11 | xargs -r rm --
-
-        # Reload wpaperd
-        ${pkgs.procps}/bin/pkill -HUP wpaperd || true
-      '';
-    };
-  };
-
-  systemd.user.timers.wallpaper-shuffler = {
-    timerConfig = {
-      OnUnitActiveSec = "30m";
-      RandomizedDelaySec = "1h";
-      Persistent = true;
-    };
-    wantedBy = ["timers.target"];
-  };
 
   # Swap Config
   zramSwap = {
