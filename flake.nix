@@ -8,10 +8,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
-    home-manager-stable = {
-      url = "github:nix-community/home-manager/release-25.11";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -26,6 +22,7 @@
       inputs.home-manager.follows = "home-manager-unstable";
     };
     stylix.url = "github:danth/stylix";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs = {
@@ -36,6 +33,7 @@
     sops-nix,
     disko,
     stylix,
+    nix-flatpak,
     ...
   } @ inputs: {
     nixosConfigurations = {
@@ -52,10 +50,15 @@
           stylix.nixosModules.stylix
 
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.munkien = import ./users/munkien/home.nix;
-            home-manager.extraSpecialArgs = {inherit inputs;};
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              sharedModules = [
+                nix-flatpak.homeManagerModules.nix-flatpak
+              ];
+              users.munkien = import ./users/munkien/home.nix;
+              extraSpecialArgs = {inherit inputs;};
+            };
           }
         ];
       };

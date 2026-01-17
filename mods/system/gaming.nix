@@ -12,6 +12,8 @@
     localNetworkGameTransfers.openFirewall = true;
   };
 
+  services.flatpak.enable = true;
+
   hardware.graphics = {
     enable = true;
     enable32Bit = true; # Absolut nødvendigt for Steam

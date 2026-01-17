@@ -80,12 +80,33 @@ in {
     vscodium
     headsetcontrol
     spotify
-    heroic
+    gh
+
     fractal
     fish
     nixd
     nixpkgs-fmt
+
+    # Game Clients
+    heroic
+
+    # Games
+    dwarf-fortress-full
+    liquidwar
+    openttd
+    tbe
   ];
+
+  services.flatpak = {
+    enable = true;
+    update = {
+      auto = {
+        enable = true;
+        onCalendar = "daily";
+      };
+    };
+    packages = ["net.openra.OpenRA"];
+  };
 
   programs.vscode = {
     enable = true;
