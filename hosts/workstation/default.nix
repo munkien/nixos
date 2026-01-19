@@ -120,6 +120,16 @@
   };
   services.blueman.enable = true;
 
+  specialisation = {
+    "Recovery-Shell" = {
+      configuration = {
+        system.nixos.tags = ["recovery"];
+        services.getty.autologinUser = "root";
+        networking.hostName = "nixos-recovery";
+      };
+    };
+  };
+
   # Swap Config
   zramSwap = {
     enable = true;

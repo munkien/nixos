@@ -303,6 +303,9 @@ in {
       core.sshCommand = "ssh -i ~/.ssh/id_ed25519 -F /dev/null";
       push.autoSetupRemote = "true";
     };
+    extraConfig = {
+      url."git@github.com:".insteadOf = "https://github.com/";
+    };
   };
 
   # Lad Home Manager styre sig selv
