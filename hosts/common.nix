@@ -18,14 +18,19 @@
 
   # Time, Dr. Freeman?
   time.timeZone = "Europe/Copenhagen";
-  services.timesyncd = {
+  services.timesyncd.enable = false;
+  networking.firewall.allowedUDPPorts = [123];
+  services.chrony = {
     enable = true;
-    servers = [
-      "pool.ntp.org"
-    ];
-    fallbackServers = [
-      "time.google.com"
-    ];
+    initstepslew = {
+      enabled = true;
+      threshold = 1.0;
+    };
+    extraConfig = ''
+      driftfile /var/lib/chrony/drift
+      makestep 1.0 3
+      pool pool.ntp.org iburst maxsources 5
+    '';
   };
 
   # Enable networking
@@ -42,7 +47,6 @@
     SystemMaxUse=200M
     MaxFileSec=14day
   '';
-
 
   # NH Helper :)
   programs.nh = {

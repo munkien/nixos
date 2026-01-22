@@ -5,42 +5,90 @@
   lib,
   ...
 }: let
-  plasmaPanelCommon = {
-    location = "bottom";
-    height = 40;
-    widgets = [
-      "org.kde.plasma.kickoff"
+  bcachefsStatus = pkgs.writeShellScript "bcachefs-status.sh" ''
+    # Sti til dit specifikke filesystem
+    SYS_PATH="/sys/fs/bcachefs/fe8de683-7e92-4cc0-ace2-8ce2bccfa296"
 
-      "org.kde.plasma.panelspacer"
+    if [ ! -d "$SYS_PATH" ]; then
+      echo "BFS: NOT FOUND"
+      exit 1
+    fi
 
-      {
-        name = "org.kde.plasma.icontasks";
-        config.General.launchers = [
-          "applications:codium.desktop"
-          "applications:kitty.desktop"
-          "applications:firefox.desktop"
-          "applications:org.gnome.Fractal.desktop"
-          "applications:systemsettings.desktop"
-        ];
-      }
+    USAGE=$(cat "$SYS_PATH/internal/usage_stats")
 
-      "org.kde.plasma.panelspacer"
+    # State check (Hurtigere end list_volumes hvis sysfs tillader det)
+    # Men vi beholder din version da den er mest præcis på tværs af versioner
+    STATE=$(${pkgs.bcachefs-tools}/bin/bcachefs list_volumes / | grep -q "failed\|ro" && echo "!!DEGRADED!!" || echo "OK")
 
-      {
-        name = "org.kde.plasma.systemmonitor.net";
-        config.General.displayStyle = "org.kde.ksysguard.textonly";
-      }
+    # Pending Reconcile parsing
+    PENDING_RAW=$(echo "$USAGE" | grep "reconcile:" | awk '{print $2}')
 
-      {
-        name = "org.kde.plasma.systemmonitor";
-        config.General.sensors = ["cpu/all/usage" "mem/physical/usedpercent"];
-      }
+    # Simpel men effektiv advarsels-logik:
+    # Hvis strengen indeholder 'G' (Gigabyte) eller 'T' (Terabyte), giv advarsel.
+    WARN=""
+    if [[ "$PENDING_RAW" =~ [GT] ]]; then
+        WARN="⚠️ "
+    fi
 
-      "org.kde.plasma.clipboard"
-      "org.kde.plasma.systemtray"
-      "org.kde.plasma.digitalclock"
-    ];
-  };
+    USED=$(echo "$USAGE" | grep "data:" | awk '{print $2}')
+
+    echo "BFS: $STATE | $USED | ''${WARN}Pnd: $PENDING_RAW"
+  '';
+
+  panelsDefinition = [
+    {
+      location = "top";
+      height = 30;
+      widgets = [
+        "org.kde.plasma.lock_logout"
+        "org.kde.plasma.panelspacer"
+        {
+          name = "org.kde.plasma.commandoutput";
+          config = {
+            General = {
+              # The command to run (using your bcachefsStatus variable)
+              command = "${bcachefsStatus}";
+              # Refresh interval in seconds (e.g., 60 seconds)
+              interval = 60;
+              # Appearance
+              showTitle = false;
+              displayType = "text";
+            };
+          };
+        }
+        "org.kde.plasma.panelspacer"
+        "org.kde.plasma.digitalclock"
+      ];
+    }
+    {
+      location = "bottom";
+      height = 40;
+      widgets = [
+        "org.kde.plasma.kickoff"
+        "org.kde.plasma.panelspacer"
+        {
+          name = "org.kde.plasma.icontasks";
+          config.General.launchers = [
+            "applications:codium.desktop"
+            "applications:kitty.desktop"
+            "applications:firefox.desktop"
+            "applications:org.gnome.Fractal.desktop"
+            "applications:systemsettings.desktop"
+          ];
+        }
+        "org.kde.plasma.panelspacer"
+        "org.kde.plasma.mediacontroller"
+        {
+          name = "org.kde.plasma.systemmonitor";
+          config = {
+            Appearance.chartType = "textOnly";
+            Sensors.sensors = ["cpu/all/usage" "mem/physical/usedpercent"];
+          };
+        }
+        "org.kde.plasma.systemtray"
+      ];
+    }
+  ];
 in {
   imports = [
     inputs.plasma-manager.homeModules.plasma-manager
@@ -61,16 +109,64 @@ in {
 
   programs.plasma = {
     enable = true;
-    panels = [
-      (plasmaPanelCommon // {screen = 0;})
-      (plasmaPanelCommon // {screen = 1;})
+    overrideConfig = false;
+    panels = lib.flatten [
+      (map (p: p // {screen = 0;}) panelsDefinition)
+      (map (p: p // {screen = 1;}) panelsDefinition)
     ];
+
+    workspace = {
+      lookAndFeel = "com.github.vinceliuice.Sweet";
+      iconTheme = "candy-icons";
+      cursorTheme = "Sweet-cursors";
+      colorScheme = "Sweet";
+    };
+
+    kwin = {
+      effects = {
+        blur.enable = true;
+        translucency.enable = true;
+        fps.enable = false; # Set to true if you're debugging performance
+      };
+    };
+
+    configFile = {
+      # Force Kvantum as the widget provider for transparency
+      "kdeglobals"."KDE"."widgetStyle" = "kvantum";
+
+      # Configure Blur Intensity (Value 0-20)
+      "kwinrc"."Plugins"."blurRadius" = 12;
+
+      # Set specific window transparency for inactive windows
+      "kwinrc"."Plugins"."translucencyOpaque" = 85;
+
+      # Enable the "Magic Lamp" animation for that futuristic look
+      "kwinrc"."Plugins"."magiclampEnabled" = true;
+    };
   };
 
+  xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+    [General]
+    theme=Sweet
+  '';
+
+  gtk = {
+    enable = true;
+    theme = {
+      name = lib.mkForce "Sweet-Dark";
+    };
+    iconTheme = {
+      name = "candy-icons";
+    };
+  };
+  home.sessionVariables.GTK_THEME = "Sweet-Dark";
+
+  # Steam
   home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ln -sfn /scratch/battle.net $VERBOSE_ARG /home/munkien/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
   '';
 
+  # Packages
   home.packages = with pkgs; [
     tor-browser
     cliphist
@@ -82,10 +178,17 @@ in {
     spotify
     gh
 
-    fractal
+    kdePackages.kate
+    moonlight
+
     fish
-    nixd
+    nixfmt
     nixpkgs-fmt
+
+    # Theming / Plasma6
+    sweet-nova
+    candy-icons
+    kdePackages.qtstyleplugin-kvantum
 
     # Game Clients
     heroic
@@ -157,14 +260,6 @@ in {
     };
   };
 
-  # Fractal Configuration
-  dconf.settings = {
-    "org/gnome/Fractal" = {
-      "view-sidebar" = true;
-      "window-maximized" = false;
-    };
-  };
-
   programs.thunderbird = {
     enable = true;
     profiles.munkien = {
@@ -187,7 +282,6 @@ in {
     }
   ];
 
-  stylix.targets.firefox.profileNames = ["munkien"];
   programs.firefox = {
     enable = true;
     policies = {
@@ -289,6 +383,7 @@ in {
   programs.git = {
     enable = true;
     settings = {
+      url."git@github.com:".insteadOf = "https://github.com/";
       user = {
         name = "munkien";
         email = "munkien@gmail.com";
@@ -303,11 +398,7 @@ in {
       core.sshCommand = "ssh -i ~/.ssh/id_ed25519 -F /dev/null";
       push.autoSetupRemote = "true";
     };
-    extraConfig = {
-      url."git@github.com:".insteadOf = "https://github.com/";
-    };
   };
 
-  # Lad Home Manager styre sig selv
   programs.home-manager.enable = true;
 }

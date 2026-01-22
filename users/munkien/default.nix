@@ -9,9 +9,5 @@
     initialPassword = "asdfasdf"; # Temporary weak password
     description = "Anders";
     extraGroups = ["networkmanager" "wheel"];
-    packages = with pkgs; [
-      kdePackages.kate
-      moonlight-qt
-    ];
   };
 }
