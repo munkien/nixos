@@ -82,32 +82,6 @@
     };
   };
 
-  # Style and wallpaper
-  stylix = {
-    enable = true;
-    image = ./default-wallpaper.jpg;
-
-    # https://github.com/tinted-theming/schemes
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-
-    fonts = {
-      serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
-      };
-      sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
-      };
-      monospace = {
-        package = pkgs.nerd-fonts.jetbrains-mono; # Ny syntax i unstable
-        name = "JetBrainsMono Nerd Font";
-      };
-    };
-
-    opacity.terminal = 0.9;
-  };
-
   # Bluetooth
   hardware.bluetooth = {
     enable = true;
@@ -135,15 +109,6 @@
     enable = true;
     memoryPercent = 50;
     priority = 100;
-  };
-
-  # Btrfs Vedligeholdelse
-  services.btrfs = {
-    autoScrub = {
-      enable = true;
-      interval = "weekly";
-      fileSystems = ["/"];
-    };
   };
 
   networking.hostName = "workstation";

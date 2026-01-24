@@ -111,6 +111,11 @@
     settings.dynamic_tuning = true;
   };
 
+  # Root account failsafe - very strong password
+  users.users.root = {
+    hashedPassword = "$y$jFT$CiCF1yexMhqJzwW93W.tA1$Ta0ur3NW9HmlhDaDkHFh8sXK7e.6axUYY4GJjk4J0V4";
+  };
+
   # SSH
   services.openssh = {
     enable = true;
@@ -155,7 +160,6 @@
     git
     nil
     deadnix
-    quickemu
     pre-commit
     comma
   ];

@@ -97,7 +97,7 @@ in {
         --errors=fix_safe \
         --compression=zstd \
         --background_compression=zstd \
-        /dev/sda || true
+        /dev/sda1 || true
 
 
       $TOOL set-file-option --data_replicas=1 --promote_target=ssd --foreground_target=hdd --background_target=hdd $POOL/@scratch || true
@@ -114,7 +114,7 @@ in {
     restartIfChanged = false;
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.bcachefs-tools}/bin/bcachefs scrub /dev/sda";
+      ExecStart = "${pkgs.bcachefs-tools}/bin/bcachefs scrub /dev/sda1";
       Nice = 15;
       IOSchedulingClass = "idle";
     };
@@ -126,6 +126,14 @@ in {
       OnCalendar = "weekly";
       Persistent = true;
       RandomizedDelaySec = "24h";
+    };
+  };
+
+  services.btrfs = {
+    autoScrub = {
+      enable = true;
+      interval = "weekly";
+      fileSystems = ["/"];
     };
   };
 }

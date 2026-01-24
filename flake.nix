@@ -21,7 +21,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager-unstable";
     };
-    stylix.url = "github:danth/stylix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
@@ -32,7 +31,6 @@
     plasma-manager,
     sops-nix,
     disko,
-    stylix,
     nix-flatpak,
     ...
   } @ inputs: {
@@ -47,7 +45,6 @@
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
           home-manager-unstable.nixosModules.home-manager
-          stylix.nixosModules.stylix
 
           {
             home-manager = {
