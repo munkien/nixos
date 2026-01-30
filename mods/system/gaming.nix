@@ -16,7 +16,7 @@
 
   hardware.graphics = {
     enable = true;
-    enable32Bit = true; # Absolut nødvendigt for Steam
+    enable32Bit = true;
   };
 
   programs.gamemode.enable = true;

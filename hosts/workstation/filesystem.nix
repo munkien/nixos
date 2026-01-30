@@ -97,7 +97,7 @@ in {
         --errors=fix_safe \
         --compression=zstd \
         --background_compression=zstd \
-        /dev/sda1 || true
+        /dev/disk/by-uuid/fe8de683-7e92-4cc0-ace2-8ce2bccfa296 || true
 
 
       $TOOL set-file-option --data_replicas=1 --promote_target=ssd --foreground_target=hdd --background_target=hdd $POOL/@scratch || true
@@ -126,14 +126,6 @@ in {
       OnCalendar = "weekly";
       Persistent = true;
       RandomizedDelaySec = "24h";
-    };
-  };
-
-  services.btrfs = {
-    autoScrub = {
-      enable = true;
-      interval = "weekly";
-      fileSystems = ["/"];
     };
   };
 }

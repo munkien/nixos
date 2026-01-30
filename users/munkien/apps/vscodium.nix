@@ -24,7 +24,7 @@
         "nix.formatterPath" = "${pkgs.nixfmt}/bin/nixfmt";
 
         "nix.serverSettings" = {
-          "nil" = {
+          "nixd" = {
             "formatting" = {"command" = ["nixfmt"];};
             "options" = {
               "nixos" = {

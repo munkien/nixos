@@ -5,66 +5,29 @@
   lib,
   ...
 }: let
-  # Define the script first
-  bcachefsStatus = pkgs.writeShellScript "bcachefs-status.sh" ''
-    # Sti til dit specifikke filesystem
-    SYS_PATH="/sys/fs/bcachefs/fe8de683-7e92-4cc0-ace2-8ce2bccfa296"
-
-    if [ ! -d "$SYS_PATH" ]; then
-      echo "BFS: NOT FOUND"
-      exit 1
-    fi
-
-    # Note: Ensure your user has read permissions for this file, or use sudo wrapper
-    USAGE=$(cat "$SYS_PATH/internal/usage_stats")
-
-    # State check
-    STATE=$(${pkgs.bcachefs-tools}/bin/bcachefs list_volumes / | grep -q "failed\|ro" && echo "!!DEGRADED!!" || echo "OK")
-
-    # Pending Reconcile parsing
-    PENDING_RAW=$(echo "$USAGE" | grep "reconcile:" | awk '{print $2}')
-
-    # Warning logic
-    WARN=""
-    if [[ "$PENDING_RAW" =~ [GT] ]]; then
-        WARN="⚠️ "
-    fi
-
-    USED=$(echo "$USAGE" | grep "data:" | awk '{print $2}')
-
-    echo "BFS: $STATE | $USED | ''${WARN}Pnd: $PENDING_RAW"
-  '';
-
   # Define panels layout
   panelsDefinition = [
     {
       location = "top";
-      height = 40;
+      height = 30;
+      floating = false;
+      lengthMode = "fill";
+      hiding = "none";
+
       widgets = [
-        "org.kde.plasma.lock_logout"
+        "org.kde.plasma.kickoff"
+        "org.kde.plasma.appmenu"
         "org.kde.plasma.panelspacer"
-        "org.kde.plasma.mediacontroller"
-        "org.kde.plasma.panelspacer"
-        {
-          name = "org.kde.plasma.commandoutput"; # Ensure this widget is installed (plasma-applet-commandoutput)
-          config = {
-            General = {
-              command = "${bcachefsStatus}";
-              interval = 60;
-              showTitle = false;
-              displayType = "text";
-            };
-          };
-        }
-        "org.kde.plasma.panelspacer"
+        "org.kde.plasma.systemtray"
         "org.kde.plasma.digitalclock"
+        "org.kde.plasma.showdesktop"
       ];
     }
     {
       location = "bottom";
-      height = 44;
+      height = 52;
+      floating = false;
       widgets = [
-        "org.kde.plasma.kickoff"
         "org.kde.plasma.panelspacer"
         {
           name = "org.kde.plasma.icontasks";
@@ -72,18 +35,9 @@
             "applications:codium.desktop"
             "applications:kitty.desktop"
             "applications:firefox.desktop"
-            "applications:systemsettings.desktop"
           ];
         }
         "org.kde.plasma.panelspacer"
-        {
-          name = "org.kde.plasma.systemmonitor";
-          config = {
-            Appearance.chartType = "textOnly";
-            Sensors.sensors = ["cpu/all/usage" "mem/physical/usedpercent"];
-          };
-        }
-        "org.kde.plasma.systemtray"
       ];
     }
   ];
@@ -108,14 +62,13 @@ in {
       (map (p: p // {screen = 1;}) panelsDefinition)
     ];
 
-    # MERGED CONFIG BLOCK (Fixes the duplicate key error)
     configFile = {
       # Clipboard / Spectacle
       "klipperrc"."General" = {
         "MaxClipItems" = 100;
         "KeepClipboardContents" = true;
         "IgnoreImages" = false;
-        "SyncClipboards" = true;
+        "SyncClipboards" = false;
       };
 
       "spectaclerc" = {
@@ -133,6 +86,8 @@ in {
         };
       };
 
+      "ksmserverrc"."General"."loginMode" = "emptySession";
+
       # Theming / Kwin
       "kdeglobals"."KDE"."widgetStyle" = "kvantum";
       "kwinrc"."Plugins" = {
@@ -141,7 +96,6 @@ in {
         "magiclampEnabled" = true;
       };
 
-      # Force Taskbar/Panel to be Dark (matches Tokyo Night better)
       "plasmarc"."Theme"."name" = "breeze-dark";
       "ksplashrc"."KSplash"."Theme" = "None";
 
@@ -193,4 +147,34 @@ in {
 
   xdg.configFile."Kvantum/kvantum.kvconfig".text = "theme=Sweet";
   home.sessionVariables.GTK_THEME = "Sweet-Dark";
+
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = "firefox.desktop";
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
+      "x-scheme-handler/about" = "firefox.desktop";
+      "x-scheme-handler/unknown" = "firefox.desktop";
+    };
+  };
+
+  home.file.".config/autostart/steam.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Steam
+    Exec=steam -silent
+  '';
+  home.file.".config/autostart/spotify.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Spotify
+    Exec=spotify --minimized
+  '';
+  home.file.".config/autostart/discord.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Discord
+    Exec=discord --start-minimized
+  '';
 }

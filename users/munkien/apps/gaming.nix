@@ -24,6 +24,12 @@
         onCalendar = "daily";
       };
     };
-    packages = ["net.openra.OpenRA"];
+    packages = [
+      "net.openra.OpenRA"
+      "com.play0ad.zeroad"
+      "com.remnantsoftheprecursors.ROTP"
+      "info.beyondallreason.bar"
+      "com.revolutionarygamesstudio.ThriveLauncher"
+    ];
   };
 }
