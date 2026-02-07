@@ -29,6 +29,8 @@
 
   services.jotta-cli.enable = true;
 
+  services.xserver.videoDrivers = ["amdgpu"];
+
   # Vector Konfiguration
   sops.secrets.ntfy_url = {};
   systemd.services.vector.serviceConfig = {

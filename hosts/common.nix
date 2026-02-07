@@ -111,6 +111,17 @@
     settings.dynamic_tuning = true;
   };
 
+  # mDNS
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
+  };
+
   # Root account failsafe - very strong password
   users.users.root = {
     hashedPassword = "$y$jFT$CiCF1yexMhqJzwW93W.tA1$Ta0ur3NW9HmlhDaDkHFh8sXK7e.6axUYY4GJjk4J0V4";
@@ -162,6 +173,12 @@
     deadnix
     pre-commit
     comma
+    rustscan
+    eza
+    btop
+    bat
+    trippy
+    ncdu
   ];
 
   # This value determines the NixOS release from which the default

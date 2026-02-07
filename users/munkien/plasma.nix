@@ -18,7 +18,25 @@
         "org.kde.plasma.kickoff"
         "org.kde.plasma.appmenu"
         "org.kde.plasma.panelspacer"
-        "org.kde.plasma.systemtray"
+
+        {
+          name = "org.kde.plasma.systemtray";
+          config = {
+            General = {
+              hiddenItems = [
+                "org.kde.plasma.battery"
+                "org.kde.plasma.brightness"
+              ];
+
+              shownItems = [
+                "org.kde.plasma.networkmanagement"
+                "org.kde.plasma.volume"
+                "org.kde.plasma.clipboard"
+              ];
+            };
+          };
+        }
+
         "org.kde.plasma.digitalclock"
         "org.kde.plasma.showdesktop"
       ];
@@ -48,7 +66,8 @@ in {
     kdePackages.qtstyleplugin-kvantum
     tokyonight-gtk-theme
     nerd-fonts.jetbrains-mono
-    pkgs.wl-clipboard
+    wl-clipboard
+    kdePackages.plasma-browser-integration
   ];
 
   xdg.dataFile."color-schemes/TokyoNight.colors".source = "${pkgs.tokyonight-gtk-theme}/share/themes/Tokyonight-Dark/kde/TokyoNight.colors";
@@ -56,6 +75,8 @@ in {
   programs.plasma = {
     enable = true;
     overrideConfig = true;
+
+    input.keyboard.numlockOnStartup = "on";
 
     panels = lib.flatten [
       (map (p: p // {screen = 0;}) panelsDefinition)
@@ -95,15 +116,6 @@ in {
         "translucencyOpaque" = 85;
         "magiclampEnabled" = true;
       };
-
-      "plasmarc"."Theme"."name" = "breeze-dark";
-      "ksplashrc"."KSplash"."Theme" = "None";
-
-      "kde-gtk-configrc"."General" = {
-        "gtkTheme" = "Sweet-Dark";
-        "iconTheme" = "candy-icons";
-        "font" = "JetBrainsMono Nerd Font,12,-1,5,50,0,0,0,0,0";
-      };
     };
 
     shortcuts = {
@@ -111,7 +123,6 @@ in {
       "spectacle" = {
         "Launch" = "Meta+Print";
         "FullScreenScreenShot" = "Print";
-        "ActiveWindowScreenShot" = "Meta+Print";
         "RectangularRegionScreenShot" = "Meta+Shift+S";
       };
     };
@@ -146,7 +157,6 @@ in {
   };
 
   xdg.configFile."Kvantum/kvantum.kvconfig".text = "theme=Sweet";
-  home.sessionVariables.GTK_THEME = "Sweet-Dark";
 
   xdg.mimeApps = {
     enable = true;
@@ -159,22 +169,32 @@ in {
     };
   };
 
-  home.file.".config/autostart/steam.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Steam
-    Exec=steam -silent
-  '';
-  home.file.".config/autostart/spotify.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Spotify
-    Exec=spotify --minimized
-  '';
-  home.file.".config/autostart/discord.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Discord
-    Exec=discord --start-minimized
-  '';
+  systemd.user.services = {
+    steam = {
+      Unit = {
+        Description = "Steam";
+        After = ["graphical-session.target"];
+      };
+      Service = {ExecStart = "${pkgs.steam}/bin/steam -silent";};
+      Install = {WantedBy = ["graphical-session.target"];};
+    };
+    discord = {
+      Unit = {
+        Description = "Discord";
+        After = ["graphical-session.target"];
+      };
+      Service = {ExecStart = "${pkgs.discord}/bin/discord --start-minimized";};
+      Install = {WantedBy = ["graphical-session.target"];};
+    };
+    spotify = {
+      Unit = {
+        Description = "Spotify";
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = "${pkgs.spotify}/bin/spotify";
+      };
+      Install = {WantedBy = ["graphical-session.target"];};
+    };
+  };
 }

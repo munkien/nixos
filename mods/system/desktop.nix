@@ -31,6 +31,21 @@ in {
   security.rtkit.enable = true;
   services.libinput.enable = true;
   programs.noisetorch.enable = true;
+
+  systemd.user.services.noisetorch-autostart = {
+    description = "Noisetorch Auto-load";
+    after = ["graphical-session.target" "pipewire.service"];
+    partOf = ["graphical-session.target"];
+    wantedBy = ["graphical-session.target"];
+
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+      ExecStart = "${pkgs.noisetorch}/bin/noisetorch -i";
+      RemainAfterExit = true;
+    };
+  };
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;

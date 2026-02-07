@@ -28,7 +28,7 @@
 
   # Housekeeping
   systemd.user.tmpfiles.rules = [
-    "e %h/.cache - - - 14d -"
+    "e %h/.cache - - - 7d -"
   ];
 
   # Packages
@@ -38,6 +38,9 @@
     btrfs-assistant
     headsetcontrol
     kdePackages.kate
+
+    # ISO writer to USB
+    woeusb-ng
 
     # Privacy
     tor-browser

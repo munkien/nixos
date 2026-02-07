@@ -45,17 +45,31 @@
     enableFishIntegration = true;
     settings = {
       add_newline = false;
+
       format = lib.concatStrings [
+        "$username"
+        "$hostname"
+        "$directory"
+        "$git_branch"
+        "$git_status"
+        "$nix_shell"
+        "$cmd_duration"
         "$line_break"
         "$package"
         "$line_break"
         "$character"
       ];
+
       scan_timeout = 10;
 
       character = {
         success_symbol = "➜";
-        error_symbol = "➜";
+        error_symbol = "X➜";
+      };
+
+      directory = {
+        truncation_length = 3;
+        style = "bold blue";
       };
     };
   };
