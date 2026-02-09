@@ -64,16 +64,19 @@
   boot.initrd.systemd.enable = true;
 
   # Auto upgrade
-  system.autoUpgrade = {
-    enable = true;
-    dates = "daily";
-    allowReboot = true;
-    randomizedDelaySec = "1hr";
-    rebootWindow = {
-      lower = "23:00";
-      upper = "06:00";
+  {
+    system.autoUpgrade = {
+      enable = true;
+      dates = "04:00";
+      allowReboot = true;
+      randomizedDelaySec = "2hr";
+      rebootWindow = {
+        lower = "23:00";
+        upper = "06:00";
+      };
+      flake = "git+ssh://git@github.com/munkien/nixos.git"; 
     };
-  };
+  }
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";
@@ -148,8 +151,19 @@
       AddKeysToAgent yes
       ServerAliveInterval 60
       ServerAliveCountMax 3
+      Host github.com
+        User git
+        IdentityFile /etc/ssh/ssh_host_ed25519_key
+        IdentitiesOnly yes
     '';
   };
+programs.ssh.extraConfig = ''
+  Host github.com
+    User git
+    # Use the machine's own host key for authentication
+    IdentityFile /etc/ssh/ssh_host_ed25519_key
+    IdentitiesOnly yes
+'';
   programs.mosh.enable = true;
   networking.firewall.allowedTCPPorts = [22];
   networking.firewall.allowedUDPPortRanges = [
