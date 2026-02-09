@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   systemd.services.fleet-update-leader = {
     description = "Flake Update Leader: Update, Check, and Push";
     path = with pkgs; [git nix openssh coreutils];
@@ -13,22 +10,16 @@
     };
 
     script = ''
-      # 1. Update the lockfile with a standard summary message
-      # This handles multiple updates by listing them all in the commit
-      nix flake update --commit-lock-file --commit-lockfile-summary
+      nix flake update --commit-lock-file
 
-      # 2. The Safety Check (The most important step)
-      # We only push if the flake is actually valid/buildable
-      echo "Running safety check..."
       if ! nix flake check --no-build; then
         echo "Check failed! Rolling back lockfile..."
-        git checkout flake.lock
+        git restore flake.lock
         exit 1
       fi
 
-      # 3. Push to the repository so followers can see it
       echo "Pushing new lockfile to origin..."
-      git push origin main
+      git push origin master
     '';
   };
   systemd.timers.fleet-update-leader = {
