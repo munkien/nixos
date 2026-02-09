@@ -19,6 +19,7 @@
     ../../mods/system/wifi-gl3.nix
     #../../mods/system/impermanence.nix
     ../../mods/system/gaming.nix
+    ../../mods/system/fleet-update-leader.nix
 
     ../../users/munkien
   ];
