@@ -47,10 +47,7 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    nix-flatpak = {
-      url = "github:gmodena/nix-flatpak";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs = inputs @ {flake-parts, ...}:
@@ -144,7 +141,7 @@
         }: let
           filePathDisko = ./hosts/${hostname}/disko.nix;
           filePathHardware = ./hosts/${hostname}/hardware-configuration.nix;
-          filePathSops  = ./hosts/${hostname}/secrets.sops.yaml;
+          filePathSops = ./hosts/${hostname}/secrets.sops.yaml;
         in
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
@@ -165,15 +162,19 @@
                   };
                 }
 
-                # Handle secrets
-                { sops.defaultSopsFile = ../../secrets/global.sops.yaml; }
-                (if builtins.pathExists filePathSops then { sops.defaultSopsFile = filePathSops; }
-
                 inputs.home-manager.nixosModules.home-manager
                 inputs.sops-nix.nixosModules.sops
               ]
-              ++ (if builtins.pathExists filePathDisko then [inputs.disko.nixosModules.disko filePathDisko] else [])
-              ++ (if builtins.pathExists filePathHardware then [filePathHardware] else [])
+              ++ (
+                if builtins.pathExists filePathDisko
+                then [inputs.disko.nixosModules.disko filePathDisko]
+                else []
+              )
+              ++ (
+                if builtins.pathExists filePathHardware
+                then [filePathHardware]
+                else []
+              )
               ++ modules;
           };
 
