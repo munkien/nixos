@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   ...
 }: {
   systemd.services.fleet-update-leader = {

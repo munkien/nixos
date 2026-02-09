@@ -1,7 +1,4 @@
 {
-  config,
-  pkgs,
-  inputs,
   ...
 }: {
   users.users.munkien = {

@@ -1,7 +1,4 @@
 {
-  config,
-  pkgs,
-  inputs,
   ...
 }: {
   programs.irssi = {

@@ -58,7 +58,6 @@
       perSystem = {
         config,
         pkgs,
-        system,
         ...
       }: {
         pre-commit = {

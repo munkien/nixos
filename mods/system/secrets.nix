@@ -1,8 +1,5 @@
 {
-  config,
-  lib,
   pkgs,
-  modulesPath,
   ...
 }: {
   sops.defaultSopsFile = ../../secrets.yaml;

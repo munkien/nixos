@@ -1,8 +1,5 @@
 {
-  config,
-  lib,
   pkgs,
-  modulesPath,
   ...
 }: {
   programs.fuse.userAllowOther = true;
