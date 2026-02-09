@@ -65,8 +65,8 @@
   ############################################
   # Authentication & More
   ############################################
-  services.getty.autologinUser = "root";
-  users.users.root.password = "";
+  services.getty.autologinUser = lib.mkForce "root";
+  users.users.root.password = lib.mkForce "";
   networking.wireless.enable = false;
 
   ############################################

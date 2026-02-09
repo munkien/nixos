@@ -16,6 +16,7 @@
     connect-timeout = 5;
     fallback = true;
     warn-dirty = false;
+    download-buffer-size = 67108864;
   };
 
   security.sudo.wheelNeedsPassword = false;
