@@ -181,6 +181,7 @@
     git
     nil
     deadnix
+    statix
     pre-commit
     comma
     rustscan
