@@ -110,6 +110,7 @@
         # Rescue USB Iso
         apps.build-rescue = {
           type = "app";
+          meta.description = "Build the rescue ISO and copy it to /scratch";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
             runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
@@ -186,30 +187,29 @@
             ];
           };
 
-          server-x86 = self.lib.mkSystem {
-            hostname = "server-x86";
-            system = "x86_64-linux";
-            modules = [inputs.disko.nixosModules.disko];
-          };
+          # server-x86 = self.lib.mkSystem {
+          #   hostname = "server-x86";
+          #   system = "x86_64-linux";
+          #   modules = [inputs.disko.nixosModules.disko];
+          # };
 
-          hetzner-vm = self.lib.mkSystem {
-            hostname = "hetzner-vm";
-            system = "aarch64-linux";
-            modules = [inputs.disko.nixosModules.disko];
-          };
+          # hetzner-vm = self.lib.mkSystem {
+          #   hostname = "hetzner-vm";
+          #   system = "aarch64-linux";
+          #   modules = [inputs.disko.nixosModules.disko];
+          # };
 
-          pi5 = self.lib.mkSystem {
-            hostname = "pi5";
-            system = "aarch64-linux";
-            modules = [inputs.nixos-hardware.nixosModules.raspberry-pi-5];
-          };
+          # pi5 = self.lib.mkSystem {
+          #   hostname = "pi5";
+          #   system = "aarch64-linux";
+          #   modules = [inputs.nixos-hardware.nixosModules.raspberry-pi-5];
+          # };
 
           # Uses standard nixosSystem to avoid injecting user/home-manager configs into the ISO
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            meta.description = "Build the rescue ISO and copy it to /scratch";
             specialArgs = {inherit inputs;};
-            modules = [./hosts/rescue-usb/default.nix];
+            modules = [./hosts/rescue/default.nix];
           };
         };
       };
