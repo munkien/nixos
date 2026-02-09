@@ -5,11 +5,22 @@
   ...
 }: {
   nix.settings = {
-    # Prevents direnv from needing to rebuild everything constantly
     keep-outputs = true;
     keep-derivations = true;
+    daemon-base-priority = 10;
     experimental-features = ["nix-command" "flakes"];
+    sandbox = true;
+    auto-optimise-store = true;
+    max-jobs = "auto";
+    cores = 0;
+    max-substitution-sys-load = 1;
+    download-attempts = 5;
+    trusted-users = [ "root" "munkien" ];
+    connect-timeout = 5;
+    fallback = true;
+    warn-dirty = false;
   };
+
   security.sudo.wheelNeedsPassword = false;
   programs.nix-ld.enable = true;
   programs.nix-index.enable = true;
@@ -107,15 +118,7 @@
     enableSystemSlice = true;
   };
 
-  # Configure builds and store
-  nix.settings.auto-optimise-store = true;
-  nix.settings.max-jobs = "auto";
-  nix.settings.cores = 0;
-
-  # Sandbox
-  nix.settings.sandbox = true;
-
-  # Configure tuned
+# Configure tuned
   services.tuned = {
     enable = true;
     settings.dynamic_tuning = true;
