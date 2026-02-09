@@ -5,7 +5,7 @@
 
     serviceConfig = {
       Type = "oneshot";
-      User = "munkien";
+      User = "root";
       WorkingDirectory = "/home/munkien/nixos";
     };
 
