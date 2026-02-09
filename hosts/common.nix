@@ -180,6 +180,7 @@
     wget
     git
     nil
+    fastfetch
     deadnix
     statix
     pre-commit
