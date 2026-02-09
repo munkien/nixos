@@ -49,37 +49,41 @@
 
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak";
-      inputs.nixpkgs.follows = "nixpkgs"; 
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" ];
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux" "aarch64-linux"];
 
       # --- Architecture Specific Logic ---
-      perSystem = { config, pkgs, system, ... }: {
-        # Required to activate the pre-commit settings defined below
-        imports = [ inputs.git-hooks.flakeModule ];
+      perSystem = {
+        config,
+        pkgs,
+        system,
+        ...
+      }: {
+        imports = [inputs.git-hooks.flakeModule];
 
-       pre-commit = {
+        pre-commit = {
           settings.hooks = {
-            alejandra.enable = true; 
+            alejandra.enable = true;
             deadnix.enable = true;
             statix.enable = true;
-            
+
             check-added-large-files = {
               enable = true;
-              args = [ "--maxkb=2000" ];
+              args = ["--maxkb=2000"];
             };
-      
+
             check-symlinks.enable = true;
-      
+
             check-yaml = {
               enable = true;
-              excludes = [ ".*sops\\.yaml$" ];
+              excludes = [".*sops\\.yaml$"];
             };
-      
+
             flake-check = {
               enable = true;
               name = "Fast Flake Check";
@@ -91,39 +95,35 @@
 
         # Shell hook automatically installs git hooks when entering the directory
         devShells.default = pkgs.mkShell {
-            # This installs the pre-commit hooks into your local .git/hooks/
-            shellHook = ''
-              ${config.pre-commit.installationScript}
-              
-              echo "🔐 Syncing SOPS keys..."
-              # This ensures your keys are up to date for editing secrets
-              # It looks for a .sops.yaml in the root by default
-              if [ -f .sops.yaml ]; then
-                ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
-              fi
-            '';
-        
-            packages = with pkgs; [ 
-              sops 
-              age 
-              ssh-to-age 
-              alejandra # Added so you can run it manually if needed
-            ];
-          };
+          # This installs the pre-commit hooks into your local .git/hooks/
+          shellHook = ''
+            ${config.pre-commit.installationScript}
+            if [ -f .sops.yaml ]; then
+              ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
+            fi
+          '';
+
+          packages = with pkgs; [
+            sops
+            age
+            ssh-to-age
+            alejandra
+          ];
+        };
 
         # Rescue USB Iso
         apps.build-rescue = {
           type = "app";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
-            runtimeInputs = [ pkgs.coreutils pkgs.findutils pkgs.nix ];
+            runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
             text = ''
               echo "Building Rescue ISO..."
               OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-              
+
               if [ -z "$ISO_FILE" ]; then echo "Error: ISO not found"; exit 1; fi
-              
+
               DEST="/scratch/rescue-usb.iso"
               echo "Copying to $DEST..."
               mkdir -p /scratch
@@ -137,28 +137,34 @@
 
       # --- Architecture Agnostic Logic ---
       flake = {
-        lib.mkSystem = { hostname, system, modules ? [] }:
+        lib.mkSystem = {
+          hostname,
+          system,
+          modules ? [],
+        }:
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
-            specialArgs = { inherit inputs; };
-            modules = [
-              ./hosts/${hostname}/default.nix
-              ./users/munkien.nix
+            specialArgs = {inherit inputs;};
+            modules =
+              [
+                ./hosts/${hostname}/default.nix
+                ./users/munkien.nix
 
-              {
-                users.mutableUsers = false;
-                users.users.root = {
-                  # Generate this with: mkpasswd -m sha-512
-                  initialHashedPassword = "$6$rounds=40000$SALT$HASH..."; 
-                  openssh.authorizedKeys.keys = [
-                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..." # Your main admin key
-                  ];
-                };
-              }
+                {
+                  users.mutableUsers = false;
+                  users.users.root = {
+                    # Generate this with: mkpasswd -m sha-512
+                    initialHashedPassword = "$6$rounds=40000$SALT$HASH...";
+                    openssh.authorizedKeys.keys = [
+                      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..." # Your main admin key
+                    ];
+                  };
+                }
 
-              inputs.home-manager.nixosModules.home-manager
-              inputs.sops-nix.nixosModules.sops
-            ] ++ modules;
+                inputs.home-manager.nixosModules.home-manager
+                inputs.sops-nix.nixosModules.sops
+              ]
+              ++ modules;
           };
 
         nixosConfigurations = {
@@ -167,33 +173,33 @@
             system = "x86_64-linux";
             modules = [
               inputs.disko.nixosModules.disko
-              { home-manager.sharedModules = [ inputs.plasma-manager.homeManagerModules.plasma-manager ]; }
+              {home-manager.sharedModules = [inputs.plasma-manager.homeManagerModules.plasma-manager];}
             ];
           };
 
           server-x86 = inputs.self.flake.lib.mkSystem {
             hostname = "server-x86";
             system = "x86_64-linux";
-            modules = [ inputs.disko.nixosModules.disko ];
+            modules = [inputs.disko.nixosModules.disko];
           };
 
           hetzner-vm = inputs.self.flake.lib.mkSystem {
             hostname = "hetzner-vm";
             system = "aarch64-linux";
-            modules = [ inputs.disko.nixosModules.disko ];
+            modules = [inputs.disko.nixosModules.disko];
           };
 
           pi5 = inputs.self.flake.lib.mkSystem {
             hostname = "pi5";
             system = "aarch64-linux";
-            modules = [ inputs.nixos-hardware.nixosModules.raspberry-pi-5 ];
+            modules = [inputs.nixos-hardware.nixosModules.raspberry-pi-5];
           };
 
           # Uses standard nixosSystem to avoid injecting user/home-manager configs into the ISO
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            specialArgs = { inherit inputs; };
-            modules = [ ./hosts/rescue-usb/default.nix ];
+            specialArgs = {inherit inputs;};
+            modules = [./hosts/rescue-usb/default.nix];
           };
         };
       };
