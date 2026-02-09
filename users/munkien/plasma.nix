@@ -43,7 +43,7 @@
     }
     {
       location = "bottom";
-      height = 52;
+      height = 60;
       floating = false;
       widgets = [
         "org.kde.plasma.panelspacer"
@@ -107,7 +107,11 @@ in {
         };
       };
 
-      "ksmserverrc"."General"."loginMode" = "emptySession";
+      "ksmserverrc"."General" = {
+        "loginMode" = "emptySession"; # You already have this
+        "confirmLogout" = false; # <--- ADDS INSTANT SHUTDOWN
+        "offerShutdown" = true; # Ensures the option is still available
+      };
 
       # Theming / Kwin
       "kdeglobals"."KDE"."widgetStyle" = "kvantum";
@@ -170,29 +174,44 @@ in {
   };
 
   systemd.user.services = {
+    # 30 Second Delay
     steam = {
       Unit = {
         Description = "Steam";
         After = ["graphical-session.target"];
       };
-      Service = {ExecStart = "${pkgs.steam}/bin/steam -silent";};
-      Install = {WantedBy = ["graphical-session.target"];};
-    };
-    discord = {
-      Unit = {
-        Description = "Discord";
-        After = ["graphical-session.target"];
+      Service = {
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 30";
+        ExecStart = "${pkgs.steam}/bin/steam -silent";
+        Restart = "on-failure";
       };
-      Service = {ExecStart = "${pkgs.discord}/bin/discord --start-minimized";};
       Install = {WantedBy = ["graphical-session.target"];};
     };
+
+    # 80 Second Delay
     spotify = {
       Unit = {
         Description = "Spotify";
         After = ["graphical-session.target"];
       };
       Service = {
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 80";
         ExecStart = "${pkgs.spotify}/bin/spotify";
+        Restart = "on-failure";
+      };
+      Install = {WantedBy = ["graphical-session.target"];};
+    };
+
+    # 120 Second Delay
+    discord = {
+      Unit = {
+        Description = "Discord";
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 120";
+        ExecStart = "${pkgs.discord}/bin/discord";
+        Restart = "on-failure";
       };
       Install = {WantedBy = ["graphical-session.target"];};
     };
