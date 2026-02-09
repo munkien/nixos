@@ -1,146 +1,200 @@
 {
   description = "Munkiens Fleet: Multi-Arch, Auto-Updating, and Declarative";
 
-  # ---------------------------------------------------------------
-  # 1. INPUTS
-  # ---------------------------------------------------------------
   inputs = {
-    # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    
-    # Framework
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
-    # Modules
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Extras
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-anywhere = {
+      url = "github:nix-community/nixos-anywhere";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.disko.follows = "disko";
+    };
+
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-    nix-flatpak.url = "github:gmodena/nix-flatpak";
+
+    nix-flatpak = {
+      url = "github:gmodena/nix-flatpak";
+      inputs.nixpkgs.follows = "nixpkgs"; 
+    };
   };
 
-  # ---------------------------------------------------------------
-  # 2. OUTPUTS
-  # ---------------------------------------------------------------
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      
       systems = [ "x86_64-linux" "aarch64-linux" ];
 
-      # ===========================================================
-      # A. PER-SYSTEM LOGIC (Apps & Checks)
-      # ===========================================================
+      # --- Architecture Specific Logic ---
       perSystem = { config, pkgs, system, ... }: {
+        # Required to activate the pre-commit settings defined below
+        imports = [ inputs.git-hooks.flakeModule ];
+
+       pre-commit = {
+          settings.hooks = {
+            alejandra.enable = true; 
+            deadnix.enable = true;
+            statix.enable = true;
+            
+            check-added-large-files = {
+              enable = true;
+              args = [ "--maxkb=2000" ];
+            };
+      
+            check-symlinks.enable = true;
+      
+            check-yaml = {
+              enable = true;
+              excludes = [ ".*sops\\.yaml$" ];
+            };
+      
+            flake-check = {
+              enable = true;
+              name = "Fast Flake Check";
+              entry = "${pkgs.nix}/bin/nix flake check --no-build";
+              pass_filenames = false;
+            };
+          };
+        };
+
+        # Shell hook automatically installs git hooks when entering the directory
+        devShells.default = pkgs.mkShell {
+            # This installs the pre-commit hooks into your local .git/hooks/
+            shellHook = ''
+              ${config.pre-commit.installationScript}
+              
+              echo "🔐 Syncing SOPS keys..."
+              # This ensures your keys are up to date for editing secrets
+              # It looks for a .sops.yaml in the root by default
+              if [ -f .sops.yaml ]; then
+                ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
+              fi
+            '';
         
-        # 1. Rescue ISO Builder Script
-        # Usage: nix run .#build-rescue
+            packages = with pkgs; [ 
+              sops 
+              age 
+              ssh-to-age 
+              alejandra # Added so you can run it manually if needed
+            ];
+          };
+
+        # Rescue USB Iso
         apps.build-rescue = {
           type = "app";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
             runtimeInputs = [ pkgs.coreutils pkgs.findutils pkgs.nix ];
             text = ''
-              echo "🔨 Building Rescue ISO..."
+              echo "Building Rescue ISO..."
               OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-              if [ -z "$ISO_FILE" ]; then echo "❌ Error: ISO not found"; exit 1; fi
+              
+              if [ -z "$ISO_FILE" ]; then echo "Error: ISO not found"; exit 1; fi
               
               DEST="/scratch/rescue-usb.iso"
-              echo "📂 Copying to $DEST..."
+              echo "Copying to $DEST..."
               mkdir -p /scratch
               cp --reflink=auto "$ISO_FILE" "$DEST"
               chmod 644 "$DEST"
-              echo "✅ Success! ISO ready at $DEST"
+              echo "Success! ISO ready at $DEST"
             '';
           }}/bin/build-rescue-iso";
         };
       };
 
-      # ===========================================================
-      # B. GLOBAL LOGIC (The Hosts)
-      # ===========================================================
+      # --- Architecture Agnostic Logic ---
       flake = {
-        
-        # 1. THE BUILDER FUNCTION
-        # This reduces code duplication by 80%
-        lib.mkSystem = { hostname, system, modules ? [] }: 
+        lib.mkSystem = { hostname, system, modules ? [] }:
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
             specialArgs = { inherit inputs; };
             modules = [
-              # A. Auto-Import Host Config
               ./hosts/${hostname}/default.nix
-              
-              # B. Global Modules (Inject into EVERY system)
-              ./modules/user-munkien.nix    # <--- Ensure this file exists!
+              ./users/munkien.nix
+
+              {
+                users.mutableUsers = false;
+                users.users.root = {
+                  # Generate this with: mkpasswd -m sha-512
+                  initialHashedPassword = "$6$rounds=40000$SALT$HASH..."; 
+                  openssh.authorizedKeys.keys = [
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..." # Your main admin key
+                  ];
+                };
+              }
+
               inputs.home-manager.nixosModules.home-manager
               inputs.sops-nix.nixosModules.sops
-              
-              # C. Host Specific Extras
             ] ++ modules;
           };
 
-        # 2. THE CONFIGURATIONS
         nixosConfigurations = {
-          
-          # --- Workstation ---
           workstation = inputs.self.flake.lib.mkSystem {
             hostname = "workstation";
             system = "x86_64-linux";
-            modules = [ 
-              inputs.disko.nixosModules.disko 
+            modules = [
+              inputs.disko.nixosModules.disko
               { home-manager.sharedModules = [ inputs.plasma-manager.homeManagerModules.plasma-manager ]; }
             ];
           };
 
-          # --- Server ---
           server-x86 = inputs.self.flake.lib.mkSystem {
             hostname = "server-x86";
             system = "x86_64-linux";
             modules = [ inputs.disko.nixosModules.disko ];
           };
 
-          # --- Cloud VM ---
           hetzner-vm = inputs.self.flake.lib.mkSystem {
             hostname = "hetzner-vm";
             system = "aarch64-linux";
             modules = [ inputs.disko.nixosModules.disko ];
           };
 
-          # --- Raspberry Pi ---
           pi5 = inputs.self.flake.lib.mkSystem {
             hostname = "pi5";
             system = "aarch64-linux";
             modules = [ inputs.nixos-hardware.nixosModules.raspberry-pi-5 ];
           };
 
-          # --- Rescue USB ---
-          # Kept manual because it doesn't need users/sops/home-manager
+          # Uses standard nixosSystem to avoid injecting user/home-manager configs into the ISO
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             specialArgs = { inherit inputs; };
             modules = [ ./hosts/rescue-usb/default.nix ];
           };
-
         };
       };
     };
