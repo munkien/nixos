@@ -1,0 +1,10 @@
+ignore = [
+  ".git/",
+  "result",
+  "flake.lock",
+  "hardware-configuration.nix"
+]
+
+disabled = [
+  "repeated_keys"
+]

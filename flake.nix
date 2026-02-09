@@ -149,13 +149,15 @@
                 inputs.sops-nix.nixosModules.sops
 
                 {
-                  home-manager.useGlobalPkgs = true;
-                  home-manager.useUserPackages = true;
+                  home-manager = {
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
 
-                  home-manager.sharedModules = [
-                    inputs.plasma-manager.homeModules.plasma-manager
-                    inputs.nix-flatpak.homeManagerModules.nix-flatpak
-                  ];
+                    sharedModules = [
+                      inputs.plasma-manager.homeModules.plasma-manager
+                      inputs.nix-flatpak.homeManagerModules.nix-flatpak
+                    ];
+                  };
 
                   # This ensures the user config is actually applied
                   home-manager.users.munkien = import ./users/munkien/home.nix;
