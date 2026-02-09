@@ -156,14 +156,10 @@
         IdentityFile /etc/ssh/ssh_host_ed25519_key
         IdentitiesOnly yes
     '';
+    knownHosts."github.com" = {
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+    };
   };
-programs.ssh.extraConfig = ''
-  Host github.com
-    User git
-    # Use the machine's own host key for authentication
-    IdentityFile /etc/ssh/ssh_host_ed25519_key
-    IdentitiesOnly yes
-'';
   programs.mosh.enable = true;
   networking.firewall.allowedTCPPorts = [22];
   networking.firewall.allowedUDPPortRanges = [
