@@ -4,7 +4,12 @@
   inputs,
   ...
 }: {
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings = {
+    # Prevents direnv from needing to rebuild everything constantly
+    keep-outputs = true;
+    keep-derivations = true;
+    experimental-features = ["nix-command" "flakes"];
+  };
   security.sudo.wheelNeedsPassword = false;
   programs.nix-ld.enable = true;
   programs.nix-index.enable = true;
@@ -15,6 +20,8 @@
     nix-direnv.enable = true;
   };
   console.keyMap = "dk-latin1";
+
+
 
   # Time, Dr. Freeman?
   time.timeZone = "Europe/Copenhagen";
