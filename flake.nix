@@ -63,8 +63,8 @@
         pre-commit = {
           settings.hooks = {
             alejandra.enable = true;
-            deadnix.enable = false;
-            statix.enable = false;
+            deadnix.enable = true;
+            statix.enable = true;
             check-added-large-files = {
               enable = true;
               args = ["--maxkb=2000"];
