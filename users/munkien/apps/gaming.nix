@@ -18,7 +18,7 @@
 
   services.flatpak = {
     enable = true;
-    uninstallUnusedRuntimes = true;
+    uninstallUnused = true;
     update = {
       auto = {
         enable = true;

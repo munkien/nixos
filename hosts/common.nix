@@ -7,13 +7,11 @@
   nix.settings = {
     keep-outputs = true;
     keep-derivations = true;
-    daemon-base-priority = 10;
     experimental-features = ["nix-command" "flakes"];
     sandbox = true;
     auto-optimise-store = true;
     max-jobs = "auto";
     cores = 0;
-    max-substitution-sys-load = 1;
     download-attempts = 5;
     trusted-users = ["root" "munkien"];
     connect-timeout = 5;

@@ -6,8 +6,6 @@
   ...
 }: {
   imports = [
-    inputs.plasma-manager.homeModules.plasma-manager
-
     ./plasma.nix
 
     ./apps/terminal.nix

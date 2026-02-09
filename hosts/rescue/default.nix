@@ -4,10 +4,9 @@
   pkgs,
   modulesPath,
   ...
-}:
-
-{
+}: {
   imports = [
+    "${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
     ../common.nix
   ];
 
@@ -38,7 +37,7 @@
     "sd_mod"
   ];
 
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.kernelModules = ["amdgpu"];
   boot.initrd.systemd.enable = true;
 
   boot.kernelParams = [
@@ -64,11 +63,18 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   ############################################
+  # Authentication & More
+  ############################################
+  services.getty.autologinUser = "root";
+  users.users.root.password = "";
+  networking.wireless.enable = false;
+
+  ############################################
   # Live environment packages
   ############################################
 
   environment.systemPackages = with pkgs; [
-# --- Installation & Recovery ---
+    # --- Installation & Recovery ---
     nixos-install-tools
     rsync
     testdisk
@@ -101,7 +107,7 @@
   ############################################
 
   services.xserver.enable = true;
-services.desktopManager.plasma6.enable = true;
+  services.desktopManager.plasma6.enable = true;
   services.displayManager.sddm.enable = true;
 
   ############################################
@@ -109,7 +115,7 @@ services.desktopManager.plasma6.enable = true;
   ############################################
 
   networking.networkmanager.enable = true;
-networking.networkmanager.ensureProfiles.profiles = {
+  networking.networkmanager.ensureProfiles.profiles = {
     home-wifi = {
       connection = {
         id = "home-wifi";
@@ -126,10 +132,4 @@ networking.networkmanager.ensureProfiles.profiles = {
       };
     };
   };
-
-  ############################################
-  # ISO metadata
-  ############################################
-
-  image.fileName = "nixos-custom-installer.iso";
 }

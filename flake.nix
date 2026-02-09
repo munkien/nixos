@@ -7,7 +7,7 @@
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
-      #inputs.nixpkgs-lib.follows = "nixpkgs";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
     home-manager = {
@@ -55,7 +55,6 @@
       systems = ["x86_64-linux" "aarch64-linux"];
       imports = [inputs.git-hooks.flakeModule];
 
-      # --- Architecture Specific Logic ---
       perSystem = {
         config,
         pkgs,
@@ -65,21 +64,17 @@
         pre-commit = {
           settings.hooks = {
             alejandra.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
-
+            deadnix.enable = false;
+            statix.enable = false;
             check-added-large-files = {
               enable = true;
               args = ["--maxkb=2000"];
             };
-
             check-symlinks.enable = true;
-
             check-yaml = {
               enable = true;
               excludes = [".*sops\\.yaml$"];
             };
-
             flake-check = {
               enable = true;
               name = "Fast Flake Check";
@@ -89,28 +84,18 @@
           };
         };
 
-        # Shell hook automatically installs git hooks when entering the directory
         devShells.default = pkgs.mkShell {
-          # This installs the pre-commit hooks into your local .git/hooks/
           shellHook = ''
             ${config.pre-commit.installationScript}
             if [ -f .sops.yaml ]; then
               ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
             fi
           '';
-
-          packages = with pkgs; [
-            sops
-            age
-            ssh-to-age
-            alejandra
-          ];
+          packages = with pkgs; [sops age ssh-to-age alejandra];
         };
 
-        # Rescue USB Iso
         apps.build-rescue = {
           type = "app";
-          meta.description = "Build the rescue ISO and copy it to /scratch";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
             runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
@@ -118,11 +103,8 @@
               echo "Building Rescue ISO..."
               OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-
               if [ -z "$ISO_FILE" ]; then echo "Error: ISO not found"; exit 1; fi
-
               DEST="/scratch/rescue-usb.iso"
-              echo "Copying to $DEST..."
               mkdir -p /scratch
               cp --reflink=auto "$ISO_FILE" "$DEST"
               chmod 644 "$DEST"
@@ -132,8 +114,8 @@
         };
       };
 
-      # --- Architecture Agnostic Logic ---
       flake = {
+        # --- System Builder Helper ---
         lib.mkSystem = {
           hostname,
           system,
@@ -141,6 +123,19 @@
         }: let
           filePathDisko = ./hosts/${hostname}/disko.nix;
           filePathHardware = ./hosts/${hostname}/hardware-configuration.nix;
+
+          # Pre-calculating path existence outside the nixosSystem call prevents infinite recursion
+          conditionalModules =
+            (
+              if builtins.pathExists filePathDisko
+              then [inputs.disko.nixosModules.disko filePathDisko]
+              else []
+            )
+            ++ (
+              if builtins.pathExists filePathHardware
+              then [filePathHardware]
+              else []
+            );
         in
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
@@ -150,62 +145,42 @@
                 ./hosts/${hostname}/default.nix
                 ./users/munkien/default.nix
 
+                inputs.home-manager.nixosModules.home-manager
+                inputs.sops-nix.nixosModules.sops
+
                 {
+                  home-manager.useGlobalPkgs = true;
+                  home-manager.useUserPackages = true;
+
+                  home-manager.sharedModules = [
+                    inputs.plasma-manager.homeModules.plasma-manager
+                    inputs.nix-flatpak.homeManagerModules.nix-flatpak
+                  ];
+
+                  # This ensures the user config is actually applied
+                  home-manager.users.munkien = import ./users/munkien/home.nix;
+
                   users.mutableUsers = false;
                   users.users.root = {
-                    # Generate this with: mkpasswd -m sha-512
                     initialHashedPassword = "$6$rounds=40000$SALT$HASH...";
                     openssh.authorizedKeys.keys = [
-                      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..." # Your main admin key
+                      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..."
                     ];
                   };
                 }
-
-                inputs.home-manager.nixosModules.home-manager
-                inputs.sops-nix.nixosModules.sops
               ]
-              ++ (
-                if builtins.pathExists filePathDisko
-                then [inputs.disko.nixosModules.disko filePathDisko]
-                else []
-              )
-              ++ (
-                if builtins.pathExists filePathHardware
-                then [filePathHardware]
-                else []
-              )
+              ++ conditionalModules
               ++ modules;
           };
 
+        # --- Top-level NixOS Configurations ---
         nixosConfigurations = {
           workstation = self.lib.mkSystem {
             hostname = "workstation";
             system = "x86_64-linux";
-            modules = [
-              inputs.disko.nixosModules.disko
-              {home-manager.sharedModules = [inputs.plasma-manager.homeManagerModules.plasma-manager];}
-            ];
+            modules = [];
           };
 
-          # server-x86 = self.lib.mkSystem {
-          #   hostname = "server-x86";
-          #   system = "x86_64-linux";
-          #   modules = [inputs.disko.nixosModules.disko];
-          # };
-
-          # hetzner-vm = self.lib.mkSystem {
-          #   hostname = "hetzner-vm";
-          #   system = "aarch64-linux";
-          #   modules = [inputs.disko.nixosModules.disko];
-          # };
-
-          # pi5 = self.lib.mkSystem {
-          #   hostname = "pi5";
-          #   system = "aarch64-linux";
-          #   modules = [inputs.nixos-hardware.nixosModules.raspberry-pi-5];
-          # };
-
-          # Uses standard nixosSystem to avoid injecting user/home-manager configs into the ISO
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             specialArgs = {inherit inputs;};

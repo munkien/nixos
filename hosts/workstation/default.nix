@@ -20,8 +20,6 @@
     #../../mods/system/impermanence.nix
     ../../mods/system/gaming.nix
     ../../mods/system/fleet-update-leader.nix
-
-    ../../users/munkien
   ];
 
   environment.enableDebugInfo = true;
