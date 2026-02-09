@@ -7,7 +7,7 @@
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
+      #inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
     home-manager = {
@@ -50,9 +50,10 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs = inputs @ {flake-parts, ...}:
-    flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs = inputs @ {self, ...}:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux"];
+      imports = [inputs.git-hooks.flakeModule];
 
       # --- Architecture Specific Logic ---
       perSystem = {
@@ -61,8 +62,6 @@
         system,
         ...
       }: {
-        imports = [inputs.git-hooks.flakeModule];
-
         pre-commit = {
           settings.hooks = {
             alejandra.enable = true;
@@ -141,7 +140,6 @@
         }: let
           filePathDisko = ./hosts/${hostname}/disko.nix;
           filePathHardware = ./hosts/${hostname}/hardware-configuration.nix;
-          filePathSops = ./hosts/${hostname}/secrets.sops.yaml;
         in
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
@@ -149,7 +147,7 @@
             modules =
               [
                 ./hosts/${hostname}/default.nix
-                ./users/munkien.nix
+                ./users/munkien/default.nix
 
                 {
                   users.mutableUsers = false;
@@ -179,7 +177,7 @@
           };
 
         nixosConfigurations = {
-          workstation = inputs.self.flake.lib.mkSystem {
+          workstation = self.lib.mkSystem {
             hostname = "workstation";
             system = "x86_64-linux";
             modules = [
@@ -188,19 +186,19 @@
             ];
           };
 
-          server-x86 = inputs.self.flake.lib.mkSystem {
+          server-x86 = self.lib.mkSystem {
             hostname = "server-x86";
             system = "x86_64-linux";
             modules = [inputs.disko.nixosModules.disko];
           };
 
-          hetzner-vm = inputs.self.flake.lib.mkSystem {
+          hetzner-vm = self.lib.mkSystem {
             hostname = "hetzner-vm";
             system = "aarch64-linux";
             modules = [inputs.disko.nixosModules.disko];
           };
 
-          pi5 = inputs.self.flake.lib.mkSystem {
+          pi5 = self.lib.mkSystem {
             hostname = "pi5";
             system = "aarch64-linux";
             modules = [inputs.nixos-hardware.nixosModules.raspberry-pi-5];
@@ -209,6 +207,7 @@
           # Uses standard nixosSystem to avoid injecting user/home-manager configs into the ISO
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
+            meta.description = "Build the rescue ISO and copy it to /scratch";
             specialArgs = {inherit inputs;};
             modules = [./hosts/rescue-usb/default.nix];
           };

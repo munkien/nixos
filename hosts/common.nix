@@ -15,7 +15,7 @@
     cores = 0;
     max-substitution-sys-load = 1;
     download-attempts = 5;
-    trusted-users = [ "root" "munkien" ];
+    trusted-users = ["root" "munkien"];
     connect-timeout = 5;
     fallback = true;
     warn-dirty = false;
@@ -31,8 +31,6 @@
     nix-direnv.enable = true;
   };
   console.keyMap = "dk-latin1";
-
-
 
   # Time, Dr. Freeman?
   time.timeZone = "Europe/Copenhagen";
@@ -82,19 +80,17 @@
   boot.initrd.systemd.enable = true;
 
   # Auto upgrade
-  {
-    system.autoUpgrade = {
-      enable = true;
-      dates = "04:00";
-      allowReboot = true;
-      randomizedDelaySec = "2hr";
-      rebootWindow = {
-        lower = "23:00";
-        upper = "06:00";
-      };
-      flake = "git+ssh://git@github.com/munkien/nixos.git"; 
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+    allowReboot = true;
+    randomizedDelaySec = "2hr";
+    rebootWindow = {
+      lower = "23:00";
+      upper = "06:00";
     };
-  }
+    flake = "git+ssh://git@github.com/munkien/nixos.git";
+  };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";
@@ -118,7 +114,7 @@
     enableSystemSlice = true;
   };
 
-# Configure tuned
+  # Configure tuned
   services.tuned = {
     enable = true;
     settings.dynamic_tuning = true;

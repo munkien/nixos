@@ -1,12 +1,16 @@
-{ pkgs, inputs, ... }: {
-systemd.services.fleet-update-leader = {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
+  systemd.services.fleet-update-leader = {
     description = "Flake Update Leader: Update, Check, and Push";
-    path = with pkgs; [ git nix openssh coreutils ];
-    
+    path = with pkgs; [git nix openssh coreutils];
+
     serviceConfig = {
       Type = "oneshot";
       User = "munkien";
-      WorkingDirectory = "/home/munkien/nixos"; 
+      WorkingDirectory = "/home/munkien/nixos";
     };
 
     script = ''
@@ -29,11 +33,11 @@ systemd.services.fleet-update-leader = {
     '';
   };
   systemd.timers.fleet-update-leader = {
-    wantedBy = [ "timers.target" ];
+    wantedBy = ["timers.target"];
     timerConfig = {
       OnCalendar = "weekly";
       Persistent = true;
       RandomizedDelaySec = "6h";
     };
   };
-};
+}
