@@ -1,0 +1,23 @@
+name: "CI: Verify NixOS Build"
+
+on:
+  pull_request: # Runs on any PR, including the one created by the update workflow
+  push:
+    branches: [ main, master ]
+
+jobs:
+  verify-flake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+
+      # 1. Check strict flake validity (syntax, loose inputs)
+      - name: Check Flake
+        run: nix flake check
+
+      # 2. Dry-build the system to ensure 'switch' will succeed
+      - name: Build NixOS System
+        run: nix build .#nixosConfigurations.workstation.config.system.build.toplevel --dry-run
