@@ -67,6 +67,7 @@
   ############################################
   services.getty.autologinUser = lib.mkForce "root";
   users.users.root.password = lib.mkForce "";
+  users.users.root.hashedPassword = lib.mkForce "";
   networking.wireless.enable = false;
 
   ############################################

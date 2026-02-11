@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   micName = "CleanMic";
   ladspaPath = "${pkgs.ladspaPlugins}/lib/ladspa";
   rnnoisePath = "${pkgs.rnnoise-plugin}/lib/ladspa";

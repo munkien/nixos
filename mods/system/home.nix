@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   programs.fuse.userAllowOther = true;
   home-manager.backupFileExtension = "backup";
 

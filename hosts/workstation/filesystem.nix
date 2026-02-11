@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   bcachefs_device = "/dev/disk/by-uuid/fe8de683-7e92-4cc0-ace2-8ce2bccfa296";
 in {
   ##########

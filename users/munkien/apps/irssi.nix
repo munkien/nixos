@@ -1,6 +1,4 @@
-{
-  ...
-}: {
+{...}: {
   programs.irssi = {
     enable = true;
     networks = {

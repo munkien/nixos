@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: {
+{config, ...}: {
   sops.secrets.wifi_password_1 = {};
   sops.secrets.wifi_password_2 = {};
   sops.templates."GL3-5G.nmconnection" = {

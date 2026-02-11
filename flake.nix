@@ -95,12 +95,13 @@
 
         apps.build-rescue = {
           type = "app";
+          meta.description = "Rescue ISO";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
             runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
             text = ''
-              echo "Building Rescue ISO..."
-              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
+              echo "Building Rescue ISO..."o0þǿ-
+              OUT_PATH=$(nix build --print-out-pæ.-10aths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
               if [ -z "$ISO_FILE" ]; then echo "Error: ISO not found"; exit 1; fi
               DEST="/scratch/rescue-usb.iso"
