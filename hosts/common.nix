@@ -62,6 +62,13 @@
     MaxFileSec=14day
   '';
 
+  # Locate!
+  services.locate = {
+    enable = true;
+    package = pkgs.plocate;
+    interval = "hourly";
+  };
+
   # NH Helper :)
   programs.nh = {
     enable = true;

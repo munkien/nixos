@@ -27,6 +27,25 @@
 
   services.jotta-cli.enable = true;
 
+  services.pipewire.wireplumber.extraConfig."10-strict-audio-blacklist" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [
+          # Disables GPU HDMI/DP audio (Navi) and Motherboard audio (Starship)
+          {"node.name" = "~alsa_output.pci.*";}
+          # Disables the AB13X and generic CS202 USB adapters
+          {"node.name" = "~alsa_output.usb-Generic.*";}
+          {"node.name" = "~alsa_output.usb-AB13X.*";}
+        ];
+        actions = {
+          update-props = {
+            "node.disabled" = true;
+          };
+        };
+      }
+    ];
+  };
+
   services.xserver.videoDrivers = ["amdgpu"];
 
   # Vector Konfiguration
