@@ -1,20 +1,39 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs; [
+    fd
+    ripgrep
+  ];
+
   # 1. Shell
   programs.bash.enable = true; # Fallback
   programs.fish = {
     enable = true;
     shellAliases = {
-      # Critical: Added safety check. 'git add .' is risky.
-      # This alias now shows status first, then commits.
       gcp = "git status && git add . && git commit -m 'WIP' && git push";
       ls = "eza --icons --group-directories-first"; # Modern replacement for ls
       cat = "bat"; # Modern replacement for cat (matches Tokyo Night)
+      grep = "rg"; # Replaces legacy grep with ripgrep
+      find = "fd";
     };
 
     # Ensure Starship is initialized
     interactiveShellInit = ''
       set fish_greeting # Disable greeting
     '';
+  };
+
+  # Integrates fzf directly into Fish using fd
+  programs.fzf = {
+    enable = true;
+    enableFishIntegration = true;
+
+    defaultCommand = "fd --type f --hidden --exclude .git";
+    fileWidgetCommand = "fd --type f --hidden --exclude .git";
+    changeDirWidgetCommand = "fd --type d --hidden --exclude .git";
   };
 
   # 2. Terminal Emulator
