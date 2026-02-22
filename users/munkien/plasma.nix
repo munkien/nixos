@@ -34,6 +34,7 @@
         {
           name = "org.kde.plasma.icontasks";
           config.General.launchers = [
+            "applications:org.kde.dolphin.desktop"
             "applications:codium.desktop"
             "applications:kitty.desktop"
             "applications:firefox.desktop"
