@@ -39,7 +39,7 @@
   # 2. Terminal Emulator
   programs.kitty = {
     enable = true;
-    theme = "Tokyo Night"; # Standard HM theme name (Verified)
+    themeFile = "tokyo_night_night";
 
     font = {
       name = "JetBrainsMono Nerd Font";

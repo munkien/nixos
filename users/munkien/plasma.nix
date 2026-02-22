@@ -117,7 +117,10 @@ in {
     # 5. Window Management (KWin)
     kwin = {
       effects = {
-        blur.enable = true;
+        blur = {
+          enable = true;
+          strength = 12;
+        };
         translucency.enable = true;
       };
       titlebarButtons = {
@@ -125,15 +128,9 @@ in {
         right = ["close"];
       };
     };
-
     # 6. Detailed Configuration (RC Files)
     configFile = {
       "kdeglobals"."KDE"."widgetStyle" = "Breeze";
-
-      "kwinrc"."Plugins" = {
-        "blurRadius" = 12;
-        "translucencyOpaque" = 85; # 85% Opacity
-      };
 
       "klipperrc"."General" = {
         "MaxClipItems" = 100;
