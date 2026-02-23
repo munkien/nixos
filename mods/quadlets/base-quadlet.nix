@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, config }:
 
 {
   autoStart = true;
@@ -21,7 +21,7 @@
     readOnly = true;
     userns = "auto:size=65536";
     environments = {
-      TZ = "Europe/Copenhagen";
+      TZ = config.time.timeZone;
     };
   };
 }
