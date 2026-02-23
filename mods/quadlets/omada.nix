@@ -20,7 +20,10 @@ in
 
   services.caddy.virtualHosts."omada.lan.munkie.dk" = {
     useACMEHost = "munkie.dk";
-    extraConfig = "reverse_proxy 127.0.0.1:8088";
+    extraConfig = ''
+      import secure_proxy 
+      reverse_proxy 127.0.0.1:8088
+    '';
   };
 
   # 3. Containers
