@@ -6,7 +6,7 @@
 }:
 
 let
-  common = import ./common-quadlet.nix { inherit lib config; };
+  common = import ./base-quadlet.nix { inherit lib config; };
 in
 {
   # 1. Base directories (Generated dynamically)
