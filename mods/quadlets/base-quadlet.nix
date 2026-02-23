@@ -14,8 +14,9 @@
     healthStartPeriod = "10s";
     healthStartupInterval = "5s";
     healthStartupRetries = 15;
-    notify = "healthy";
+    notify = "ready";
     networks = [ "homelab" ];
+    dropCapabilities = [ "ALL" ];
     stopTimeout = 900;
     readOnly = true;
     userns = "auto:size=65536";
