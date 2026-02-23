@@ -186,11 +186,11 @@
             hostname = "pc-anders";
             system = "x86_64-linux";
             modules = [             
-              ./common.nix
+              ./hosts/common.nix
               ./mods/system/secrets.nix
               ./mods/system/home.nix
-              ./mods/quadlets/default.nix
 
+              ./mods/quadlets/default.nix
               ./mods/quadlets/omada.nix
             ];
           };
@@ -199,7 +199,7 @@
             hostname = "pc-anders";
             system = "x86_64-linux";
             modules = [             
-              ./common.nix
+              ./hosts/common.nix
               ./mods/system/desktop.nix
               ./mods/system/secrets.nix
               ./mods/system/home.nix
