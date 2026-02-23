@@ -24,6 +24,7 @@
   programs.nix-index.enable = true;
   nixpkgs.config.allowUnfree = true;
   programs.git.enable = true;
+  services.jotta-cli.enable = true;
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
