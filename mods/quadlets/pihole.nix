@@ -7,9 +7,6 @@
 
 let
   common = import ./base-quadlet.nix { inherit lib config; };
-  
-  # Define your host IP once. If you ever change the server's IP, 
-  # you only change it here, and the entire file updates automatically.
   hostIp = "192.168.0.50"; 
 in
 {
