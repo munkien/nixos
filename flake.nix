@@ -182,7 +182,20 @@
             modules = [];
           };
 
-          workstation = self.lib.mkSystem {
+          server-home-1 = self.lib.mkSystem {
+            hostname = "pc-anders";
+            system = "x86_64-linux";
+            modules = [             
+              ./common.nix
+              ./mods/system/secrets.nix
+              ./mods/system/home.nix
+              ./mods/quadlets/default.nix
+
+              ./mods/quadlets/omada.nix
+            ];
+          }
+
+          pc-anders = self.lib.mkSystem {
             hostname = "pc-anders";
             system = "x86_64-linux";
             modules = [             
