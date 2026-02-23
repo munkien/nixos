@@ -193,7 +193,7 @@
 
               ./mods/quadlets/omada.nix
             ];
-          }
+          };
 
           pc-anders = self.lib.mkSystem {
             hostname = "pc-anders";
