@@ -90,11 +90,15 @@
         devShells.default = pkgs.mkShell {
           shellHook = ''
             ${config.pre-commit.installationScript}
+            
+            # Ensures ** matches directories recursively in bash
+            shopt -s globstar 
+            
             if [ -f .sops.yaml ]; then
               ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
             fi
           '';
-          packages = with pkgs; [sops age ssh-to-age alejandra];
+          packages = with pkgs; [ sops age ssh-to-age alejandra ];
         };
 
         apps.build-rescue = {
@@ -102,12 +106,17 @@
           meta.description = "Rescue ISO";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
-            runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
+            runtimeInputs = [ pkgs.coreutils pkgs.findutils pkgs.nix ];
             text = ''
-              echo "Building Rescue ISO..."o0þǿ-
-              OUT_PATH=$(nix build --print-out-pæ.-10aths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
+              echo "Building Rescue ISO..."
+              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-              if [ -z "$ISO_FILE" ]; then echo "Error: ISO not found"; exit 1; fi
+              
+              if [ -z "$ISO_FILE" ]; then 
+                echo "Error: ISO not found"
+                exit 1
+              fi
+              
               DEST="/scratch/rescue-usb.iso"
               mkdir -p /scratch
               cp --reflink=auto "$ISO_FILE" "$DEST"
@@ -120,63 +129,49 @@
 
       flake = {
         # --- System Builder Helper ---
-        lib.mkSystem = {
-          hostname,
-          system,
-          modules ? [],
-        }: let
-          filePathDisko = ./hosts/${hostname}/disko.nix;
-          filePathHardware = ./hosts/${hostname}/hardware-configuration.nix;
-
-          # Pre-calculating path existence outside the nixosSystem call prevents infinite recursion
-          conditionalModules =
-            (
-              if builtins.pathExists filePathDisko
-              then [inputs.disko.nixosModules.disko filePathDisko]
-              else []
-            )
-            ++ (
-              if builtins.pathExists filePathHardware
-              then [filePathHardware]
-              else []
-            );
-        in
+        lib.mkSystem = { hostname, system, modules ? [] }: 
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
-            specialArgs = {inherit inputs;};
-            modules =
-              [
-                ./hosts/${hostname}/default.nix
-                ./users/munkien/default.nix
+            specialArgs = { inherit inputs; };
+            modules = [
+              ./users/munkien/default.nix
+              inputs.home-manager.nixosModules.home-manager
+              inputs.sops-nix.nixosModules.sops
+              
+              {
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  sharedModules = [
+                    inputs.plasma-manager.homeModules.plasma-manager
+                    inputs.nix-flatpak.homeManagerModules.nix-flatpak
+                  ];
+                  users.munkien = import ./users/munkien/home.nix;
+                };
 
-                inputs.home-manager.nixosModules.home-manager
-                inputs.sops-nix.nixosModules.sops
-
-                {
-                  home-manager = {
-                    useGlobalPkgs = true;
-                    useUserPackages = true;
-
-                    sharedModules = [
-                      inputs.plasma-manager.homeModules.plasma-manager
-                      inputs.nix-flatpak.homeManagerModules.nix-flatpak
-                    ];
-                  };
-
-                  # This ensures the user config is actually applied
-                  home-manager.users.munkien = import ./users/munkien/home.nix;
-
-                  users.mutableUsers = false;
-                  users.users.root = {
-                    initialHashedPassword = "$6$rounds=40000$SALT$HASH...";
-                    openssh.authorizedKeys.keys = [
-                      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..."
-                    ];
-                  };
-                }
-              ]
-              ++ conditionalModules
-              ++ modules;
+                users.mutableUsers = false;
+                users.users.root = {
+                  initialHashedPassword = "$6$rounds=40000$SALT$HASH...";
+                  openssh.authorizedKeys.keys = [
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..."
+                  ];
+                };
+              }
+            ]
+            # 1. Cleanly filter and load all standard host files if they exist
+            ++ (builtins.filter builtins.pathExists [
+              ./hosts/${hostname}/default.nix # basic settings
+              ./hosts/${hostname}/filesystem.nix # filesystem
+              ./hosts/${hostname}/hardware.nix # curated manual file
+              ./hosts/${hostname}/hardware-configuration.nix # auto generated file
+              ./hosts/${hostname}/disko.nix # disko filesystem layout
+            ])
+            # 2. Inject the Disko module *only* if disko.nix exists for this host
+            ++ (if builtins.pathExists ./hosts/${hostname}/disko.nix 
+                then [ inputs.disko.nixosModules.disko ] 
+                else [])
+            # 3. Add any extra modules passed from the host definition
+            ++ modules;
           };
 
         # --- Top-level NixOS Configurations ---
@@ -191,12 +186,12 @@
             hostname = "pc-anders";
             system = "x86_64-linux";
             modules = [             
-                  ../common.nix
-                  ../../mods/system/desktop.nix
-                  ../../mods/system/secrets.nix
-                  ../../mods/system/home.nix
-                  ../../mods/system/wifi-gl3.nix
-                  ../../mods/system/gaming.nix
+              ./common.nix
+              ./mods/system/desktop.nix
+              ./mods/system/secrets.nix
+              ./mods/system/home.nix
+              ./mods/system/wifi-gl3.nix
+              ./mods/system/gaming.nix
             ];
           };
 
