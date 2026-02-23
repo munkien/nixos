@@ -188,7 +188,6 @@
             modules = [             
               ./hosts/common.nix
               ./mods/system/secrets.nix
-              ./mods/system/home.nix
 
               ./mods/quadlets/default.nix
               ./mods/quadlets/omada.nix
