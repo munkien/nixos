@@ -18,9 +18,11 @@ creation_rules:
       - age:
         - *munkien
         - *munkie_workstation
+        - *pc_anders
 
   - path_regex: hosts/pc-anders/secrets\.yaml$
     key_groups:
       - age:
         - *munkien
+        - *munkie_workstation
         - *pc_anders
