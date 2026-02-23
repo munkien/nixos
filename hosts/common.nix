@@ -203,6 +203,7 @@
     bat
     trippy
     ncdu
+    pwgen
   ];
 
   # This value determines the NixOS release from which the default
