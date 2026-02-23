@@ -187,6 +187,19 @@
             modules = [];
           };
 
+          workstation = self.lib.mkSystem {
+            hostname = "pc-anders";
+            system = "x86_64-linux";
+            modules = [             
+                  ../common.nix
+                  ../../mods/system/desktop.nix
+                  ../../mods/system/secrets.nix
+                  ../../mods/system/home.nix
+                  ../../mods/system/wifi-gl3.nix
+                  ../../mods/system/gaming.nix
+            ];
+          };
+
           rescue-usb = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             specialArgs = {inherit inputs;};
