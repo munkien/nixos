@@ -19,6 +19,11 @@
       ];
 
       userSettings = {
+        "remote.SSH.useLocalServer" = true;
+        "remote.SSH.showLoginTerminal" = true;
+      };
+
+      userSettings = {
         "editor.formatOnSave" = true;
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nixd";
