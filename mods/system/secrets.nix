@@ -1,5 +1,5 @@
-{pkgs, ...}: {
-  sops.defaultSopsFile = ../../secrets.yaml;
+{config, pkgs, ...}: {
+  sops.defaultSopsFile = ../../hosts/${config.networking.hostName}/secrets.yaml;
   sops.age = {
     sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
     keyFile = "/persist/secrets/age-tpm-identity.txt";
