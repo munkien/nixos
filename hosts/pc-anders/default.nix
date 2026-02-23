@@ -5,5 +5,5 @@
   ...
 }: {
   # Naming
-  networking.hostName = "pc-anders";  
+  networking.hostName = "pc-anders"; 
 }
