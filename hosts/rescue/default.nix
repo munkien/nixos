@@ -10,13 +10,12 @@
     ../common.nix
   ];
 
-  ############################################
+  # ==========================================
   # Kernel & Filesystems
-  ############################################
-
+  # ==========================================
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  boot.supportedFilesystems = lib.mkForce [
+  boot.supportedFilesystems = [
     "bcachefs"
     "btrfs"
     "vfat"
@@ -24,20 +23,13 @@
     "ntfs3"
   ];
 
-  ############################################
-  # Initrd / boot
-  ############################################
-
+  # ==========================================
+  # Initrd / Boot
+  # ==========================================
   boot.initrd.availableKernelModules = [
-    "nvme"
-    "ahci"
-    "xhci_pci"
-    "usb_storage"
-    "usbhid"
-    "sd_mod"
+    "nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod"
   ];
-
-  boot.initrd.kernelModules = ["amdgpu"];
+  boot.initrd.kernelModules = [ "amdgpu" ];
   boot.initrd.systemd.enable = true;
 
   boot.kernelParams = [
@@ -46,10 +38,9 @@
     "usbcore.autosuspend=-1"
   ];
 
-  ############################################
+  # ==========================================
   # Hardware
-  ############################################
-
+  # ==========================================
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -57,65 +48,47 @@
 
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;
-  hardware.cpu.amd.updateMicrocode =
-    lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  ############################################
-  # Authentication & More
-  ############################################
-  services.getty.autologinUser = lib.mkForce "root";
-  users.users.root.password = lib.mkForce "";
-  users.users.root.hashedPassword = lib.mkForce "";
-  networking.wireless.enable = false;
-
-  ############################################
-  # Live environment packages
-  ############################################
-
+  # ==========================================
+  # Live Environment Packages
+  # ==========================================
   environment.systemPackages = with pkgs; [
-    # --- Installation & Recovery ---
-    nixos-install-tools
-    rsync
-    testdisk
-
-    # --- Disk & Filsystemer (Bcachefs fokus) ---
-    bcachefs-tools
-    btrfs-progs
-    smartmontools
-    nvme-cli
-    gparted
-    ntfs3g
-
-    # --- System Info & Overvågning ---
-    pciutils
-    usbutils
-    htop
-    btop
-
-    # --- Editorer & Udvikling ---
-    vscodium
-    vim
-    git
-
-    # --- Netværk ---
-    wireguard-tools
+    # Installation & Recovery
+    nixos-install-tools rsync testdisk gparted
+    # Disk & Filesystems
+    bcachefs-tools btrfs-progs smartmontools nvme-cli ntfs3g
+    # System Info & Network
+    pciutils usbutils htop btop wireguard-tools
+    # Editors & Dev
+    vscodium vim git
   ];
 
-  ############################################
-  # Graphical Environment
-  ############################################
+  # ==========================================
+  # SOPS / Secrets
+  # ==========================================
+  # Point this to wherever your encrypted yaml lives in your repo
+  sops.defaultSopsFile = ../../secrets/rescue.yaml; 
+  sops.secrets."wifi-psk" = {};
 
-  services.xserver.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  services.displayManager.sddm.enable = true;
+  # Format the secret securely into a KEY=VALUE environment file
+  sops.templates."wifi_password_1".content = ''
+    WIFI_PASSWORD=${config.sops.placeholder."wifi-psk"}
+  '';
 
-  ############################################
+  # ==========================================
   # Networking
-  ############################################
-
+  # ==========================================
+  networking.wireless.enable = false;
   networking.networkmanager.enable = true;
+  
+  # Tell NetworkManager to read our secure template file
+  networking.networkmanager.ensureProfiles.environmentFiles = [
+    config.sops.templates."wifi_password_1".path
+  ];
+  
   networking.networkmanager.ensureProfiles.profiles = {
     home-wifi = {
       connection = {
@@ -129,7 +102,8 @@
       };
       wifi-security = {
         key-mgmt = "wpa-psk";
-        psk = "";
+        # NetworkManager will expand this variable internally
+        psk = "$WIFI_PASSWORD"; 
       };
     };
   };
