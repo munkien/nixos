@@ -48,8 +48,6 @@
 
   services.xserver.videoDrivers = ["amdgpu"];
 
-  services.jotta-cli.enable = true;
-
   services.pipewire.wireplumber.extraConfig."10-strict-audio-blacklist" = {
     "monitor.alsa.rules" = [
       {
