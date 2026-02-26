@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   lib,
   ...
 }: let
@@ -128,6 +129,7 @@ in {
         right = ["close"];
       };
     };
+
     # 6. Detailed Configuration (RC Files)
     configFile = {
       "kdeglobals"."KDE"."widgetStyle" = "Breeze";
@@ -157,6 +159,14 @@ in {
         "confirmLogout" = false;
         "offerShutdown" = true;
       };
+
+      "baloofilerc"."General" = {
+        "exclude folders" = "${config.home.homeDirectory}/.cache/,${config.home.homeDirectory}/.nix-profile/,${config.home.homeDirectory}/.local/state/,${config.home.homeDirectory}/.cargo/";
+
+        # Exclude noisy file extensions and dev folders
+        "exclude filters" = "*~,*.part,*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,cmake_install.cmake,CMakeCache.txt,CTestTestfile.cmake,libtool,config.status,confdefs.h,autom4te,conftest,confstat,Makefile.am,*.gcode,.ninja_deps,.ninja_log,build.ninja,*.nix,node_modules,build,target";
+        "exclude filters version" = 9;
+      };
     };
 
     # 7. Shortcuts
@@ -168,6 +178,12 @@ in {
         "RectangularRegionScreenShot" = "Meta+Shift+S";
       };
     };
+  };
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = [pkgs.kdePackages.xdg-desktop-portal-kde];
+    config.common.default = "kde";
   };
 
   # Set Default Apps
@@ -187,5 +203,22 @@ in {
     steam = mkDelayedStart "Steam" 30 "${pkgs.steam}/bin/steam -silent";
     spotify = mkDelayedStart "Spotify" 80 "${pkgs.spotify}/bin/spotify";
     discord = mkDelayedStart "Discord" 120 "${pkgs.discord}/bin/discord";
+  };
+
+  # Wipe cache on boot
+  systemd.user.services.clear-plasma-cache = {
+    Unit = {
+      Description = "Clean Plasma metadata cache on startup";
+      Before = ["plasma-plasmashell.service"];
+      OnFailure = ["notify-error.service"]; # Optional
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'rm -rf %h/.cache/plasmashell* %h/.cache/ksycoca6* %h/.cache/org.kde.dirmodel-cache.kcache'";
+      RemainAfterExit = false;
+    };
+    Install = {
+      WantedBy = ["plasma-workspace.target"];
+    };
   };
 }
