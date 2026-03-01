@@ -54,17 +54,21 @@ in {
   };
 
   ##########
+  # Impermanence
+  #########
+  fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=755"];
+    neededForBoot = true;
+  };
+
+  ##########
   # BTRFS
   #########
   services.btrfs.autoScrub.enable = true;
-  services.btrfs.autoScrub.fileSystems = ["/"];
+  services.btrfs.autoScrub.fileSystems = ["/nix" "/.swap"];
   services.btrfs.autoScrub.interval = "weekly";
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
-    fsType = "btrfs";
-    options = ["subvol=@" "compress=zstd" "noatime" "nofail"];
-    neededForBoot = true;
-  };
 
   fileSystems."/nix" = {
     device = "/dev/disk/by-uuid/44c8f65e-0f9f-47f2-97aa-ddfadc0955c4";
@@ -102,26 +106,5 @@ in {
       $TOOL set-file-option --data_replicas=2 --promote_target=ssd --foreground_target=ssd --background_target=ssd $POOL/@nix || true
       $TOOL set-file-option --data_replicas=1 --foreground_target=hdd --background_target=hdd $POOL/@log || true
     '';
-  };
-
-  # Automatic scrub
-  systemd.services.bcachefs-scrub = {
-    description = "Bcachefs scrub";
-    restartIfChanged = false;
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.bcachefs-tools}/bin/bcachefs scrub /dev/sda1";
-      Nice = 15;
-      IOSchedulingClass = "idle";
-    };
-  };
-  systemd.timers.bcachefs-scrub = {
-    description = "Weekly bcachefs scrub";
-    wantedBy = ["timers.target"];
-    timerConfig = {
-      OnCalendar = "weekly";
-      Persistent = true;
-      RandomizedDelaySec = "24h";
-    };
   };
 }

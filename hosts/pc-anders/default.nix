@@ -12,6 +12,7 @@
     ../../mods/system/home.nix
     ../../mods/system/wifi-gl3.nix
     ../../mods/system/gaming.nix
+    ../../mods/system/impermanence.nix
   ];
 
   # Naming

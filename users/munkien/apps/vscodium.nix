@@ -19,21 +19,22 @@
       ];
 
       userSettings = {
+        # Combined settings into one block
         "remote.SSH.useLocalServer" = true;
         "remote.SSH.showLoginTerminal" = true;
-      };
-
-      userSettings = {
         "editor.formatOnSave" = true;
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nixd";
-        "nix.formatterPath" = "${pkgs.nixfmt}/bin/nixfmt";
+        "nix.formatterPath" = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+        "editor.defaultFormatter" = "jnoortheen.nix-ide";
+        "workbench.colorTheme" = "Tokyo Night";
 
         "nix.serverSettings" = {
           "nixd" = {
             "formatting" = {"command" = ["nixfmt"];};
             "options" = {
               "nixos" = {
+                # Ensure the path is absolute and the configuration name matches your flake.nix
                 "expr" = "(builtins.getFlake \"/home/munkien/nixos\").nixosConfigurations.workstation.options";
               };
               "home-manager" = {
@@ -42,9 +43,6 @@
             };
           };
         };
-
-        "editor.defaultFormatter" = "jnoortheen.nix-ide";
-        "workbench.colorTheme" = "Tokyo Night";
       };
     };
   };

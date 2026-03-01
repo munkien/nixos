@@ -20,6 +20,7 @@
 
   # Housekeeping
   systemd.user.tmpfiles.rules = [
+    "X %h/.cache/nix - - - -"
     "e %h/.cache - - - 7d -"
   ];
 

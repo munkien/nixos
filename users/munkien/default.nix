@@ -1,7 +1,11 @@
-{...}: {
+{config, ...}: {
+  sops.secrets.munkien_password = {
+    neededForUsers = true;
+  };
+
   users.users.munkien = {
     isNormalUser = true;
-    initialPassword = "asdfasdf"; # Temporary weak password
+    hashedPasswordFile = config.sops.secrets.munkien_password.path;
     description = "Anders";
     extraGroups = ["networkmanager" "wheel"];
   };

@@ -17,6 +17,7 @@
     fallback = true;
     warn-dirty = false;
     download-buffer-size = 67108864;
+    tarball-ttl = 604800; # 7 days in seconds
   };
 
   security.sudo.wheelNeedsPassword = false;
