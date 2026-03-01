@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     nixfmt
-    nixpkgs-fmt
     nixd
     nil
     direnv
@@ -25,7 +24,7 @@
         "editor.formatOnSave" = true;
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nixd";
-        "nix.formatterPath" = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+        "nix.formatterPath" = "${pkgs.nixfmt}/bin/nixfmt";
         "editor.defaultFormatter" = "jnoortheen.nix-ide";
         "workbench.colorTheme" = "Tokyo Night";
 
