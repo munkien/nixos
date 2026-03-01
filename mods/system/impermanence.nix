@@ -17,27 +17,27 @@
       "/var/lib/sops-nix/key.txt"
     ];
 
-    users.munkien = {
-      directories = [
-        "Downloads"
-        "Music"
-        "Pictures"
-        "Documents"
-        "Videos"
-        ".pki"
-        ".ssh"
-        ".cache/nix"
-        ".mozilla" # Firefox profile
-        ".config" # App settings
-        ".local/share" # App data
-        ".local/share/Steam"
-        ".config/discord"
-        ".local/state"
-      ];
-      files = [
-        ".bash_history"
-      ];
-    };
+    # users.munkien = {
+    #   directories = [
+    #     "Downloads"
+    #     "Music"
+    #     "Pictures"
+    #     "Documents"
+    #     "Videos"
+    #     ".pki"
+    #     ".ssh"
+    #     ".cache/nix"
+    #     ".mozilla" # Firefox profile
+    #     ".config" # App settings
+    #     ".local/share" # App data
+    #     ".local/share/Steam"
+    #     ".config/discord"
+    #     ".local/state"
+    #   ];
+    #   files = [
+    #     ".bash_history"
+    #   ];
+    # };
   };
 
   users.mutableUsers = false;
