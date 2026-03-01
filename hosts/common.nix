@@ -85,6 +85,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.memtest86.enable = true;
   boot.initrd.systemd.enable = true;
+  boot.tmp.useTmpfs = true;
 
   # Auto upgrade
   system.autoUpgrade = {
