@@ -20,9 +20,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
+    agenix = {
+      url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.darwin.follows = "";
     };
 
     impermanence = {
@@ -141,7 +142,7 @@
               [
                 ./users/munkien/default.nix
                 inputs.home-manager.nixosModules.home-manager
-                inputs.sops-nix.nixosModules.sops
+                inputs.agenix.nixosModules.default
 
                 {
                   home-manager = {
@@ -150,16 +151,9 @@
                     sharedModules = [
                       inputs.plasma-manager.homeModules.plasma-manager
                       inputs.nix-flatpak.homeManagerModules.nix-flatpak
+                      inputs.agenix.homeManagerModules.default
                     ];
                     users.munkien = import ./users/munkien/home.nix;
-                  };
-
-                  users.mutableUsers = false;
-                  users.users.root = {
-                    initialHashedPassword = "$6$rounds=40000$SALT$HASH...";
-                    openssh.authorizedKeys.keys = [
-                      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..."
-                    ];
                   };
                 }
               ]

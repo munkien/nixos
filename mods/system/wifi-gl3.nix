@@ -1,22 +1,17 @@
-{config, ...}: {
-  sops.secrets.wifi_password_1 = {};
-  sops.secrets.wifi_password_2 = {};
+{
+  config,
+  inputs,
+  ...
+}: {
+  imports = [inputs.agenix.nixosModules.default];
 
-  sops.templates."wifi-secrets.env".content = ''
-    WIFI_PASS_1="${config.sops.placeholder.wifi_password_1}"
-    WIFI_PASS_2="${config.sops.placeholder.wifi_password_2}"
-  '';
-
-  systemd.services.NetworkManager-ensure-profiles = {
-    # This runs immediately before your declarative profiles are written
-    preStart = "rm -f /etc/NetworkManager/system-connections/*.nmconnection";
-  };
+  age.secrets."secrets_wifi_env".file = ../../secrets/secret_wifi_env.age;
 
   networking.networkmanager = {
     enable = true;
 
     ensureProfiles = {
-      environmentFiles = [config.sops.templates."wifi-secrets.env".path];
+      environmentFiles = [config.age.secrets."secrets_wifi_env".path];
 
       profiles = {
         "GL3-5G" = {

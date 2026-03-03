@@ -53,6 +53,7 @@
 
     # ISO writer to USB
     woeusb-ng
+    ventoy
 
     # Privacy
     tor-browser

@@ -1,11 +1,9 @@
 {config, ...}: {
-  sops.secrets.munkien_password = {
-    neededForUsers = true;
-  };
+  age.secrets."munkien_password_hashed".file = ../../secrets/secret_munkien_password.age;
 
   users.users.munkien = {
     isNormalUser = true;
-    hashedPasswordFile = config.sops.secrets.munkien_password.path;
+    hashedPasswordFile = config.age.secrets."munkien_password_hashed".path;
     description = "Anders";
     extraGroups = ["networkmanager" "wheel"];
   };

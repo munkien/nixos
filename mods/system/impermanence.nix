@@ -1,8 +1,6 @@
 {inputs, ...}: {
   imports = [inputs.impermanence.nixosModules.impermanence];
 
-  sops.age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
-
   environment.persistence."/persist" = {
     hideMounts = true; #
     directories = [
