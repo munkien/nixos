@@ -26,7 +26,7 @@
           };
           wifi-security = {
             key-mgmt = "wpa-psk";
-            psk = "$WIFI_PASS_1";
+            psk = "$WIFI_PASS_5";
           };
           ipv4.method = "auto";
           ipv6.method = "auto";
@@ -44,7 +44,7 @@
           };
           wifi-security = {
             key-mgmt = "wpa-psk";
-            psk = "$WIFI_PASS_2";
+            psk = "$WIFI_PASS_24";
           };
           ipv4.method = "auto";
           ipv6.method = "auto";
