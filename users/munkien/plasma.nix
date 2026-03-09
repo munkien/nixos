@@ -197,6 +197,7 @@ in {
       "x-scheme-handler/unknown" = "firefox.desktop";
     };
   };
+  xdg.configFile."mimeapps.list".force = true;
 
   # Delayed Startup Services
   systemd.user.services = {
