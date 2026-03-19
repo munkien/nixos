@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  bcachefs_device = "/dev/disk/by-id/wwn-0x50014ee267e93f2a:/dev/disk/by-id/wwn-0x50014ee2c089b39a-part1:/dev/disk/by-id/wwn-0x50014ee2086b9c3e:/dev/disk/by-id/wwn-0x50026b7258008b00:/dev/disk/by-id/nvme-eui.e8238fa6bf530001001b444a48b3d6e5-part1:/dev/disk/by-id/nvme-eui.e8238fa6bf530001001b448b4d08dc78-part4"; # "/dev/disk/by-uuid/fe8de683-7e92-4cc0-ace2-8ce2bccfa296";
+  bcachefs_device = "/dev/disk/by-id/wwn-0x50014ee267e93f2a"; #"/dev/disk/by-uuid/fe8de683-7e92-4cc0-ace2-8ce2bccfa296";
 in {
   ##########
   # BOOT
