@@ -186,6 +186,11 @@
   # HDD monitoring
   services.smartd.enable = !config.virtualisation.hypervGuest.enable;
 
+  # Allow ventoy..
+  nixpkgs.config.permittedInsecurePackages = [
+    "ventoy-1.1.10"
+  ];
+
   # Stuff.
   environment.systemPackages = with pkgs; [
     tuned

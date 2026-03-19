@@ -24,11 +24,6 @@
   systemd.targets.hibernate.enable = false;
   systemd.targets.hybrid-sleep.enable = false;
 
-  # Allow ventoy..
-  nixpkgs.config.permittedInsecurePackages = [
-    "ventoy-1.1.10"
-  ];
-
   # # Recovery shell
   specialisation = {
     "Recovery-Shell" = {

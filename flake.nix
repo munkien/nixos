@@ -186,7 +186,9 @@
           server-home-1 = self.lib.mkSystem {
             hostname = "server-home-1";
             system = "x86_64-linux";
-            modules = [];
+            modules = [
+              inputs.quadlet-nix.nixosModules.quadlet
+            ];
           };
 
           pc-anders = self.lib.mkSystem {

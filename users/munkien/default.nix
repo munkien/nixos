@@ -1,5 +1,8 @@
 {config, ...}: {
-  age.secrets."munkien_password_hashed".file = ../../secrets/secret_munkien_password.age;
+  age.secrets."munkien_password_hashed" = {
+    file = ../../secrets/secret_munkien_password.age;
+    symlink = true;
+  };
 
   users.users.munkien = {
     isNormalUser = true;

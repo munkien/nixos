@@ -2,16 +2,13 @@
   config,
   lib,
   ...
-}:
-
-let
+}: let
   domain = "munkie.dk";
   appUrl = "id.lan.${domain}";
   listenAddr = "127.0.0.1";
   port = 9091;
   persistDir = "/persist/services/authelia";
-in
-{
+in {
   services.caddy.virtualHosts."${appUrl}" = {
     useACMEHost = domain;
     extraConfig = "reverse_proxy ${listenAddr}:${toString port}";
@@ -23,27 +20,28 @@ in
   ];
 
   systemd.services.authelia-main.serviceConfig = {
-    ReadWritePaths = [ persistDir ];
+    ReadWritePaths = [persistDir];
   };
 
   # DRY approach to applying repetitive SOPS attributes
-  sops.secrets = lib.genAttrs [
-    "AUTHELIA_JWT_SECRET"
-    "AUTHELIA_SESSION_SECRET"
-    "AUTHELIA_STORAGE_ENCRYPTION_KEY"
-  ] (name: {
-    sopsFile = ../secrets/authelia.yaml;
-    owner = "authelia-main";
-    group = "authelia-main";
-  });
+  age.secrets =
+    lib.genAttrs [
+      "AUTHELIA_JWT_SECRET"
+      "AUTHELIA_SESSION_SECRET"
+      "AUTHELIA_STORAGE_ENCRYPTION_KEY"
+    ] (name: {
+      file = ../secrets/${name}.age;
+      owner = "authelia-main";
+      group = "authelia-main";
+    });
 
   services.authelia.instances.main = {
     enable = true;
 
     secrets = {
-      jwtSecretFile = config.sops.secrets."AUTHELIA_JWT_SECRET".path;
-      storageEncryptionKeyFile = config.sops.secrets."AUTHELIA_STORAGE_ENCRYPTION_KEY".path;
-      sessionSecretFile = config.sops.secrets."AUTHELIA_SESSION_SECRET".path;
+      jwtSecretFile = config.age.secrets."AUTHELIA_JWT_SECRET".path;
+      storageEncryptionKeyFile = config.age.secrets."AUTHELIA_STORAGE_ENCRYPTION_KEY".path;
+      sessionSecretFile = config.age.secrets."AUTHELIA_SESSION_SECRET".path;
     };
 
     settings = {
@@ -76,7 +74,7 @@ in
 
       notifier.filesystem.filename = "${persistDir}/notification.txt";
       storage.local.path = "${persistDir}/db.sqlite3";
-      
+
       access_control = {
         default_policy = "deny";
         rules = [

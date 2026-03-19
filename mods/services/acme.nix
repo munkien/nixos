@@ -1,9 +1,4 @@
-{
-  config,
-  ...
-}:
-
-{
+{config, ...}: {
   sops.secrets."acme_env" = {
     sopsFile = ../secrets/acme.yaml;
     owner = "acme";
@@ -16,12 +11,12 @@
 
   fileSystems."/var/lib/acme" = {
     device = "/persist/services/acme";
-    options = [ "bind" "nofail" ];
+    options = ["bind" "nofail"];
   };
 
   security.acme = {
     acceptTerms = true;
-    
+
     defaults = {
       email = "munkien@gmail.com";
       group = "acme";
@@ -33,7 +28,7 @@
     certs."munkie.dk" = {
       enableDebugLogs = true;
 
-      domain = "munkie.dk"; 
+      domain = "munkie.dk";
       extraDomainNames = [
         "*.munkie.dk"
         "*.lan.munkie.dk"

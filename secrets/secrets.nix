@@ -8,4 +8,9 @@ let
 in {
   "secret_wifi_env.age".publicKeys = users ++ systems;
   "secret_munkien_password.age".publicKeys = [user_munkien] ++ systems;
+  "secret_service_password.age".publicKeys = [user_munkien] ++ systems;
+
+  "AUTHELIA_JWT_SECRET.age".publicKeys = [user_munkien] ++ system_server_home;
+  "AUTHELIA_SESSION_SECRET.age".publicKeys = [user_munkien] ++ system_server_home;
+  "AUTHELIA_STORAGE_ENCRYPTION_KEY.age".publicKeys = [user_munkien] ++ system_server_home;
 }
