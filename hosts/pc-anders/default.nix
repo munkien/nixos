@@ -15,6 +15,11 @@
     ../../mods/system/impermanence.nix
   ];
 
+  # Allow ventoy..
+  nixpkgs.config.permittedInsecurePackages = [
+    "ventoy-1.1.10"
+  ];
+
   # Naming
   networking.hostName = "pc-anders";
 
