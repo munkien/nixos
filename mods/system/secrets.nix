@@ -4,7 +4,9 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  statePath = config.environment.persistence."/persist".persistentStoragePath + "/etc/ssh";
+in {
   environment.systemPackages = with pkgs; [
     inputs.agenix.packages.${pkgs.system}.default
     age
@@ -14,7 +16,7 @@
   ];
 
   systemd.services.agenix = {
-    after = ["persist.mount"];
+    after = ["basic.target"];
     requires = ["persist.mount"];
     unitConfig.DefaultDependencies = false;
   };
@@ -30,6 +32,18 @@
       hashedPasswordFile = lib.mkForce null;
     };
   };
+
+  services.openssh.hostKeys = [
+    {
+      path = statePath + "/ssh_host_rsa_key";
+      type = "rsa";
+      bits = 4096;
+    }
+    {
+      path = statePath + "/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+  ];
 
   boot.initrd.secrets = {
     "/etc/ssh/ssh_host_ed25519_key" = "/persist/etc/ssh/ssh_host_ed25519_key";

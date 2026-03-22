@@ -1,6 +1,8 @@
-{config, ...}: {
-  sops.secrets."acme_env" = {
-    sopsFile = ../secrets/acme.yaml;
+{config, ...}: let
+  secrets = config.age.secrets;
+in {
+  age.secrets."acme_env" = {
+    file = ../secrets/acme_env.age;
     owner = "acme";
     group = "acme";
   };
@@ -16,24 +18,20 @@
 
   security.acme = {
     acceptTerms = true;
-
     defaults = {
       email = "munkien@gmail.com";
       group = "acme";
-      environmentFile = config.sops.secrets."acme_env".path;
+      environmentFile = secrets."acme_env".path;
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
     };
-
     certs."munkie.dk" = {
       enableDebugLogs = true;
-
       domain = "munkie.dk";
       extraDomainNames = [
         "*.munkie.dk"
         "*.lan.munkie.dk"
       ];
-
       reloadServices = [
         "pihole"
         "caddy"
