@@ -1,6 +1,7 @@
-{ lib, config }:
-
 {
+  lib,
+  config,
+}: {
   autoStart = true;
   serviceConfig = {
     Restart = "always";
@@ -14,9 +15,8 @@
     healthStartPeriod = "10s";
     healthStartupInterval = "5s";
     healthStartupRetries = 15;
-    notify = "ready";
-    networks = [ "homelab" ];
-    dropCapabilities = [ "ALL" ];
+    networks = ["homelab"];
+    dropCapabilities = ["ALL"];
     stopTimeout = 900;
     readOnly = true;
     userns = "auto:size=65536";
