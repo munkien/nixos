@@ -9,9 +9,7 @@
     ../common.nix
     ../../mods/system/secrets.nix
     ../../mods/system/impermanence.nix
-
-    # Users
-    ../../users/munkien/default.nix
+    ../../mods/system/home.nix
 
     # Services
     ../../mods/services/quadlet.nix
