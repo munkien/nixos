@@ -4,54 +4,39 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.darwin.follows = "";
     };
-
-    impermanence = {
-      url = "github:nix-community/impermanence";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
+    impermanence.url = "github:nix-community/impermanence";
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.disko.follows = "disko";
     };
-
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    quadlet-nix = {
-      url = "github:SEIAROTg/quadlet-nix";
-    };
-
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
@@ -65,36 +50,31 @@
         pkgs,
         ...
       }: {
-        pre-commit = {
-          settings.hooks = {
-            alejandra.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
-            check-added-large-files = {
-              enable = true;
-              args = ["--maxkb=2000"];
-            };
-            check-symlinks.enable = true;
-            check-yaml = {
-              enable = true;
-              excludes = [".*sops\\.yaml$"];
-            };
-            flake-check = {
-              enable = true;
-              name = "Fast Flake Check";
-              entry = "${pkgs.nix}/bin/nix flake check --no-build";
-              pass_filenames = false;
-            };
+        pre-commit.settings.hooks = {
+          alejandra.enable = true;
+          deadnix.enable = true;
+          statix.enable = true;
+          check-added-large-files = {
+            enable = true;
+            args = ["--maxkb=2000"];
+          };
+          check-symlinks.enable = true;
+          check-yaml = {
+            enable = true;
+            excludes = [".*sops\\.yaml$"];
+          };
+          flake-check = {
+            enable = true;
+            name = "Fast Flake Check";
+            entry = "${pkgs.nix}/bin/nix flake check --no-build";
+            pass_filenames = false;
           };
         };
 
         devShells.default = pkgs.mkShell {
           shellHook = ''
             ${config.pre-commit.installationScript}
-
-            # Ensures ** matches directories recursively in bash
             shopt -s globstar
-
             if [ -f .sops.yaml ]; then
               ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
             fi
@@ -112,12 +92,7 @@
               echo "Building Rescue ISO..."
               OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-
-              if [ -z "$ISO_FILE" ]; then
-                echo "Error: ISO not found"
-                exit 1
-              fi
-
+              [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
               DEST="/scratch/rescue-usb.iso"
               mkdir -p /scratch
               cp --reflink=auto "$ISO_FILE" "$DEST"
@@ -129,10 +104,10 @@
       };
 
       flake = {
-        # --- System Builder Helper ---
         lib.mkSystem = {
           hostname,
           system,
+          enableHomeManager ? true,
           modules ? [],
         }:
           inputs.nixpkgs.lib.nixosSystem {
@@ -141,9 +116,10 @@
             modules =
               [
                 ./users/munkien/default.nix
-                inputs.home-manager.nixosModules.home-manager
                 inputs.agenix.nixosModules.default
-
+              ]
+              ++ (inputs.nixpkgs.lib.optionals enableHomeManager [
+                inputs.home-manager.nixosModules.home-manager
                 {
                   home-manager = {
                     useGlobalPkgs = true;
@@ -156,39 +132,31 @@
                     users.munkien = import ./users/munkien/home.nix;
                   };
                 }
-              ]
-              # 1. Cleanly filter and load all standard host files if they exist
-              ++ (builtins.filter builtins.pathExists [
-                ./hosts/${hostname}/default.nix # basic settings
-                ./hosts/${hostname}/filesystem.nix # filesystem
-                ./hosts/${hostname}/hardware.nix # curated manual file
-                ./hosts/${hostname}/hardware-configuration.nix # auto generated file
-                ./hosts/${hostname}/disko.nix # disko filesystem layout
               ])
-              # 2. Inject the Disko module *only* if disko.nix exists for this host
-              ++ (
-                if builtins.pathExists ./hosts/${hostname}/disko.nix
-                then [inputs.disko.nixosModules.disko]
-                else []
-              )
-              # 3. Add any extra modules passed from the host definition
+              ++ (builtins.filter builtins.pathExists [
+                ./hosts/${hostname}/default.nix
+                ./hosts/${hostname}/filesystem.nix
+                ./hosts/${hostname}/hardware.nix
+                ./hosts/${hostname}/hardware-configuration.nix
+                ./hosts/${hostname}/disko.nix
+              ])
+              ++ (inputs.nixpkgs.lib.optional
+                (builtins.pathExists ./hosts/${hostname}/disko.nix)
+                inputs.disko.nixosModules.disko)
               ++ modules;
           };
 
-        # --- Top-level NixOS Configurations ---
         nixosConfigurations = {
           workstation = self.lib.mkSystem {
             hostname = "workstation";
             system = "x86_64-linux";
-            modules = [];
           };
 
           server-home-1 = self.lib.mkSystem {
             hostname = "server-home-1";
             system = "x86_64-linux";
-            modules = [
-              inputs.quadlet-nix.nixosModules.quadlet
-            ];
+            enableHomeManager = false;
+            modules = [inputs.quadlet-nix.nixosModules.quadlet];
           };
 
           pc-anders = self.lib.mkSystem {
