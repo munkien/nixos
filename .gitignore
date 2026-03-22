@@ -1,0 +1,17 @@
+# Nix build outputs
+result
+result-*
+
+# Direnv
+.direnv/
+
+# Secrets (never commit plaintext)
+*.env
+!secrets/*.age
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+.envrc
