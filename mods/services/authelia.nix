@@ -30,7 +30,7 @@ in {
       "AUTHELIA_SESSION_SECRET"
       "AUTHELIA_STORAGE_ENCRYPTION_KEY"
     ] (name: {
-      file = ../secrets/${name}.age;
+      file = ../../secrets/${name}.age;
       owner = "authelia-main";
       group = "authelia-main";
     });
