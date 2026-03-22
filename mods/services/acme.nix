@@ -2,7 +2,7 @@
   secrets = config.age.secrets;
 in {
   age.secrets."acme_env" = {
-    file = ../secrets/acme_env.age;
+    file = ../../secrets/acme_env.age;
     owner = "acme";
     group = "acme";
   };
