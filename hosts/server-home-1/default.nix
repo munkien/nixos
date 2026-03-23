@@ -8,7 +8,7 @@
   imports = [
     ../common.nix
     ../../mods/system/secrets.nix
-    ../../mods/system/impermanence.nix
+    #../../mods/system/impermanence.nix
 
     # Services
     ../../mods/services/quadlet.nix
