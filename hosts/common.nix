@@ -145,12 +145,17 @@
   };
 
   # SSH
+  systemd.tmpfiles.rules = [
+    "d /persist/etc/ssh 0700 root root -"
+    "z /persist/etc/ssh/ssh_host_ed25519_key 0600 root root -"
+  ];
   services.openssh = {
     enable = true;
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
+      PubkeyAuthentication = true;
     };
     hostKeys = [
       {
@@ -185,11 +190,6 @@
 
   # HDD monitoring
   services.smartd.enable = !config.virtualisation.hypervGuest.enable;
-
-  # Allow ventoy..
-  nixpkgs.config.permittedInsecurePackages = [
-    "ventoy-1.1.10"
-  ];
 
   # Stuff.
   environment.systemPackages = with pkgs; [
