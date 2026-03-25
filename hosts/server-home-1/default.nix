@@ -8,7 +8,7 @@
   imports = [
     ../common.nix
     ../../mods/system/secrets.nix
-    #../../mods/system/impermanence.nix
+    ../../mods/system/impermanence.nix
 
     # Services
     ../../mods/services/quadlet.nix
@@ -21,7 +21,7 @@
     #../../mods/services/homeassistant.nix
     #../../mods/services/ialarm-mqtt.nix
     #../../mods/services/mosquitto.nix
-    #../../mods/services/omada.nix
+    ../../mods/services/omada.nix
     #../../mods/services/paperless-ngx.nix
     ../../mods/services/pihole.nix
     #../../mods/services/zigbee2mqtt.nix

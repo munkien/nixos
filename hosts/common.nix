@@ -30,7 +30,6 @@
     enable = true;
     nix-direnv.enable = true;
   };
-  console.keyMap = "dk-latin1";
 
   # Time, Dr. Freeman?
   time.timeZone = "Europe/Copenhagen";
@@ -102,7 +101,8 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";
-
+  i18n.extraLocales = ["da_DK.UTF-8/UTF-8" "en_DK.UTF-8/UTF-8"];
+  console.keyMap = "dk-latin1";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "da_DK.UTF-8";
     LC_IDENTIFICATION = "da_DK.UTF-8";
@@ -114,6 +114,7 @@
     LC_TELEPHONE = "da_DK.UTF-8";
     LC_TIME = "da_DK.UTF-8";
   };
+
   # Configure OOMd
   systemd.oomd = {
     enable = true;
@@ -239,11 +240,9 @@
 
   # Stuff.
   environment.systemPackages = with pkgs; [
-    tuned
     treefmt
     alejandra
     wget
-    git
     nil
     fastfetch
     deadnix
@@ -260,8 +259,8 @@
   ];
 
   # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions 196 wide x 243 height x 129 deep
-  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It's perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
