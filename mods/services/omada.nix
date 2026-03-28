@@ -7,10 +7,10 @@
   common = import ./base-quadlet.nix {inherit lib config;};
   persistBase = "/persist/services/omada";
 in {
-  systemd.tmpfiles.rules = map (args: "d ${persistBase}${args}") [
-    "/db   0750 mongodb     mongodb    -"
-    "/data 0755 containers  containers -"
-    "/logs 0755 containers  containers -"
+  systemd.tmpfiles.rules = [
+    "d ${persistBase}/db   0750 mongodb    mongodb    -"
+    "d ${persistBase}/data 0755 containers containers -"
+    "d ${persistBase}/logs 0755 containers containers -"
   ];
 
   networking.firewall = {
