@@ -146,8 +146,31 @@
 
   # SSH
   systemd.tmpfiles.rules = [
-    "d /persist/etc/ssh 0700 root root -"
-    "z /persist/etc/ssh/ssh_host_ed25519_key 0600 root root -"
+    # 1. System / Persist Paths (The Parent Folders)
+    "d /persist/home 0755 root root -"
+    "d /persist/etc/ssh 0755 root root -"
+
+    # 2. Host Keys (System Identity)
+    "z /persist/etc/ssh/ssh_host_*_key 0600 root root -"
+    "z /persist/etc/ssh/ssh_host_*_key.pub 0644 root root -"
+
+    # 3. User Home Directories (Fulfills SSH 'StrictModes' requirement)
+    "d /home/munkien 0750 munkien users -"
+    "d /persist/home/munkien 0750 munkien users -"
+
+    # 4. User SSH Folders (For outbound client connections like GitHub)
+    "d /home/munkien/.ssh 0700 munkien users -"
+    "d /persist/home/munkien/.ssh 0700 munkien users -"
+
+    # 5. User Private & Public Keys (Catches any id_rsa, id_ed25519, etc.)
+    "z /home/munkien/.ssh/id_* 0600 munkien users -"
+    "z /persist/home/munkien/.ssh/id_* 0600 munkien users -"
+    "z /home/munkien/.ssh/*.pub 0644 munkien users -"
+    "z /persist/home/munkien/.ssh/*.pub 0644 munkien users -"
+
+    # 6. Legacy / Manual Files (Just in case)
+    "z /home/munkien/.ssh/authorized_keys 0600 munkien users -"
+    "z /persist/home/munkien/.ssh/authorized_keys 0600 munkien users -"
   ];
   services.openssh = {
     enable = true;
