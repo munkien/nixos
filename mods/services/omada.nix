@@ -35,6 +35,9 @@ in {
   # 4. Containers
   virtualisation.quadlet.containers = {
     omada-db = lib.recursiveUpdate common {
+      serviceConfig = {
+        ExecStartPre = "+chown -R 100999:100999 /persist/services/omada/db";
+      };
       containerConfig = {
         image = "docker.io/library/mongo:8";
         notify = "healthy";
