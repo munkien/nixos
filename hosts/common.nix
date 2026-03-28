@@ -211,6 +211,29 @@
     }
   ];
 
+  # Containers user for rootless podman
+  users.groups.containers = {};
+
+  users.users.containers = {
+    isSystemUser = true;
+    description = "Service account for rootless containers";
+    group = "containers";
+    # 100 containers * 65536 IDs = 6553600 total IDs
+    subUidRanges = [
+      {
+        startUid = 100000;
+        count = 6553600;
+      }
+    ];
+
+    subGidRanges = [
+      {
+        startGid = 100000;
+        count = 6553600;
+      }
+    ];
+  };
+
   # HDD monitoring
   services.smartd.enable = !config.virtualisation.hypervGuest.enable;
 
