@@ -14,7 +14,7 @@
     ../../mods/services/quadlet.nix
 
     ../../mods/services/acme.nix
-    ../../mods/services/authelia.nix
+    #../../mods/services/authelia.nix
     ../../mods/services/caddy.nix
     #../../mods/services/ebusd.nix
     #../../mods/services/frigate.nix
