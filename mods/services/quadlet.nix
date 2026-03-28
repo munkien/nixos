@@ -22,6 +22,31 @@
   # Requires the Quadlet network to explicitly declare 'networkName = "homelab"'
   networking.firewall.trustedInterfaces = ["homelab"];
 
+  # Containers user for rootless podman
+  users.groups.containers = {};
+
+  users.users.containers = {
+    isSystemUser = true;
+    home = "/persist/var/lib/containers-user";
+    createHome = true;
+    description = "Service account for rootless containers";
+    group = "containers";
+    # 100 containers * 65536 IDs = 6553600 total IDs
+    subUidRanges = [
+      {
+        startUid = 100000;
+        count = 6553600;
+      }
+    ];
+
+    subGidRanges = [
+      {
+        startGid = 100000;
+        count = 6553600;
+      }
+    ];
+  };
+
   # ==========================================
   # Quadlet Global Settings
   # ==========================================
