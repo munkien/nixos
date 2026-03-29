@@ -54,10 +54,20 @@ in {
     script = ''
       set -euo pipefail
 
+      check_space() {
+        AVAILABLE=$(df --output=avail "$1" | tail -1)
+        REQUIRED=$(du -sk "$2" | cut -f1)
+        if [ "$AVAILABLE" -lt "$((REQUIRED * 2))" ]; then
+          echo "ERROR: insufficient disk space for snapshot, skipping"
+          return 1
+        fi
+      }
+
       repair() {
         podman run --rm \
+          --pull never \
           --user 508:508 \
-          --volume "${persistBase}/data/db:/data/db:Z" \
+          --volume "$1:/data/db:z" \
           docker.io/library/mongo:8 \
           mongod --repair --dbpath /data/db --quiet
       }
@@ -78,11 +88,7 @@ in {
       LATEST=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
       if [ -n "$LATEST" ]; then
         echo "Verifying snapshot: $LATEST"
-        if ! podman run --rm \
-          --user 508:508 \
-          --volume "$LATEST/db:/data/db:Z" \
-          docker.io/library/mongo:8 \
-          mongod --repair --dbpath /data/db --quiet; then
+        if ! repair "$LATEST/db"; then
           echo "WARNING: snapshot WiredTiger unrecoverable, discarding"
           rm -rf "$LATEST"
         else
@@ -93,7 +99,7 @@ in {
       # --- Verify live WiredTiger ---
       echo "Verifying live data..."
       if [ -d "${persistBase}/data/db" ]; then
-        if ! repair; then
+        if ! repair "${persistBase}/data/db"; then
           echo "Live WiredTiger corrupt and unrecoverable — restoring from snapshot"
           restore
         else
@@ -105,11 +111,14 @@ in {
       fi
 
       # --- Pre-start snapshot ---
-      STAMP=$(date +%Y%m%d-%H%M%S)
-      echo "Pre-start snapshot: ${snapshotDir}/$STAMP"
-      cp -a --reflink=auto ${persistBase}/data "${snapshotDir}/$STAMP"
+      if check_space "${snapshotDir}" "${persistBase}/data"; then
+        STAMP=$(date +%Y%m%d-%H%M%S)
+        echo "Pre-start snapshot: ${snapshotDir}/$STAMP"
+        cp -a --reflink=auto ${persistBase}/data "${snapshotDir}/$STAMP"
+      fi
 
-      find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d -mtime +7 -exec rm -rf {} +
+      # Keep 7 most recent snapshots by sort order, not mtime
+      find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | head -n -7 | xargs -r rm -rf
       echo "Pre-start complete"
     '';
   };
@@ -154,11 +163,23 @@ in {
       set -euo pipefail
       STAMP=$(date +%Y%m%d-%H%M%S)
 
+      AVAILABLE=$(df --output=avail ${snapshotDir} | tail -1)
+      REQUIRED=$(du -sk ${persistBase}/data | cut -f1)
+      if [ "$AVAILABLE" -lt "$((REQUIRED * 2))" ]; then
+        echo "ERROR: insufficient disk space for snapshot, aborting"
+        systemd-cat -t omada-snapshot echo "CRITICAL: omada nightly snapshot skipped — insufficient disk space"
+        exit 1
+      fi
+
       systemctl stop omada.service
       cp -a --reflink=auto ${persistBase}/data "${snapshotDir}/$STAMP"
-      systemctl start omada.service
+      systemctl start omada.service || {
+        systemd-cat -t omada-snapshot echo "CRITICAL: omada did not restart after nightly snapshot"
+        exit 1
+      }
 
-      find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d -mtime +7 -exec rm -rf {} +
+      # Keep 7 most recent snapshots by sort order, not mtime
+      find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | head -n -7 | xargs -r rm -rf
     '';
   };
 
