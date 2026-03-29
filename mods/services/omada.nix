@@ -10,10 +10,17 @@
 in {
   systemd.tmpfiles.rules = [
     "d ${persistBase}      0750 root root -"
-    "d ${persistBase}/data 0750 root root -"
-    "d ${persistBase}/logs 0750 root root -"
+    "d ${persistBase}/data 0755 508  508  -"
+    "d ${persistBase}/logs 0755 508  508  -"
     "d ${snapshotDir}      0750 root root -"
   ];
+
+  users.groups.omada = {gid = 508;};
+  users.users.omada = {
+    uid = 508;
+    group = "omada";
+    isSystemUser = true;
+  };
 
   networking.firewall = {
     allowedTCPPorts = [80 443 8088 8043];
@@ -95,6 +102,7 @@ in {
     containerConfig = {
       image = "docker.io/mbentley/omada-controller:6";
       user = "508:508";
+      userns = "host";
       ulimits = ["nofile=4096:8192"];
       networks = ["host"];
       notify = "healthy";
@@ -108,8 +116,8 @@ in {
         SHOW_SERVER_LOGS = "true";
       };
       volumes = [
-        "${persistBase}/data:/opt/tplink/EAPController/data:rw,Z,U"
-        "${persistBase}/logs:/opt/tplink/EAPController/logs:rw,Z,U"
+        "${persistBase}/data:/opt/tplink/EAPController/data:rw,Z"
+        "${persistBase}/logs:/opt/tplink/EAPController/logs:rw,Z"
       ];
     };
   };
