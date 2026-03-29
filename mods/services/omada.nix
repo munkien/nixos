@@ -48,6 +48,7 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = false;
+      User = "root";
     };
     path = with pkgs; [coreutils findutils podman];
     script = ''
@@ -55,38 +56,57 @@ in {
 
       repair() {
         podman run --rm \
-          --volume "$1:/data/db:Z" \
+          --user 508:508 \
+          --volume "${persistBase}/data/db:/data/db:Z" \
           docker.io/library/mongo:8 \
           mongod --repair --dbpath /data/db --quiet
       }
 
+      restore() {
+        GOOD=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
+        if [ -z "$GOOD" ]; then
+          echo "ERROR: no good snapshot available, proceeding with corrupt data"
+          return 1
+        fi
+        echo "Restoring from $GOOD"
+        rm -rf ${persistBase}/data
+        cp -a --reflink=auto "$GOOD" ${persistBase}/data
+        chown -R 508:508 ${persistBase}/data
+      }
+
+      # --- Verify latest snapshot WiredTiger ---
       LATEST=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
       if [ -n "$LATEST" ]; then
         echo "Verifying snapshot: $LATEST"
-        if ! repair "$LATEST"; then
-          echo "WARNING: snapshot unrecoverable, discarding $LATEST"
+        if ! podman run --rm \
+          --user 508:508 \
+          --volume "$LATEST/db:/data/db:Z" \
+          docker.io/library/mongo:8 \
+          mongod --repair --dbpath /data/db --quiet; then
+          echo "WARNING: snapshot WiredTiger unrecoverable, discarding"
           rm -rf "$LATEST"
         else
           echo "Snapshot OK"
         fi
       fi
 
+      # --- Verify live WiredTiger ---
       echo "Verifying live data..."
-      if ! repair "${persistBase}/data"; then
-        GOOD=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
-        if [ -z "$GOOD" ]; then
-          echo "ERROR: no good snapshot available, proceeding with corrupt data"
+      if [ -d "${persistBase}/data/db" ]; then
+        if ! repair; then
+          echo "Live WiredTiger corrupt and unrecoverable — restoring from snapshot"
+          restore
         else
-          echo "Restoring from $GOOD"
-          rm -rf ${persistBase}/data
-          cp -a --reflink=auto "$GOOD" ${persistBase}/data
+          echo "Live data OK"
         fi
       else
-        echo "Live data OK"
+        echo "No live db dir found — restoring from snapshot if available"
+        restore || true
       fi
 
+      # --- Pre-start snapshot ---
       STAMP=$(date +%Y%m%d-%H%M%S)
-      echo "Snapshotting to ${snapshotDir}/$STAMP"
+      echo "Pre-start snapshot: ${snapshotDir}/$STAMP"
       cp -a --reflink=auto ${persistBase}/data "${snapshotDir}/$STAMP"
 
       find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d -mtime +7 -exec rm -rf {} +
@@ -127,6 +147,7 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = false;
+      User = "root";
     };
     path = with pkgs; [coreutils findutils systemd];
     script = ''
