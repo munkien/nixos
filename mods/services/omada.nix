@@ -6,14 +6,7 @@
 }: let
   common = import ./base-quadlet.nix {inherit lib config;};
   persistBase = "/persist/services/omada";
-  snapshotDir = "/persist/omada/snapshots";
-
-  repairCmd = path: ''
-    ${pkgs.podman}/bin/podman run --rm \
-      --volume "${path}:/data/db:Z" \
-      docker.io/library/mongo:8 \
-      mongod --repair --dbpath /data/db --quiet
-  '';
+  snapshotDir = "/persist/snapshots/omada";
 in {
   systemd.tmpfiles.rules = [
     "d ${persistBase}      0750 root root -"
@@ -53,10 +46,17 @@ in {
     script = ''
       set -euo pipefail
 
+      repair() {
+        podman run --rm \
+          --volume "$1:/data/db:Z" \
+          docker.io/library/mongo:8 \
+          mongod --repair --dbpath /data/db --quiet
+      }
+
       LATEST=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
       if [ -n "$LATEST" ]; then
         echo "Verifying snapshot: $LATEST"
-        if ! ${repairCmd "$LATEST"}; then
+        if ! repair "$LATEST"; then
           echo "WARNING: snapshot unrecoverable, discarding $LATEST"
           rm -rf "$LATEST"
         else
@@ -65,7 +65,7 @@ in {
       fi
 
       echo "Verifying live data..."
-      if ! ${repairCmd "${persistBase}/data"}; then
+      if ! repair "${persistBase}/data"; then
         GOOD=$(find ${snapshotDir} -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
         if [ -z "$GOOD" ]; then
           echo "ERROR: no good snapshot available, proceeding with corrupt data"
@@ -101,7 +101,6 @@ in {
       healthStartPeriod = "5m";
       healthCmd = "wget --quiet --tries=1 --no-check-certificate --spider http://127.0.0.1:8088/ || exit 1";
       stopTimeout = 60;
-      userNs = "auto";
       environments = {
         TZ = "Europe/Copenhagen";
         PUID = "508";
