@@ -76,5 +76,8 @@
     statix # your nix linting workflow
     treefmt # your formatting workflow
     pre-commit # your dev workflow
+
+    deploy-rs
+    nixos-anywhere
   ];
 }

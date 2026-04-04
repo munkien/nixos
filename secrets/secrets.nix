@@ -14,13 +14,12 @@ let
 
   allSystems = builtins.attrValues systems;
   allUsers = builtins.attrValues users;
-
 in {
   # Shared
   "./common/wifi-gl3_env.age".publicKeys = allUsers ++ allSystems;
 
   # Users
-  "../users/munkien/password.age".publicKeys = [ users.munkien ] ++ allSystems;
+  "../users/munkien/password.age".publicKeys = [users.munkien] ++ allSystems;
 
   # Hosts
 
