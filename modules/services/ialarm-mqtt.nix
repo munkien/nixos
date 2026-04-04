@@ -2,15 +2,12 @@
   config,
   lib,
   ...
-}:
-
-let
-  common = import ./common-quadlet.nix { inherit lib; };
-in
-{
+}: let
+  common = import ./common-quadlet.nix {inherit lib;};
+in {
   # 1. Declare your secrets (requires keys to be added to your sops file)
-  sops.secrets."ialarm_username" = { sopsFile = ../secrets/ialarm.yaml; };
-  sops.secrets."ialarm_password" = { sopsFile = ../secrets/ialarm.yaml; };
+  sops.secrets."ialarm_username" = {sopsFile = ../secrets/ialarm.yaml;};
+  sops.secrets."ialarm_password" = {sopsFile = ../secrets/ialarm.yaml;};
 
   # 2. Declaratively generate the YAML file at runtime using SOPS templates.
   # This safely injects the secrets without leaking them into the /nix/store.
@@ -21,10 +18,10 @@ in
       port: 18034
       username: "${config.sops.placeholder."ialarm_username"}"
       password: "${config.sops.placeholder."ialarm_password"}"
-      
+
       # Dynamically generate the [1, 2, ..., 17] array
       zones: ${builtins.toJSON (lib.range 1 17)}
-      
+
       showUnnamedZones: false
       areas: "1"
       delay: 500
@@ -62,9 +59,9 @@ in
       user = "root";
       # Pinned to your specific version
       image = "docker.io/maxill1/ialarm-mqtt:v0.12.0";
-      
-      networks = [ "host" ];
-      
+
+      networks = ["host"];
+
       volumes = [
         # Mount the securely rendered SOPS template directly as read-only
         "${config.sops.templates."ialarm-config.yaml".path}:/config/config.yaml:ro"

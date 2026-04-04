@@ -21,14 +21,14 @@ in {
   };
 
   networking.firewall = {
-    allowedTCPPorts = [80 443 8088 8043];
+    allowedTCPPorts = [8088 8043];
     allowedTCPPortRanges = [
       {
         from = 29811;
         to = 29817;
       }
     ];
-    allowedUDPPorts = [19810 27001 29810];
+    allowedUDPPorts = [19810 27001 27002 29810];
   };
 
   services.caddy.virtualHosts."omada.lan.munkie.dk" = {
@@ -43,8 +43,10 @@ in {
     containerConfig = {
       image = "docker.io/mbentley/omada-controller:6";
       userns = "host";
-      ulimits = ["nofile=4096:8192"];
       networks = ["host"];
+      readOnly = false;
+      dropCapabilities = [];
+      ulimits = ["nofile=4096:8192"];
       notify = "healthy";
       healthStartPeriod = "5m";
       healthCmd = "wget --quiet --tries=1 --no-check-certificate --spider http://127.0.0.1:8088/ || exit 1";
@@ -53,7 +55,6 @@ in {
         TZ = "Europe/Copenhagen";
         PUID = "508";
         PGID = "508";
-        SHOW_SERVER_LOGS = "true";
       };
       volumes = [
         "${persistBase}/data:/opt/tplink/EAPController/data:rw,Z"

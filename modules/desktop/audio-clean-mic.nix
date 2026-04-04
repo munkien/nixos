@@ -1,0 +1,109 @@
+# modules/desktop/audio-clean-mic.nix
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  micName = "CleanMic";
+  ladspaPath = "${pkgs.ladspaPlugins}/lib/ladspa";
+  rnnoisePath = "${pkgs.rnnoise-plugin}/lib/ladspa";
+in {
+  options.my.audio.cleanMic.enable = lib.mkEnableOption "clean mic filter chain";
+
+  config = lib.mkIf config.my.audio.cleanMic.enable {
+    environment.systemPackages = with pkgs; [
+      rnnoise-plugin
+      ladspaPlugins
+      pavucontrol
+    ];
+
+    programs.noisetorch.enable = true;
+
+    systemd.user.services.noisetorch-autostart = {
+      description = "Noisetorch Auto-load";
+      after = ["graphical-session.target" "pipewire.service"];
+      partOf = ["graphical-session.target"];
+      wantedBy = ["graphical-session.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+        ExecStart = "${pkgs.noisetorch}/bin/noisetorch -i";
+        RemainAfterExit = true;
+      };
+    };
+
+    services.pipewire.wireplumber.extraConfig = {
+      "51-disable-suspicious-inputs"."monitor.alsa.rules" = [
+        {
+          matches = [{"node.description" = "Line In";}];
+          actions.update-props."node.disabled" = true;
+        }
+      ];
+
+      extraConfig.pipewire."10-clean-mic"."context.modules" = [
+        {
+          name = "libpipewire-module-filter-chain";
+          args = {
+            "node.description" = "SteelSeries Clean Mic";
+            "media.name" = micName;
+            "filter.graph".nodes = [
+              {
+                type = "ladspa";
+                name = "highpass";
+                plugin = "${ladspaPath}/highpass_iir_1890.so";
+                label = "highpass_iir";
+                control = {
+                  "Cutoff Frequency" = 100.0;
+                  "Stages" = 2.0;
+                };
+              }
+              {
+                type = "ladspa";
+                name = "eq";
+                plugin = "${ladspaPath}/mbeq_1197.so";
+                label = "mbeq";
+                control = {
+                  "low_gain" = -2.0;
+                  "low_mid_gain" = 2.0;
+                  "mid_gain" = 3.0;
+                  "high_mid_gain" = -2.0;
+                  "high_gain" = -4.0;
+                };
+              }
+              {
+                type = "ladspa";
+                name = "rnnoise";
+                plugin = "${rnnoisePath}/librnnoise_ladspa.so";
+                label = "noise_suppressor_stereo";
+                control = {"VAD Threshold" = 50.0;};
+              }
+              {
+                type = "ladspa";
+                name = "compressor";
+                plugin = "${ladspaPath}/sc4_1882.so";
+                label = "sc4";
+                control = {
+                  "RMS/peak" = 0.0;
+                  "Attack time (ms)" = 5.0;
+                  "Release time (ms)" = 100.0;
+                  "Threshold level (dB)" = -20.0;
+                  "Ratio (1:n)" = 4.0;
+                  "Makeup gain (dB)" = 2.0;
+                };
+              }
+            ];
+            "capture.props" = {
+              "node.name" = "capture.clean_mic";
+              "node.passive" = true;
+            };
+            "playback.props" = {
+              "node.name" = micName;
+              "media.class" = "Audio/Source";
+            };
+          };
+        }
+      ];
+    };
+  };
+}

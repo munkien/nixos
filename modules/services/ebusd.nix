@@ -2,13 +2,10 @@
   config,
   lib,
   ...
-}:
-
-let
-  common = import ./base-quadlet.nix { inherit lib; };
+}: let
+  common = import ./base-quadlet.nix {inherit lib;};
   persistDir = "/persist/services/ebusd";
-in
-{
+in {
   systemd.tmpfiles.rules = [
     "d ${persistDir} 0755 root root -"
   ];
@@ -16,10 +13,10 @@ in
   virtualisation.quadlet.containers.ebusd = lib.recursiveUpdate common {
     containerConfig = {
       # Pinned image version to ensure declarative and reproducible builds
-      image = "docker.io/john30/ebusd:23.3"; 
-      
+      image = "docker.io/john30/ebusd:23.3";
+
       healthCmd = "ebusctl info";
-      networks = [ "host" ];
+      networks = ["host"];
 
       # Map the persistent directory so downloaded configs survive reboots
       volumes = [

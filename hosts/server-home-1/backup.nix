@@ -3,10 +3,8 @@
   pkgs,
   lib,
   ...
-}:
-
-{
-  environment.systemPackages = [ pkgs.restic ];
+}: {
+  environment.systemPackages = [pkgs.restic];
 
   sops.secrets = {
     "restic-password" = {
@@ -30,7 +28,7 @@
     repository = "s3:https://hel1.your-objectstorage.com/munkien-homelab";
     environmentFile = config.sops.secrets."restic-s3-env".path;
     passwordFile = config.sops.secrets."restic-password".path;
-    paths = [ "/persist" ];
+    paths = ["/persist"];
     extraBackupArgs = [
       "--compression max"
     ];

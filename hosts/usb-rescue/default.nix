@@ -10,7 +10,7 @@
     ../common.nix
   ];
 
-  networking.hostName = "usb-rescue-1"; 
+  networking.hostName = "usb-rescue-1";
 
   # ==========================================
   # Kernel & Filesystems
@@ -29,9 +29,14 @@
   # Initrd / Boot
   # ==========================================
   boot.initrd.availableKernelModules = [
-    "nvme" "ahci" "xhci_pci" "usb_storage" "usbhid" "sd_mod"
+    "nvme"
+    "ahci"
+    "xhci_pci"
+    "usb_storage"
+    "usbhid"
+    "sd_mod"
   ];
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.kernelModules = ["amdgpu"];
   boot.initrd.systemd.enable = true;
 
   boot.kernelParams = [
@@ -59,20 +64,33 @@
   # ==========================================
   environment.systemPackages = with pkgs; [
     # Installation & Recovery
-    nixos-install-tools rsync testdisk gparted
+    nixos-install-tools
+    rsync
+    testdisk
+    gparted
     # Disk & Filesystems
-    bcachefs-tools btrfs-progs smartmontools nvme-cli ntfs3g
+    bcachefs-tools
+    btrfs-progs
+    smartmontools
+    nvme-cli
+    ntfs3g
     # System Info & Network
-    pciutils usbutils htop btop wireguard-tools
+    pciutils
+    usbutils
+    htop
+    btop
+    wireguard-tools
     # Editors & Dev
-    vscodium vim git
+    vscodium
+    vim
+    git
   ];
 
   # ==========================================
   # SOPS / Secrets
   # ==========================================
   # Point this to wherever your encrypted yaml lives in your repo
-  sops.defaultSopsFile = ../../secrets/rescue.yaml; 
+  sops.defaultSopsFile = ../../secrets/rescue.yaml;
   sops.secrets."wifi-psk" = {};
 
   # Format the secret securely into a KEY=VALUE environment file
@@ -85,12 +103,12 @@
   # ==========================================
   networking.wireless.enable = false;
   networking.networkmanager.enable = true;
-  
+
   # Tell NetworkManager to read our secure template file
   networking.networkmanager.ensureProfiles.environmentFiles = [
     config.sops.templates."wifi_password_1".path
   ];
-  
+
   networking.networkmanager.ensureProfiles.profiles = {
     home-wifi = {
       connection = {
@@ -105,7 +123,7 @@
       wifi-security = {
         key-mgmt = "wpa-psk";
         # NetworkManager will expand this variable internally
-        psk = "$WIFI_PASSWORD"; 
+        psk = "$WIFI_PASSWORD";
       };
     };
   };

@@ -7,7 +7,9 @@ result-*
 
 # Secrets (never commit plaintext)
 *.env
-!secrets/*.age
+secrets/**/*.key
+secrets/**/*.pem
+secrets/**/*.env
 
 # Editor
 .vscode/

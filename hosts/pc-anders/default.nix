@@ -3,17 +3,31 @@
   pkgs,
   lib,
   ...
-}: {
+}: let
+  users = ["munkien"];
+in {
   # Structure
-  imports = [
-    ../common.nix
-    ../../mods/system/desktop.nix
-    ../../mods/system/secrets.nix
-    ../../mods/system/home.nix
-    ../../mods/system/wifi-gl3.nix
-    ../../mods/system/gaming.nix
-    ../../mods/system/impermanence.nix
-  ];
+  imports =
+    [
+      ../../modules/common/default.nix
+      ../../roles/desktop.nix
+      ../../modules/desktop/gaming.nix
+    ]
+    ++ map (u: ../../users/${u}/default.nix) users;
+  home-manager.users = builtins.listToAttrs (map (u: {
+      name = u;
+      value = import ../../users/${u}/home.nix {pkgs = pkgs;};
+    })
+    users);
+
+  # Options
+  my.wifi.gl3.enable = true;
+  my.impermanence.enable = true;
+  my.autoUpgrade = {
+    enable = true;
+    flake = "github:munkien/nixos#pc-anders";
+  };
+  my.gaming.enable = true;
 
   # Allow ventoy..
   nixpkgs.config.permittedInsecurePackages = [
@@ -28,16 +42,4 @@
   systemd.targets.suspend.enable = false;
   systemd.targets.hibernate.enable = false;
   systemd.targets.hybrid-sleep.enable = false;
-
-  # # Recovery shell
-  specialisation = {
-    "Recovery-Shell" = {
-      configuration = {
-        system.nixos.tags = ["recovery"];
-        services.getty.autologinUser = lib.mkForce "root";
-        services.xserver.enable = lib.mkForce false;
-        systemd.defaultUnit = lib.mkForce "multi-user.target";
-      };
-    };
-  };
 }

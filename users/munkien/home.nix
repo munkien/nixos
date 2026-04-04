@@ -50,6 +50,7 @@
     btrfs-assistant
     headsetcontrol
     kdePackages.kate
+    winbox4
 
     # ISO writer to USB
     woeusb-ng
@@ -61,8 +62,19 @@
     # Media & Socials
     discord
     spotify
+    libreoffice-qt-fresh
+    vlc
+    mpv
 
     # Remote Desktop
     moonlight-qt
+
+    alejandra # your formatter of choice
+    bat # your cat replacement
+    deadnix # your nix linting workflow
+    eza # your ls replacement
+    statix # your nix linting workflow
+    treefmt # your formatting workflow
+    pre-commit # your dev workflow
   ];
 }

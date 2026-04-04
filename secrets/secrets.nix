@@ -5,7 +5,7 @@ let
   system_server_home = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBLOn8WFpEJa9SQG7BplBP3dZo00kXTJ2gaailooqeb";
   systems = [system_anders_pc system_server_home];
 in {
-  "secret_wifi_env.age".publicKeys = users ++ systems;
+  "common/wifi_env.age".publicKeys = users ++ systems;
   "secret_munkien_password.age".publicKeys = [user_munkien] ++ systems;
   "secret_service_password.age".publicKeys = [user_munkien] ++ systems;
   "AUTHELIA_JWT_SECRET.age".publicKeys = [user_munkien system_server_home];

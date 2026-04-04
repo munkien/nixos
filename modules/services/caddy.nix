@@ -1,7 +1,5 @@
-{ config, ... }:
-
-{
-  users.users.caddy.extraGroups = [ "acme" ];
+{config, ...}: {
+  users.users.caddy.extraGroups = ["acme"];
 
   services.caddy = {
     enable = true;

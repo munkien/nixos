@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   bootUuid = "52A2-1526";
   sysUuid = "b8005c52-43ec-490a-9dde-328c7d617a61";
   storageVideoUuid = "d8d0ee41-7dc0-4fa7-ae8d-934f7549e186";
-in
-{
+in {
   services.btrfs.autoScrub = {
     enable = true;
     interval = "weekly";

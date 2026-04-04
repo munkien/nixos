@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -21,7 +22,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.darwin.follows = "";
     };
-    impermanence.url = "github:nix-community/impermanence";
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,13 +35,14 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    impermanence.url = "github:nix-community/impermanence";
   };
 
   outputs = inputs @ {self, ...}:
@@ -54,14 +59,11 @@
           alejandra.enable = true;
           deadnix.enable = true;
           statix.enable = true;
+          check-symlinks.enable = true;
+          check-yaml.enable = true;
           check-added-large-files = {
             enable = true;
             args = ["--maxkb=2000"];
-          };
-          check-symlinks.enable = true;
-          check-yaml = {
-            enable = true;
-            excludes = [".*sops\\.yaml$"];
           };
           flake-check = {
             enable = true;
@@ -72,53 +74,60 @@
         };
 
         devShells.default = pkgs.mkShell {
-          shellHook = ''
-            ${config.pre-commit.installationScript}
-            shopt -s globstar
-            if [ -f .sops.yaml ]; then
-              ${pkgs.sops}/bin/sops updatekeys -y **/*.sops.yaml 2>/dev/null || true
-            fi
-          '';
-          packages = with pkgs; [sops age ssh-to-age alejandra];
+          shellHook = config.pre-commit.installationScript;
+          packages = with pkgs; [agenix alejandra deploy-rs nixos-anywhere];
         };
 
+        # nix run .#build-rescue
         apps.build-rescue = {
           type = "app";
-          meta.description = "Rescue ISO";
+          meta.description = "Build and copy rescue ISO to /scratch";
           program = "${pkgs.writeShellApplication {
             name = "build-rescue-iso";
-            runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.nix];
+            runtimeInputs = with pkgs; [coreutils findutils nix];
             text = ''
               echo "Building Rescue ISO..."
-              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.rescue-usb.config.system.build.isoImage)
+              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.usb-rescue.config.system.build.isoImage)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
               [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
-              DEST="/scratch/rescue-usb.iso"
               mkdir -p /scratch
-              cp --reflink=auto "$ISO_FILE" "$DEST"
-              chmod 644 "$DEST"
-              echo "Success! ISO ready at $DEST"
+              cp --reflink=auto "$ISO_FILE" /scratch/rescue-usb.iso
+              chmod 644 /scratch/rescue-usb.iso
+              echo "Success! ISO ready at /scratch/rescue-usb.iso"
             '';
           }}/bin/build-rescue-iso";
         };
       };
 
-      flake = {
-        lib.mkSystem = {
+      flake = let
+        # Default users — override per host as needed
+        defaultUsers = [
+          {
+            name = "munkien";
+            system = ./users/munkien/default.nix;
+            home = ./users/munkien/home.nix;
+          }
+        ];
+
+        # Build a NixOS system
+        mkSystem = {
           hostname,
           system,
-          enableHomeManager ? true,
+          users ? defaultUsers,
           modules ? [],
         }:
           inputs.nixpkgs.lib.nixosSystem {
             inherit system;
             specialArgs = {inherit inputs;};
             modules =
-              [
-                ./users/munkien/default.nix
+              # System-level user modules
+              (map (u: u.system) users)
+              ++ [
                 inputs.agenix.nixosModules.default
+                inputs.impermanence.nixosModules.impermanence
               ]
-              ++ (inputs.nixpkgs.lib.optionals enableHomeManager [
+              # Home Manager — only when users are present
+              ++ inputs.nixpkgs.lib.optionals (users != []) [
                 inputs.home-manager.nixosModules.home-manager
                 {
                   home-manager = {
@@ -129,47 +138,80 @@
                       inputs.nix-flatpak.homeManagerModules.nix-flatpak
                       inputs.agenix.homeManagerModules.default
                     ];
-                    users.munkien = import ./users/munkien/home.nix;
+                    # Dynamically assign home config per user
+                    users = builtins.listToAttrs (map (u: {
+                        name = u.name;
+                        value = import u.home;
+                      })
+                      users);
                   };
                 }
-              ])
-              ++ (builtins.filter builtins.pathExists [
+              ]
+              # Optional per-host files — only loaded if they exist
+              ++ builtins.filter builtins.pathExists [
                 ./hosts/${hostname}/default.nix
-                ./hosts/${hostname}/filesystem.nix
                 ./hosts/${hostname}/hardware.nix
                 ./hosts/${hostname}/hardware-configuration.nix
+                ./hosts/${hostname}/filesystem.nix
                 ./hosts/${hostname}/disko.nix
-              ])
-              ++ (inputs.nixpkgs.lib.optional
-                (builtins.pathExists ./hosts/${hostname}/disko.nix)
-                inputs.disko.nixosModules.disko)
+              ]
+              # Disko — only when host has a disko.nix
+              ++ inputs.nixpkgs.lib.optional
+              (builtins.pathExists ./hosts/${hostname}/disko.nix)
+              inputs.disko.nixosModules.disko
               ++ modules;
           };
 
+        # Build a deploy-rs node
+        mkNode = hostname: system: {
+          inherit hostname;
+          fastConnection = true;
+          profiles.system = {
+            user = "root";
+            sshUser = "root";
+            path =
+              inputs.deploy-rs.lib.${system}.activate.nixos
+              self.nixosConfigurations.${hostname};
+          };
+        };
+      in {
         nixosConfigurations = {
-          workstation = self.lib.mkSystem {
-            hostname = "workstation";
-            system = "x86_64-linux";
-          };
-
-          server-home-1 = self.lib.mkSystem {
-            hostname = "server-home-1";
-            system = "x86_64-linux";
-            enableHomeManager = false;
-            modules = [inputs.quadlet-nix.nixosModules.quadlet];
-          };
-
-          pc-anders = self.lib.mkSystem {
+          pc-anders = mkSystem {
             hostname = "pc-anders";
             system = "x86_64-linux";
           };
 
-          rescue-usb = inputs.nixpkgs.lib.nixosSystem {
+          server-home-1 = mkSystem {
+            hostname = "server-home-1";
+            system = "x86_64-linux";
+            users = [];
+            modules = [inputs.quadlet-nix.nixosModules.quadlet];
+          };
+
+          server-media-1 = mkSystem {
+            hostname = "server-media-1";
+            system = "x86_64-linux";
+            users = [];
+          };
+
+          # Rescue USB — intentionally minimal, outside mkSystem
+          usb-rescue = inputs.nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             specialArgs = {inherit inputs;};
-            modules = [./hosts/rescue/default.nix];
+            modules = [./hosts/usb-rescue/default.nix];
           };
         };
+
+        deploy.nodes = {
+          pc-anders = mkNode "pc-anders" "x86_64-linux";
+          server-home-1 = mkNode "server-home-1" "x86_64-linux";
+          server-media-1 = mkNode "server-media-1" "x86_64-linux";
+        };
+
+        checks =
+          builtins.mapAttrs
+          (_: deployLib: deployLib.deployChecks self.deploy)
+          inputs.deploy-rs.lib;
       };
     };
 }

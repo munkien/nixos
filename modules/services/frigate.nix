@@ -3,10 +3,8 @@
   lib,
   pkgs,
   ...
-}:
-
-let
-  common = import ./base-quadlet.nix { inherit lib; };
+}: let
+  common = import ./base-quadlet.nix {inherit lib;};
   domain = "munkie.dk";
   appUrl = "frigate.lan.${domain}";
   authUrl = "id.lan.${domain}";
@@ -16,7 +14,7 @@ let
     version = "0.14-0"; # Aligned with the container image version
 
     database.path = "/config/db/frigate.db";
-    
+
     mqtt.host = "127.0.0.1";
 
     detectors.ov = {
@@ -26,9 +24,18 @@ let
 
     record = {
       enabled = true;
-      retain = { days = 3; mode = "all"; };
-      alerts.retain = { days = 30; mode = "motion"; };
-      detections.retain = { days = 7; mode = "motion"; };
+      retain = {
+        days = 3;
+        mode = "all";
+      };
+      alerts.retain = {
+        days = 30;
+        mode = "motion";
+      };
+      detections.retain = {
+        days = 7;
+        mode = "motion";
+      };
     };
 
     model = {
@@ -42,28 +49,31 @@ let
 
     cameras = {
       driveway = {
-        ffmpeg.inputs = [{
-          path = "rtsp://192.168.0.201:554/user=admin_password={CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
-          roles = [ "detect" "record" ];
-        }];
+        ffmpeg.inputs = [
+          {
+            path = "rtsp://192.168.0.201:554/user=admin_password={CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+            roles = ["detect" "record"];
+          }
+        ];
         detect.enabled = true;
       };
 
       south = {
-        ffmpeg.inputs = [{
-          path = "rtsp://192.168.0.200:554/user=admin_password={CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
-          roles = [ "detect" "record" ];
-        }];
+        ffmpeg.inputs = [
+          {
+            path = "rtsp://192.168.0.200:554/user=admin_password={CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+            roles = ["detect" "record"];
+          }
+        ];
         detect.enabled = true;
       };
     };
   };
 
   # Generate the YAML file in the Nix store
-  yamlFormat = pkgs.formats.yaml { };
+  yamlFormat = pkgs.formats.yaml {};
   frigateYamlFile = yamlFormat.generate "frigate.yml" frigateConfig;
-in
-{
+in {
   # Define the secret containing your environment variables
   sops.secrets."frigate_env" = {
     sopsFile = ../secrets/frigate.yaml;
@@ -77,8 +87,8 @@ in
   ];
 
   networking.firewall = {
-    allowedTCPPorts = [ 8554 8555 ];
-    allowedUDPPorts = [ 8555 ];
+    allowedTCPPorts = [8554 8555];
+    allowedUDPPorts = [8555];
   };
 
   # Caddy reverse proxy with Authelia forward authentication
@@ -98,28 +108,28 @@ in
     containerConfig = {
       user = "root";
       # Pin to a specific, reproducible tag
-      image = "ghcr.io/blakeblackshear/frigate:0.14.1"; 
+      image = "ghcr.io/blakeblackshear/frigate:0.14.1";
       shmSize = "1G";
       notify = false;
-      networks = [ "host" ];
+      networks = ["host"];
       readOnly = false;
-      
+
       addCapabilities = [
         "CAP_CHOWN"
         "CAP_FOWNER"
         "CAP_DAC_OVERRIDE"
         "CAP_SYS_ADMIN"
       ];
-      
-      devices = [ "/dev/dri/renderD128" ];
-      
+
+      devices = ["/dev/dri/renderD128"];
+
       healthCmd = "wget -qO- http://127.0.0.1:5000/api/version || exit 1";
       healthStartPeriod = "3m";
-      
+
       environments = {
         S6_READ_ONLY_ROOT = "1";
         # Change to "iHD" if using a Broadwell or newer Intel CPU
-        LIBVA_DRIVER_NAME = "i965"; 
+        LIBVA_DRIVER_NAME = "i965";
       };
 
       # Inject secrets via standard .env format

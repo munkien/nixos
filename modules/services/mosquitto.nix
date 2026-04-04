@@ -6,8 +6,8 @@
         port = 1883;
         # Strictly bind to localhost to isolate the broker from the LAN
         address = "127.0.0.1";
-        
-        acl = [ "pattern readwrite #" ];
+
+        acl = ["pattern readwrite #"];
         omitPasswordAuth = true;
         settings = {
           allow_anonymous = true;

@@ -2,16 +2,13 @@
   config,
   lib,
   ...
-}:
-
-let
+}: let
   domain = "munkie.dk";
   appUrl = "z2m.lan.${domain}";
   authUrl = "id.lan.${domain}";
   port = 1880;
   persistDir = "/persist/services/zigbee2mqtt";
-in
-{
+in {
   # Declaratively ensure the persistent directory exists
   systemd.tmpfiles.rules = [
     "d ${persistDir} 0750 zigbee2mqtt zigbee2mqtt - -"
@@ -31,13 +28,13 @@ in
   services.zigbee2mqtt = {
     enable = true;
     dataDir = persistDir;
-    
+
     settings = {
       # Hardcoded to true since HA is running via Podman
       homeassistant = true;
-      
+
       # SECURITY: Deny automatic pairing
-      permit_join = false; 
+      permit_join = false;
 
       frontend = {
         # SECURITY: Bind strictly to localhost to enforce Authelia proxy
@@ -51,7 +48,7 @@ in
 
       serial = {
         # Reverted to ezsp for older coordinator hardware support
-        adapter = "ezsp"; 
+        adapter = "ezsp";
         port = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
       };
 
