@@ -73,11 +73,6 @@
           };
         };
 
-        devShells.default = pkgs.mkShell {
-          shellHook = config.pre-commit.installationScript;
-          packages = with pkgs; [agenix alejandra deploy-rs nixos-anywhere];
-        };
-
         # nix run .#build-rescue
         apps.build-rescue = {
           type = "app";

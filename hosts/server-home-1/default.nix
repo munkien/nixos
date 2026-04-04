@@ -6,7 +6,6 @@
 }: {
   # Structure
   imports = [
-    ../common.nix
     ../../mods/system/secrets.nix
     ../../mods/system/impermanence.nix
 

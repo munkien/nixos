@@ -18,22 +18,25 @@
       userSettings = {
         "remote.SSH.useLocalServer" = true;
         "remote.SSH.showLoginTerminal" = true;
-        "editor.formatOnSave" = true;
-        "editor.defaultFormatter" = "jnoortheen.nix-ide";
         "workbench.colorTheme" = "Tokyo Night";
+        "editor.formatOnSave" = true;
+
+        "[nix]" = {
+          "editor.defaultFormatter" = "jnoortheen.nix-ide";
+          "editor.formatOnSave" = true;
+        };
 
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "nixd";
-        "nix.formatterPath" = "${pkgs.alejandra}/bin/alejandra";
+        "nix.serverPath" = "${pkgs.nixd}/bin/nixd";
 
-        "nix.serverSettings"."nixd" = {
-          formatting.command = ["alejandra"];
-          options = {
-            # NixOS options — for system config completions
-            nixos."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options";
-
-            # Home Manager options — accessed through the NixOS module, not standalone
-            home-manager."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options.home-manager.users.type.functor.wrapped";
+        "nix.serverSettings" = {
+          nixd = {
+            # 3. Use pure, absolute path for the formatting command inside nixd
+            formatting.command = [ "${pkgs.alejandra}/bin/alejandra" ];
+            options = {
+              nixos."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options";
+              home-manager."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options.home-manager.users.type.functor.wrapped";
+            };
           };
         };
       };
