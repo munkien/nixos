@@ -21,8 +21,8 @@ in {
   # Users
   "../users/munkien/password.age".publicKeys = [users.munkien] ++ allSystems;
 
-  # Hosts
-
   # Services
+  "services/frigate.age".publicKeys = [users.munkien] ++ allSystems;
+
   # "services/authelia/jwt.age".publicKeys = [ users.munkien systems.server-home ];
 }

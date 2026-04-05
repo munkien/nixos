@@ -4,27 +4,35 @@
   lib,
   ...
 }: {
-  # Structure
   imports = [
-    ../../mods/system/secrets.nix
-    ../../mods/system/impermanence.nix
+    ../../modules/common/default.nix
+    ../../roles/server.nix
 
     # Services
-    ../../mods/services/quadlet.nix
+    ../../modules/services/quadlet.nix
+    ../../modules/services/acme.nix
+    ../../modules/services/frigate.nix
 
-    ../../mods/services/acme.nix
-    #../../mods/services/authelia.nix
-    ../../mods/services/caddy.nix
+    ../../modules/services/authelia.nix
+    ../../modules/services/caddy.nix
+
     #../../mods/services/ebusd.nix
-    #../../mods/services/frigate.nix
+
     #../../mods/services/homeassistant.nix
     #../../mods/services/ialarm-mqtt.nix
     #../../mods/services/mosquitto.nix
-    ../../mods/services/omada.nix
+    #../../mods/services/omada.nix
     #../../mods/services/paperless-ngx.nix
-    ../../mods/services/pihole.nix
+    #../../mods/services/pihole.nix
     #../../mods/services/zigbee2mqtt.nix
   ];
+
+  # Options
+  my.impermanence.enable = true;
+  my.autoUpgrade = {
+    enable = true;
+    flake = "github:munkien/nixos#server-home-1";
+  };
 
   # Sleep and hibernation
   systemd.targets.sleep.enable = false;

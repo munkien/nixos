@@ -31,7 +31,6 @@
 
         "nix.serverSettings" = {
           nixd = {
-            # 3. Use pure, absolute path for the formatting command inside nixd
             formatting.command = [ "${pkgs.alejandra}/bin/alejandra" ];
             options = {
               nixos."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options";

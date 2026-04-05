@@ -82,7 +82,7 @@
             runtimeInputs = with pkgs; [coreutils findutils nix];
             text = ''
               echo "Building Rescue ISO..."
-              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.usb-rescue.config.system.build.isoImage)
+              OUT_PATH=$(nix build --print-out-paths --no-link .#rescueConfigurations.usb-rescue.config.system.build.isoImage --impure)
               ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
               [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
               mkdir -p /scratch
@@ -128,6 +128,7 @@
                   home-manager = {
                     useGlobalPkgs = true;
                     useUserPackages = true;
+                    extraSpecialArgs = {inherit inputs;};
                     sharedModules = [
                       inputs.plasma-manager.homeModules.plasma-manager
                       inputs.nix-flatpak.homeManagerModules.nix-flatpak
@@ -158,15 +159,17 @@
           };
 
         # Build a deploy-rs node
-        mkNode = hostname: system: {
-          inherit hostname;
+        mkNode = configName: targetAddress: system: {
+          # targetAddress defines WHERE deploy-rs connects via SSH
+          hostname = targetAddress;
           fastConnection = true;
           profiles.system = {
             user = "root";
             sshUser = "root";
             path =
               inputs.deploy-rs.lib.${system}.activate.nixos
-              self.nixosConfigurations.${hostname};
+              # configName defines WHICH configuration to build
+              self.nixosConfigurations.${configName};
           };
         };
       in {
@@ -183,24 +186,28 @@
             modules = [inputs.quadlet-nix.nixosModules.quadlet];
           };
 
-          server-media-1 = mkSystem {
-            hostname = "server-media-1";
-            system = "x86_64-linux";
-            users = [];
-          };
+          # server-media-1 = mkSystem {
+          #   hostname = "server-media-1";
+          #   system = "x86_64-linux";
+          #   users = [];
+          # };
+        };
 
-          # Rescue USB — intentionally minimal, outside mkSystem
-          usb-rescue = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            specialArgs = {inherit inputs;};
-            modules = [./hosts/usb-rescue/default.nix];
-          };
+        # Rescue USB — intentionally minimal, outside mkSystem
+        usb-rescue = inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {inherit inputs;};
+          modules = [
+            ./hosts/usb-rescue/default.nix
+            inputs.agenix.nixosModules.default
+          ];
         };
 
         deploy.nodes = {
-          pc-anders = mkNode "pc-anders" "x86_64-linux";
-          server-home-1 = mkNode "server-home-1" "x86_64-linux";
-          server-media-1 = mkNode "server-media-1" "x86_64-linux";
+          # Usage: mkNode <configName> <IP/Domain> <Architecture>
+          pc-anders = mkNode "pc-anders" "pc-anders" "x86_64-linux";
+          server-home-1 = mkNode "server-home-1" "192.168.0.50" "x86_64-linux";
+          #server-media-1 = mkNode "server-media-1" "server-media-1" "x86_64-linux";
         };
 
         checks =

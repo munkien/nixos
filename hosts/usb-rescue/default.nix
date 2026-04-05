@@ -7,10 +7,8 @@
 }: {
   imports = [
     "${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
-    ../../modules/common/default.nix
   ];
 
-  my.wifi.gl3.enable = true;
   networking.hostName = "usb-rescue-1";
 
   networking.networkmanager.enable = true;
