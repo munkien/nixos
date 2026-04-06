@@ -1,5 +1,5 @@
 {config, ...}: let
-  secrets = config.age.secrets;
+  inherit (config.age) secrets;
 in {
   age.secrets."acme_env" = {
     file = ../../secrets/acme_env.age;

@@ -1,4 +1,4 @@
-{...}: {
+_: {
   networking = {
     wireless.enable = false;
     networkmanager = {

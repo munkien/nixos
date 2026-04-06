@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  ...
 }: {
   autoStart = true;
   serviceConfig = {

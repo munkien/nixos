@@ -22,9 +22,9 @@
   config = lib.mkIf config.my.autoUpgrade.enable {
     system.autoUpgrade = {
       enable = true;
-      flake = config.my.autoUpgrade.flake;
+      inherit (config.my.autoUpgrade) flake;
       dates = config.my.autoUpgrade.frequency;
-      allowReboot = config.my.autoUpgrade.allowReboot;
+      inherit (config.my.autoUpgrade) allowReboot;
       randomizedDelaySec = "2h"; # stagger updates across hosts
       runGarbageCollection = true;
     };

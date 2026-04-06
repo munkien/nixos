@@ -16,7 +16,7 @@ in {
     ++ map (u: ../../users/${u}/default.nix) users;
   home-manager.users = builtins.listToAttrs (map (u: {
       name = u;
-      value = import ../../users/${u}/home.nix {pkgs = pkgs;};
+      value = import ../../users/${u}/home.nix {inherit pkgs;};
     })
     users);
 

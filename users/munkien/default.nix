@@ -4,7 +4,7 @@
   ...
 }: let
   # Absolute path to your user's public key
-  munkienPubKey = builtins.readFile (builtins.toPath ./../munkien/secret_key.pub);
+  munkienPubKey = builtins.readFile ./../munkien/secret_key.pub;
 in {
   age.secrets."munkien_password_hashed" = {
     file = ./password.age; # relative path, must exist
