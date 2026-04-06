@@ -3,14 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.my.gaming;
-in {
+}: {
   options.my.gaming = {
     enable = lib.mkEnableOption "gaming setup (Steam, gamemode, etc.)";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.my.gaming.enable {
     programs.steam = {
       enable = true;
 

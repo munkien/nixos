@@ -88,10 +88,10 @@
       users ? defaultUsers,
     }:
       inputs.nixpkgs.lib.nixosSystem {
-        inherit system;
         specialArgs = {inherit inputs;};
         modules =
-          (map (u: u.system) users)
+          [{nixpkgs.hostPlatform = system;}]
+          ++ (map (u: u.system) users)
           ++ sharedNixosModules
           ++ inputs.nixpkgs.lib.optionals (users != []) [
             inputs.home-manager.nixosModules.home-manager
@@ -140,7 +140,7 @@
       // {
         # Manually appended utility configuration
         usb-rescue = inputs.nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
+          nixpkgs.hostPlatform = "x86_64-linux";
           specialArgs = {inherit inputs;};
           modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
         };

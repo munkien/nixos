@@ -5,7 +5,6 @@
   ...
 }: {
   imports = [
-    ../../modules/common/default.nix
     ../../roles/server.nix
 
     # Services

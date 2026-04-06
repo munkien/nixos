@@ -6,14 +6,6 @@
 }: let
   users = ["munkien"];
 in {
-  # Structure
-  imports =
-    [
-      ../../modules/common/default.nix
-      ../../roles/desktop.nix
-      ../../modules/desktop/gaming.nix
-    ]
-    ++ map (u: ../../users/${u}/default.nix) users;
   home-manager.users = builtins.listToAttrs (map (u: {
       name = u;
       value = import ../../users/${u}/home.nix {inherit pkgs;};
@@ -23,6 +15,7 @@ in {
   # Options
   my.wifi.gl3.enable = true;
   my.impermanence.enable = true;
+  my.desktop.enable = true;
   my.autoUpgrade = {
     enable = true;
     flake = "github:munkien/nixos#pc-anders";
