@@ -22,7 +22,7 @@ in {
   "../users/munkien/password.age".publicKeys = [users.munkien] ++ allSystems;
 
   # Services
-  "services/frigate.age".publicKeys = [users.munkien] ++ allSystems;
+  "./acme_env.age".publicKeys = [users.munkien] ++ allSystems;
 
   # "services/authelia/jwt.age".publicKeys = [ users.munkien systems.server-home ];
 }

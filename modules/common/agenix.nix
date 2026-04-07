@@ -7,19 +7,17 @@
   ...
 }: let
   hasPersistence =
-    config.environment ? persistence
-    && config.environment.persistence ? "/persist";
+    config.environment.persistence ? "/persist";
   statePath =
     if hasPersistence
     then "/persist/etc/ssh"
     else "/etc/ssh";
 in {
-  environment.systemPackages = with pkgs; [
-    inputs.agenix.packages.${pkgs.system}.default
-    age
-    age-plugin-tpm
-    ssh-to-age
-    mkpasswd
+  environment.systemPackages = [
+    inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    pkgs.rage
+    pkgs.ssh-to-age
+    pkgs.mkpasswd
   ];
 
   systemd.services.agenix = {
@@ -43,6 +41,6 @@ in {
   ];
 
   boot.initrd.secrets = lib.mkIf hasPersistence {
-    "/etc/ssh/ssh_host_ed25519_key" = "/persist/etc/ssh/ssh_host_ed25519_key";
+    "/etc/ssh/ssh_host_ed25519_key" = "${statePath}/ssh_host_ed25519_key";
   };
 }

@@ -7,7 +7,7 @@
     enable = lib.mkEnableOption "automatic NixOS upgrades";
     flake = lib.mkOption {
       type = lib.types.str;
-      description = "Flake URI to upgrade from, e.g. github:youruser/nixos-config#hostname";
+      default = "github:munkien/nixos#${config.networking.hostName}";
     };
     frequency = lib.mkOption {
       type = lib.types.str;
@@ -15,17 +15,16 @@
     };
     allowReboot = lib.mkOption {
       type = lib.types.bool;
-      default = false;
+      default = true;
     };
   };
-
   config = lib.mkIf config.my.autoUpgrade.enable {
     system.autoUpgrade = {
       enable = true;
       inherit (config.my.autoUpgrade) flake;
       dates = config.my.autoUpgrade.frequency;
       inherit (config.my.autoUpgrade) allowReboot;
-      randomizedDelaySec = "2h"; # stagger updates across hosts
+      randomizedDelaySec = "2h";
       runGarbageCollection = true;
     };
     systemd.timers.nixos-upgrade.timerConfig.Persistent = lib.mkForce true;

@@ -15,12 +15,17 @@ in {
   # Options
   my.wifi.gl3.enable = true;
   my.impermanence.enable = true;
+  my.impermanence.extraDirs = ["/var/lib/containers"];
   my.desktop.enable = true;
   my.autoUpgrade = {
     enable = true;
     flake = "github:munkien/nixos#pc-anders";
   };
   my.gaming.enable = true;
+
+  # Services for testing
+  my.containers.enable = true;
+  my.services.frigate.enable = true;
 
   # Allow ventoy..
   nixpkgs.config.permittedInsecurePackages = [
