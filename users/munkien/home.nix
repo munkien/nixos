@@ -68,6 +68,7 @@
 
     # Remote Desktop
     moonlight-qt
+    rustdesk
 
     alejandra # your formatter of choice
     bat # your cat replacement

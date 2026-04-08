@@ -79,6 +79,9 @@
         system = "x86_64-linux";
         deployIp = "192.168.0.50";
       };
+      pc-kiosk-browser = {
+        system = "x86_64-linux";
+      };
     };
 
     # System Builder
