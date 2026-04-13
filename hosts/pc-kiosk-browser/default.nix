@@ -1,8 +1,23 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: let
+  firefox-kiosk = pkgs.symlinkJoin {
+    name = "firefox-kiosk";
+    paths = [pkgs.firefox];
+    postBuild = ''
+      CHROME=$out/lib/firefox/browser/defaults/profile/chrome
+      mkdir -p $CHROME
+      cat > $CHROME/userChrome.css <<EOF
+      .titlebar-buttonbox-container { display: none !important; }
+      .titlebar-spacer { display: none !important; }
+      EOF
+
+      PREFS=$out/lib/firefox/browser/defaults/profile
+      mkdir -p $PREFS
+      cat > $PREFS/user.js <<EOF
+      user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+      EOF
+    '';
+  };
+in {
   my.impermanence.enable = true;
   my.autoUpgrade = {
     enable = true;
@@ -19,8 +34,15 @@
   services.cage = {
     enable = true;
     user = "kiosk";
-    # Launch Firefox in private kiosk mode
-    program = "${pkgs.firefox}/bin/firefox -kiosk -private-window https://hjv.dk";
+    program = "${firefox-kiosk}/bin/firefox --private-window https://hjv.dk";
+  };
+
+  # Restart Cage (and Firefox) if it ever exits
+  systemd.services."cage-tty1" = {
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = 2;
+    };
   };
 
   # Hardware: Audio and Lid Power Management
@@ -30,7 +52,7 @@
     alsa.enable = true;
     pulse.enable = true;
   };
-  services.logind.lidSwitch = "suspend";
+  services.logind.settings.Login.HandleLidSwitch = "suspend";
 
   # Declaratively lock down Firefox to prevent filesystem escape
   programs.firefox = {
@@ -38,24 +60,43 @@
     policies = {
       DisableAppUpdate = true;
       DisableDeveloperTools = true;
-      DisableFileAccess = true; # Critical: Prevents file:// URI access
+      DisableFileAccess = true;
       DisableProfileImport = true;
       DisableTelemetry = true;
       DisableSafeMode = true;
       NoDefaultBookmarks = true;
       OfferToSaveLogins = false;
+      TranslateEnabled = false;
+      PopupBlocking = {
+        Default = false;
+        Locked = true;
+      };
       OverrideFirstRunPage = "";
       PromptForDownloadLocation = false;
-      # Disable printing to avoid the print dialog escape vector
-      DisablePrinting = true;
+      DisablePrinting = false;
       BlockAboutPreferences = true;
       BlockAboutConfig = true;
+      DisplayBookmarksToolbar = "always";
+      DisplayMenuBar = "never";
+      Homepage = {
+        URL = "https://minside.hjv.dk";
+        Locked = true;
+        StartPage = "homepage-locked";
+      };
+      Bookmarks = [
+        {
+          Title = "HJV";
+          URL = "https://hjv.dk";
+          Favicon = "https://hjv.dk/favicon.ico";
+          Placement = "toolbar";
+        }
+        {
+          Title = "Google";
+          URL = "https://google.dk";
+          Placement = "toolbar";
+        }
+      ];
+      NewTabPage = false;
     };
   };
-
-  # Ensure the system never sleeps or blanks the screen
-  systemd.targets.sleep.enable = false;
-  systemd.targets.suspend.enable = false;
-  systemd.targets.hibernate.enable = false;
-  systemd.targets.hybrid-sleep.enable = false;
 }

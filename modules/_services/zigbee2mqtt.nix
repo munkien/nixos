@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: let
+_: let
   domain = "munkie.dk";
   appUrl = "z2m.lan.${domain}";
   authUrl = "id.lan.${domain}";

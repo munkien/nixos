@@ -1,31 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}: {
-  imports = [
-    ../../roles/server.nix
-
-    # Services
-    ../../modules/services/quadlet.nix
-    ../../modules/services/acme.nix
-    ../../modules/services/frigate.nix
-
-    ../../modules/services/authelia.nix
-    ../../modules/services/caddy.nix
-
-    #../../mods/services/ebusd.nix
-
-    #../../mods/services/homeassistant.nix
-    #../../mods/services/ialarm-mqtt.nix
-    #../../mods/services/mosquitto.nix
-    #../../mods/services/omada.nix
-    #../../mods/services/paperless-ngx.nix
-    #../../mods/services/pihole.nix
-    #../../mods/services/zigbee2mqtt.nix
-  ];
-
+_: {
   # Options
   my.impermanence.enable = true;
   my.autoUpgrade = {

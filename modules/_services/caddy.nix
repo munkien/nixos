@@ -1,4 +1,4 @@
-{config, ...}: {
+_: {
   users.users.caddy.extraGroups = ["acme"];
 
   services.caddy = {

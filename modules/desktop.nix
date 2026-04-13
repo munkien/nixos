@@ -30,6 +30,5 @@
       wireplumber.enable = true;
     };
     services.pulseaudio.enable = false;
-    my.audio.cleanMic.enable = true;
   };
 }

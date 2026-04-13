@@ -8,7 +8,7 @@
 
   config = lib.mkIf config.my.wifi.gl3.enable {
     age.secrets.wifi-gl3 = {
-      file = ../../secrets/common/wifi-gl3_env.age;
+      rekeyFile = ../../secrets/common/wifi-gl3_env.age;
       owner = "root";
       mode = "0600";
     };

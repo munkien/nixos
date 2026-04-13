@@ -201,9 +201,9 @@ in {
 
   # Delayed Startup Services
   systemd.user.services = {
-    steam = mkDelayedStart "Steam" 30 "${pkgs.steam}/bin/steam -silent";
-    spotify = mkDelayedStart "Spotify" 80 "${pkgs.spotify}/bin/spotify";
-    discord = mkDelayedStart "Discord" 120 "${pkgs.discord}/bin/discord";
+    steam = mkDelayedStart "Steam" 5 "${pkgs.steam}/bin/steam -silent";
+    spotify = mkDelayedStart "Spotify" 10 "${pkgs.spotify}/bin/spotify";
+    discord = mkDelayedStart "Discord" 15 "${pkgs.discord}/bin/discord";
   };
 
   # Wipe cache on boot

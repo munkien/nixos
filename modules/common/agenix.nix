@@ -1,4 +1,3 @@
-# modules/common/agenix.nix
 {
   config,
   lib,
@@ -39,8 +38,4 @@ in {
       type = "ed25519";
     }
   ];
-
-  boot.initrd.secrets = lib.mkIf hasPersistence {
-    "/etc/ssh/ssh_host_ed25519_key" = "${statePath}/ssh_host_ed25519_key";
-  };
 }

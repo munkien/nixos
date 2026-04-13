@@ -3,8 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    flake-parts.url = "github:hercules-ci/flake-parts";
 
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     import-tree.url = "github:vic/import-tree";
 
     home-manager = {
@@ -20,8 +21,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.darwin.follows = "";
     };
-    deploy-rs = {
-      url = "github:serokell/deploy-rs";
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-anywhere = {
@@ -43,172 +44,156 @@
     impermanence.url = "github:nix-community/impermanence";
   };
 
-  outputs = inputs @ {self, ...}: let
-    systems = ["x86_64-linux" "aarch64-linux"];
-    forAllSystems = inputs.nixpkgs.lib.genAttrs systems;
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux" "aarch64-linux"];
+      imports = [inputs.agenix-rekey.flakeModule];
 
-    defaultUsers = [
-      {
-        name = "munkien";
-        system = ./users/munkien/default.nix;
-        home = ./users/munkien/home.nix;
-      }
-    ];
+      flake = let
+        defaultUsers = [
+          {
+            name = "munkien";
+            system = ./users/munkien/default.nix;
+            home = ./users/munkien/home.nix;
+          }
+        ];
 
-    # 1. Centralized External Dependencies
-    sharedNixosModules = with inputs; [
-      agenix.nixosModules.default
-      impermanence.nixosModules.impermanence
-      disko.nixosModules.disko
-      quadlet-nix.nixosModules.quadlet
-    ];
+        sharedNixosModules = with inputs; [
+          agenix.nixosModules.default
+          agenix-rekey.nixosModules.default
 
-    sharedHomeModules = with inputs; [
-      plasma-manager.homeModules.plasma-manager
-      nix-flatpak.homeManagerModules.nix-flatpak
-      agenix.homeManagerModules.default
-    ];
+          ({config, ...}: {
+            age.rekey = {
+              masterIdentities = ["~/.ssh/id_ed25519"];
+              storageMode = "local";
+              localStorageDir = ./hosts/${config.networking.hostName}/secrets;
+            };
+          })
 
-    # 2. The Single Source of Truth
-    fleet = {
-      pc-anders = {
-        system = "x86_64-linux";
-        deployIp = "pc-anders";
-      };
-      server-home-1 = {
-        system = "x86_64-linux";
-        deployIp = "192.168.0.50";
-      };
-      pc-kiosk-browser = {
-        system = "x86_64-linux";
-      };
-    };
+          impermanence.nixosModules.impermanence
+          disko.nixosModules.disko
+          quadlet-nix.nixosModules.quadlet
+        ];
 
-    # System Builder
-    mkSystem = {
-      hostname,
-      system,
-      users ? defaultUsers,
-    }:
-      inputs.nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
-        modules =
-          [{nixpkgs.hostPlatform = system;}]
-          ++ (map (u: u.system) users)
-          ++ sharedNixosModules
-          ++ inputs.nixpkgs.lib.optionals (users != []) [
-            inputs.home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = {inherit inputs;};
-                sharedModules = sharedHomeModules;
-                users = builtins.listToAttrs (map (u: {
-                    inherit (u) name;
-                    value = import u.home;
-                  })
-                  users);
-              };
-            }
-          ]
-          ++ [
-            (inputs.import-tree ./hosts/${hostname})
-            (inputs.import-tree ./modules)
-          ];
-      };
+        sharedHomeModules = with inputs; [
+          plasma-manager.homeModules.plasma-manager
+          nix-flatpak.homeManagerModules.nix-flatpak
+          agenix.homeManagerModules.default
+        ];
 
-    # Deploy-RS Node Builder
-    mkNode = configName: targetAddress: system: {
-      hostname = targetAddress;
-      fastConnection = true;
-      profiles.system = {
-        user = "root";
-        sshUser = "root";
-        path =
-          inputs.deploy-rs.lib.${system}.activate.nixos
-          self.nixosConfigurations.${configName};
-      };
-    };
-  in {
-    # Generated NixOS Configurations
-    nixosConfigurations =
-      builtins.mapAttrs (name: hostConfig:
-        mkSystem {
-          hostname = name;
-          system = hostConfig.system;
-          users = hostConfig.users or defaultUsers;
-        })
-      fleet
-      // {
-        # Manually appended utility configuration
-        usb-rescue = inputs.nixpkgs.lib.nixosSystem {
-          nixpkgs.hostPlatform = "x86_64-linux";
-          specialArgs = {inherit inputs;};
-          modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
-        };
-      };
-
-    # 6. Generated Deployment Nodes
-    deploy.nodes =
-      builtins.mapAttrs (name: hostConfig: mkNode name hostConfig.deployIp hostConfig.system) fleet;
-
-    # 7. Multi-Arch Tooling
-    apps = forAllSystems (system: let
-      pkgs = import inputs.nixpkgs {inherit system;};
-    in {
-      build-rescue = {
-        type = "app";
-        meta.description = "Build and copy rescue ISO to /scratch";
-        program = "${pkgs.writeShellApplication {
-          name = "build-rescue-iso";
-          runtimeInputs = with pkgs; [coreutils findutils nix];
-          text = ''
-            echo "Building Rescue ISO..."
-            OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.usb-rescue.config.system.build.isoImage --impure)
-            ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-            [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
-            mkdir -p /scratch
-            cp --reflink=auto "$ISO_FILE" /scratch/rescue-usb.iso
-            chmod 644 /scratch/rescue-usb.iso
-            echo "Success! ISO ready at /scratch/rescue-usb.iso"
-          '';
-        }}/bin/build-rescue-iso";
-      };
-    });
-
-    checks = forAllSystems (system: let
-      deployChecks = inputs.deploy-rs.lib.${system}.deployChecks self.deploy;
-      pre-commit-check = inputs.git-hooks.lib.${system}.run {
-        src = ./.;
-        hooks = {
-          alejandra.enable = true;
-          deadnix.enable = true;
-          statix.enable = true;
-          check-symlinks.enable = true;
-          check-yaml.enable = true;
-          check-added-large-files = {
-            enable = true;
-            args = ["--maxkb=2000"];
+        mkHost = {
+          hostname,
+          system,
+          users ? defaultUsers,
+        }:
+          inputs.nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = {inherit inputs;};
+            modules =
+              [
+                {networking.hostName = hostname;}
+                (inputs.import-tree ./hosts/${hostname})
+                (inputs.import-tree ./modules)
+              ]
+              ++ sharedNixosModules
+              ++ map (u: u.system) users
+              ++ inputs.nixpkgs.lib.optionals (users != []) [
+                inputs.home-manager.nixosModules.home-manager
+                {
+                  home-manager = {
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
+                    extraSpecialArgs = {inherit inputs;};
+                    sharedModules = sharedHomeModules;
+                    users = builtins.listToAttrs (map (u: {
+                        inherit (u) name;
+                        value = import u.home;
+                      })
+                      users);
+                  };
+                }
+              ];
           };
-          flake-check = {
-            enable = true;
-            name = "Fast Flake Check";
-            entry = "nix flake check --no-build";
-            pass_filenames = false;
+      in {
+        nixosConfigurations = {
+          pc-anders = mkHost {
+            hostname = "pc-anders";
+            system = "x86_64-linux";
+          };
+          server-home-1 = mkHost {
+            hostname = "server-home-1";
+            system = "x86_64-linux";
+          };
+          pc-kiosk-browser = mkHost {
+            hostname = "pc-kiosk-browser";
+            system = "x86_64-linux";
+          };
+          server-datalix-1 = mkHost {
+            hostname = "server-datalix-1";
+            system = "x86_64-linux";
+          };
+
+          usb-rescue = inputs.nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = {inherit inputs;};
+            modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
           };
         };
       };
-    in
-      deployChecks // {inherit pre-commit-check;});
 
-    devShells = forAllSystems (system: let
-      pkgs = import inputs.nixpkgs {inherit system;};
-    in {
-      default = pkgs.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+      perSystem = {
+        config,
+        pkgs,
+        system,
+        ...
+      }: {
+        apps.build-rescue = {
+          type = "app";
+          program = pkgs.lib.getExe (pkgs.writeShellApplication {
+            name = "build-rescue-iso";
+            runtimeInputs = with pkgs; [coreutils findutils nix];
+            text = ''
+              echo "Building Rescue ISO..."
+              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.usb-rescue.config.system.build.isoImage --impure)
+              ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
+              [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
+              mkdir -p /scratch
+              cp --reflink=auto "$ISO_FILE" /scratch/rescue-usb.iso
+              chmod 644 /scratch/rescue-usb.iso
+              echo "Success! ISO ready at /scratch/rescue-usb.iso"
+            '';
+          });
+        };
+
+        checks.pre-commit-check = inputs.git-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            alejandra.enable = true;
+            deadnix.enable = true;
+            statix.enable = true;
+            check-symlinks.enable = true;
+            check-yaml.enable = true;
+            check-added-large-files = {
+              enable = true;
+              args = ["--maxkb=2000"];
+            };
+            flake-check = {
+              enable = true;
+              name = "Fast Flake Check";
+              entry = "nix flake check --no-build";
+              pass_filenames = false;
+            };
+          };
+        };
+
+        devShells.default = pkgs.mkShell {
+          inherit (config.checks.pre-commit-check) shellHook;
+          buildInputs =
+            config.checks.pre-commit-check.enabledPackages
+            ++ [
+              inputs.agenix-rekey.packages.${system}.default
+            ];
+        };
       };
-    });
-  };
+    };
 }

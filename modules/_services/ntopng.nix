@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+_: {
   services.ntopng = {
     enable = true;
     interfaces = ["view:collector:2055"];

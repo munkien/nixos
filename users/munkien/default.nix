@@ -14,6 +14,12 @@ in {
   services.jotta-cli.enable = true;
   programs.fish.enable = true;
 
+  # Open ports
+  networking.firewall = {
+    allowedTCPPorts = [53317]; # LocalSend
+    allowedUDPPorts = [53317]; # LocalSend
+  };
+
   users.users.munkien = {
     isNormalUser = true;
     hashedPasswordFile = config.age.secrets."munkien_password_hashed".path;

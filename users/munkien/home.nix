@@ -54,7 +54,7 @@
 
     # ISO writer to USB
     woeusb-ng
-    ventoy
+    #ventoy
 
     # Privacy
     tor-browser
@@ -66,10 +66,15 @@
     vlc
     mpv
 
-    # Remote Desktop
+    # Audio
+    easyeffects
+
+    # Remote Desktop / access
     moonlight-qt
     rustdesk
+    localsend
 
+    # Programming
     alejandra # your formatter of choice
     bat # your cat replacement
     deadnix # your nix linting workflow
@@ -78,6 +83,7 @@
     treefmt # your formatting workflow
     pre-commit # your dev workflow
 
+    # Deployment
     deploy-rs
     nixos-anywhere
   ];

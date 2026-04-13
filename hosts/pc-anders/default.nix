@@ -1,9 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   users = ["munkien"];
 in {
   home-manager.users = builtins.listToAttrs (map (u: {
@@ -11,6 +6,9 @@ in {
       value = import ../../users/${u}/home.nix {inherit pkgs;};
     })
     users);
+
+  # Secrets
+  age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHX8xYUGCFSnNC2LfioaQUD1E4QVzLTAcAvlOo7dB110 root@pc-anders";
 
   # Options
   my.wifi.gl3.enable = true;
@@ -22,6 +20,10 @@ in {
     flake = "github:munkien/nixos#pc-anders";
   };
   my.gaming.enable = true;
+
+  networking.networkmanager.enable = true;
+  networking.useNetworkd = false;
+  services.resolved.enable = false;
 
   # Services for testing
   my.containers.enable = true;

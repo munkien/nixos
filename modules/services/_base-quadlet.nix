@@ -1,8 +1,4 @@
-{
-  lib,
-  config,
-  ...
-}: {
+{config, ...}: {
   autoStart = true;
   serviceConfig = {
     Restart = "always";

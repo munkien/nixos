@@ -27,6 +27,27 @@
       enable32Bit = true;
     };
 
+    networking.firewall = {
+      # Port 24642 is the default for Stardew Valley multiplayer
+      allowedTCPPorts = [24642];
+      allowedUDPPorts = [
+        24642 # Stardew Valley Discovery/Data
+        27036 # Steam Remote Play
+      ];
+
+      # Steamworks P2P and Voice Chat ranges
+      allowedUDPPortRanges = [
+        {
+          from = 27000;
+          to = 27031;
+        }
+        {
+          from = 4380;
+          to = 4380;
+        }
+      ];
+    };
+
     programs.gamemode.enable = true;
     programs.gamescope.enable = true;
 
@@ -35,6 +56,12 @@
       gamescope
       faudio
       protontricks
+      steam-run
+      dotnet-sdk_8
+      icu
+      zlib
+      openssl
+      prelink
     ];
   };
 }

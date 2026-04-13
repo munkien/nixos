@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{lib, ...}: let
   common = import ./base-quadlet.nix {inherit lib;};
   persistDir = "/persist/services/ebusd";
 in {
