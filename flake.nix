@@ -39,6 +39,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    colmena.url = "github:zhaofengli/colmena";
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     impermanence.url = "github:nix-community/impermanence";
@@ -50,6 +51,9 @@
       imports = [inputs.agenix-rekey.flakeModule];
 
       flake = let
+        lib = inputs.nixpkgs.lib;
+
+        # ── Users ────────────────────────────────────────────────────────────
         defaultUsers = [
           {
             name = "munkien";
@@ -58,10 +62,10 @@
           }
         ];
 
+        # ── Shared module lists ───────────────────────────────────────────────
         sharedNixosModules = with inputs; [
           agenix.nixosModules.default
           agenix-rekey.nixosModules.default
-
           ({config, ...}: {
             age.rekey = {
               masterIdentities = ["~/.ssh/id_ed25519"];
@@ -69,7 +73,6 @@
               localStorageDir = ./hosts/${config.networking.hostName}/secrets;
             };
           })
-
           impermanence.nixosModules.impermanence
           disko.nixosModules.disko
           quadlet-nix.nixosModules.quadlet
@@ -81,64 +84,100 @@
           agenix.homeManagerModules.default
         ];
 
+        # ── Host inventory ────────────────────────────────────────────────────
+        # Add deployment.* keys here to control colmena behaviour per-host.
+        hosts = {
+          pc-anders = {
+            system = "x86_64-linux";
+            deployment.targetHost = "pc-anders";
+            deployment.tags = ["workstations"];
+          };
+          server-home-1 = {
+            system = "x86_64-linux";
+            deployment.targetHost = "server-home-1";
+            deployment.tags = ["servers"];
+          };
+          pc-kiosk-browser = {
+            system = "x86_64-linux";
+            deployment.targetHost = "pc-kiosk-browser";
+            deployment.tags = ["workstations" "kiosks"];
+          };
+          server-datalix-1 = {
+            system = "x86_64-linux";
+            deployment.targetHost = "server-datalix-1";
+            deployment.tags = ["servers"];
+          };
+        };
+
+        # ── Module composition ────────────────────────────────────────────────
+        mkHostModules = {
+          hostname,
+          users ? defaultUsers,
+        }:
+          [
+            {networking.hostName = hostname;}
+            (inputs.import-tree ./hosts/${hostname})
+            (inputs.import-tree ./modules)
+          ]
+          ++ sharedNixosModules
+          ++ map (u: u.system) users
+          ++ lib.optionals (users != []) [
+            inputs.home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = {inherit inputs;};
+                sharedModules = sharedHomeModules;
+                users = builtins.listToAttrs (map (u: {
+                    inherit (u) name;
+                    value = import u.home;
+                  })
+                  users);
+              };
+            }
+          ];
+
+        # ── nixosSystem wrapper ───────────────────────────────────────────────
         mkHost = {
           hostname,
           system,
           users ? defaultUsers,
         }:
-          inputs.nixpkgs.lib.nixosSystem {
+          lib.nixosSystem {
             inherit system;
             specialArgs = {inherit inputs;};
-            modules =
-              [
-                {networking.hostName = hostname;}
-                (inputs.import-tree ./hosts/${hostname})
-                (inputs.import-tree ./modules)
-              ]
-              ++ sharedNixosModules
-              ++ map (u: u.system) users
-              ++ inputs.nixpkgs.lib.optionals (users != []) [
-                inputs.home-manager.nixosModules.home-manager
-                {
-                  home-manager = {
-                    useGlobalPkgs = true;
-                    useUserPackages = true;
-                    extraSpecialArgs = {inherit inputs;};
-                    sharedModules = sharedHomeModules;
-                    users = builtins.listToAttrs (map (u: {
-                        inherit (u) name;
-                        value = import u.home;
-                      })
-                      users);
-                  };
-                }
-              ];
-          };
-      in {
-        nixosConfigurations = {
-          pc-anders = mkHost {
-            hostname = "pc-anders";
-            system = "x86_64-linux";
-          };
-          server-home-1 = mkHost {
-            hostname = "server-home-1";
-            system = "x86_64-linux";
-          };
-          pc-kiosk-browser = mkHost {
-            hostname = "pc-kiosk-browser";
-            system = "x86_64-linux";
-          };
-          server-datalix-1 = mkHost {
-            hostname = "server-datalix-1";
-            system = "x86_64-linux";
+            modules = mkHostModules {inherit hostname users;};
           };
 
-          usb-rescue = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            specialArgs = {inherit inputs;};
-            modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
+      in {
+        # Build all managed hosts plus the rescue image.
+        nixosConfigurations =
+          lib.mapAttrs (hostname: host: mkHost ({inherit hostname;} // host)) hosts
+          // {
+            usb-rescue = lib.nixosSystem {
+              system = "x86_64-linux";
+              specialArgs = {inherit inputs;};
+              modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
+            };
           };
-        };
+
+        # Colmena deployment topology — derived from the same `hosts` inventory.
+        colmena =
+          {
+            meta = {
+              # Default nixpkgs; overridden per-node via nodeNixpkgs.
+              nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
+              nodeNixpkgs = lib.mapAttrs (
+                _: host: import inputs.nixpkgs {inherit (host) system;}
+              ) hosts;
+              specialArgs = {inherit inputs;};
+            };
+          }
+          // lib.mapAttrs (hostname: host: {
+            deployment = host.deployment;
+            imports = mkHostModules {inherit hostname;};
+          }) hosts;
       };
 
       perSystem = {
@@ -192,6 +231,7 @@
             config.checks.pre-commit-check.enabledPackages
             ++ [
               inputs.agenix-rekey.packages.${system}.default
+              inputs.colmena.packages.${system}.colmena
             ];
         };
       };
