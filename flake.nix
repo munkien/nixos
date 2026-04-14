@@ -51,7 +51,7 @@
       imports = [inputs.agenix-rekey.flakeModule];
 
       flake = let
-        lib = inputs.nixpkgs.lib;
+        inherit (inputs.nixpkgs) lib;
 
         # ── Users ────────────────────────────────────────────────────────────
         defaultUsers = [
@@ -149,16 +149,20 @@
             specialArgs = {inherit inputs;};
             modules = mkHostModules {inherit hostname users;};
           };
-
       in {
         # Build all managed hosts plus the rescue image.
         nixosConfigurations =
-          lib.mapAttrs (hostname: host: mkHost ({inherit hostname;} // host)) hosts
+          lib.mapAttrs (hostname: host:
+            mkHost {
+              inherit hostname;
+              inherit (host) system;
+            })
+          hosts
           // {
-            usb-rescue = lib.nixosSystem {
+            rescue = lib.nixosSystem {
               system = "x86_64-linux";
               specialArgs = {inherit inputs;};
-              modules = sharedNixosModules ++ [./hosts/usb-rescue/default.nix];
+              modules = [./hosts/rescue/default.nix];
             };
           };
 
@@ -168,16 +172,19 @@
             meta = {
               # Default nixpkgs; overridden per-node via nodeNixpkgs.
               nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
-              nodeNixpkgs = lib.mapAttrs (
-                _: host: import inputs.nixpkgs {inherit (host) system;}
-              ) hosts;
+              nodeNixpkgs =
+                lib.mapAttrs (
+                  _: host: import inputs.nixpkgs {inherit (host) system;}
+                )
+                hosts;
               specialArgs = {inherit inputs;};
             };
           }
           // lib.mapAttrs (hostname: host: {
-            deployment = host.deployment;
+            inherit (host) deployment;
             imports = mkHostModules {inherit hostname;};
-          }) hosts;
+          })
+          hosts;
       };
 
       perSystem = {
@@ -186,24 +193,6 @@
         system,
         ...
       }: {
-        apps.build-rescue = {
-          type = "app";
-          program = pkgs.lib.getExe (pkgs.writeShellApplication {
-            name = "build-rescue-iso";
-            runtimeInputs = with pkgs; [coreutils findutils nix];
-            text = ''
-              echo "Building Rescue ISO..."
-              OUT_PATH=$(nix build --print-out-paths --no-link .#nixosConfigurations.usb-rescue.config.system.build.isoImage --impure)
-              ISO_FILE=$(find "$OUT_PATH/iso" -name "*.iso" | head -n 1)
-              [ -z "$ISO_FILE" ] && echo "Error: ISO not found" && exit 1
-              mkdir -p /scratch
-              cp --reflink=auto "$ISO_FILE" /scratch/rescue-usb.iso
-              chmod 644 /scratch/rescue-usb.iso
-              echo "Success! ISO ready at /scratch/rescue-usb.iso"
-            '';
-          });
-        };
-
         checks.pre-commit-check = inputs.git-hooks.lib.${system}.run {
           src = ./.;
           hooks = {

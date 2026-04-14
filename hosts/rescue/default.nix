@@ -3,17 +3,17 @@
   modulesPath,
   ...
 }: {
-  imports = [
-    "${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
-  ];
+  image.modules.iso = {
+    imports = ["${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"];
+  };
 
-  networking.hostName = "usb-rescue-1";
+  networking.hostName = "rescue";
 
   networking.networkmanager.enable = true;
   networking.networkmanager.ensureProfiles = {
     # Read the decrypted env file from the HOST machine and bake it into the ISO
     environmentFiles = [
-      (pkgs.writeText "wifi-gl3-baked-env" (builtins.readFile "/run/agenix/wifi-gl3_env"))
+      /tmp/wifi-gl3
     ];
     profiles = {
       "GL3-5G" = {

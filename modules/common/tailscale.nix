@@ -1,4 +1,3 @@
-# modules/common/tailscale.nix
 {
   config,
   lib,
@@ -17,7 +16,7 @@
 
   # Tailscale secret — add the corresponding .age file to your secrets
   age.secrets.tailscale-authkey = {
-    rekeyFile = ../../secrets/tailscale-authkey.age;
+    rekeyFile = ../../secrets/common/tailscale.age;
     mode = "0400";
   };
 
