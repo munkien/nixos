@@ -25,6 +25,8 @@ in {
   networking.useNetworkd = false;
   services.resolved.enable = false;
 
+  boot.kernelParams = ["snd_hda_intel.power_save=0" "snd_hda_intel.power_save_controller=N"];
+
   # Services for testing
   my.containers.enable = true;
   my.services.frigate.enable = true;

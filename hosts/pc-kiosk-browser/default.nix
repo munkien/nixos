@@ -45,6 +45,34 @@ in {
     };
   };
 
+  # Allow printing
+  # Enable the CUPS service to print documents.
+  networking.firewall.allowedUDPPorts = [161];
+  services.printing = {
+    enable = true;
+    drivers = [pkgs.hplipWithPlugin];
+  };
+  hardware.sane = {
+    enable = true;
+    extraBackends = [pkgs.hplipWithPlugin];
+  };
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true; # Allows resolving .local hostnames
+    openFirewall = true; # Opens UDP port 5353
+  };
+  hardware.printers = {
+    ensurePrinters = [
+      {
+        name = "HP_Kiosk_Printer";
+        location = "Front Desk";
+        deviceUri = "hp:/net/Your_Model_Name?ip=192.168.1.XX"; # Replace with your URI
+        model = "drv:///hp/hpcups.drv/hp-officejet_pro_8710.ppd"; # Example PPD
+      }
+    ];
+    ensureDefaultPrinter = "HP_Kiosk_Printer";
+  };
+
   # Hardware: Audio and Lid Power Management
   security.rtkit.enable = true;
   services.pipewire = {

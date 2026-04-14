@@ -91,6 +91,7 @@
             system = "x86_64-linux";
             deployment.targetHost = "pc-anders";
             deployment.tags = ["workstations"];
+            deployment.allowLocalDeployment = true;
           };
           server-home-1 = {
             system = "x86_64-linux";
