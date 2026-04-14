@@ -167,7 +167,7 @@
           };
 
         # Colmena deployment topology — derived from the same `hosts` inventory.
-        colmena =
+        colmenaHive = inputs.colmena.lib.makeHive (
           {
             meta = {
               # Default nixpkgs; overridden per-node via nodeNixpkgs.
@@ -181,10 +181,11 @@
             };
           }
           // lib.mapAttrs (hostname: host: {
-            inherit (host) deployment;
+            deployment = host.deployment;
             imports = mkHostModules {inherit hostname;};
           })
-          hosts;
+          hosts
+        );
       };
 
       perSystem = {
