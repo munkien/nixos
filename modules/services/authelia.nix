@@ -1,0 +1,113 @@
+{
+  config,
+  lib,
+  ...
+}: let
+  domain = "munkie.dk";
+  appUrl = "id.lan.${domain}";
+  listenAddr = "127.0.0.1";
+  port = 9091;
+  persistDir = "/persist/services/authelia";
+in {
+  options.my.services.authelia.enable = lib.mkEnableOption "Authelia SSO";
+
+  config = lib.mkIf config.my.services.authelia.enable {
+    age.secrets = {
+      authelia-jwt-secret = {
+        rekeyFile = ../../secrets/services/authelia/jwt-secret.age;
+        owner = "authelia-main";
+        group = "authelia-main";
+        mode = "0400";
+      };
+      authelia-session-secret = {
+        rekeyFile = ../../secrets/services/authelia/session-secret.age;
+        owner = "authelia-main";
+        group = "authelia-main";
+        mode = "0400";
+      };
+      authelia-storage-encryption-key = {
+        rekeyFile = ../../secrets/services/authelia/storage-encryption-key.age;
+        owner = "authelia-main";
+        group = "authelia-main";
+        mode = "0400";
+      };
+    };
+
+    systemd.tmpfiles.rules = [
+      "d ${persistDir} 0750 authelia-main authelia-main -"
+    ];
+
+    systemd.services.authelia-main.serviceConfig = {
+      ReadWritePaths = [persistDir];
+    };
+
+    services.caddy.virtualHosts.${appUrl} = {
+      useACMEHost = domain;
+      extraConfig = "reverse_proxy ${listenAddr}:${toString port}";
+    };
+
+    services.authelia.instances.main = {
+      enable = true;
+
+      secrets = {
+        jwtSecretFile = config.age.secrets.authelia-jwt-secret.path;
+        sessionSecretFile = config.age.secrets.authelia-session-secret.path;
+        storageEncryptionKeyFile = config.age.secrets.authelia-storage-encryption-key.path;
+      };
+
+      settings = {
+        theme = "dark";
+
+        server.address = "tcp://${listenAddr}:${toString port}";
+
+        # TOTP issuer shown in authenticator apps — use the bare domain, not the URL.
+        totp.issuer = domain;
+
+        webauthn.enable_passkey_login = true;
+
+        authentication_backend = {
+          password_reset.disable = true;
+          file = {
+            path = "${persistDir}/users.yaml";
+            watch = true;
+            search.email = true;
+          };
+        };
+
+        session = {
+          cookies = [
+            {
+              inherit domain;
+              subdomain = "id.lan";
+              authelia_url = "https://${appUrl}";
+              # Allow SSO across all subdomains on the domain.
+              default_redirection_url = "https://${domain}";
+            }
+          ];
+        };
+
+        # Filesystem notifier writes emails to a file instead of sending them.
+        # Switch to an smtp notifier when email delivery is needed.
+        notifier.filesystem.filename = "${persistDir}/notifications.txt";
+
+        storage.local.path = "${persistDir}/db.sqlite3";
+
+        access_control = {
+          default_policy = "deny";
+          rules = [
+            {
+              domain = "*.lan.${domain}";
+              policy = "two_factor";
+            }
+          ];
+        };
+
+        telemetry.metrics = {
+          enabled = true;
+          # Metrics are served on port 9959 on localhost only.
+          address = "tcp://127.0.0.1:9959";
+        };
+      };
+    };
+  };
+}
