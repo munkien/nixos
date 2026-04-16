@@ -1,12 +1,4 @@
-{pkgs, ...}: let
-  users = ["munkien"];
-in {
-  home-manager.users = builtins.listToAttrs (map (u: {
-      name = u;
-      value = import ../../users/${u}/home.nix {inherit pkgs;};
-    })
-    users);
-
+_: {
   # Secrets
   age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHX8xYUGCFSnNC2LfioaQUD1E4QVzLTAcAvlOo7dB110 root@pc-anders";
 

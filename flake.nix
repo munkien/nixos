@@ -5,6 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     import-tree.url = "github:vic/import-tree";
 
@@ -182,7 +187,7 @@
             };
           }
           // lib.mapAttrs (hostname: host: {
-            deployment = host.deployment;
+            inherit (host) deployment;
             imports = mkHostModules {inherit hostname;};
           })
           hosts
@@ -215,13 +220,14 @@
             };
           };
         };
+        agenix-rekey.nodes = builtins.removeAttrs inputs.self.nixosConfigurations ["rescue"];
 
         devShells.default = pkgs.mkShell {
           inherit (config.checks.pre-commit-check) shellHook;
           buildInputs =
             config.checks.pre-commit-check.enabledPackages
             ++ [
-              inputs.agenix-rekey.packages.${system}.default
+              config.agenix-rekey.package
               inputs.colmena.packages.${system}.colmena
             ];
         };

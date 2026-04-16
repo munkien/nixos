@@ -30,7 +30,6 @@ _: {
   };
 
   programs.mosh.enable = true;
-  networking.firewall.allowedTCPPorts = [22];
   networking.firewall.allowedUDPPortRanges = [
     {
       from = 60000;

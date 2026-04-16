@@ -8,7 +8,8 @@
 in {
   age.secrets."munkien_password_hashed" = {
     file = ./password.age; # relative path, must exist
-    symlink = true;
+    symlink = false;
+    path = "/etc/age-secrets/munkien_password_hashed";
   };
 
   services.jotta-cli.enable = true;

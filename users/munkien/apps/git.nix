@@ -16,7 +16,6 @@ _: {
         rebase = true;
       };
       core.editor = "nano";
-      core.sshCommand = "ssh -i ~/.ssh/id_ed25519 -F /dev/null";
       push.autoSetupRemote = "true";
     };
   };

@@ -1,23 +1,4 @@
-{pkgs, ...}: let
-  firefox-kiosk = pkgs.symlinkJoin {
-    name = "firefox-kiosk";
-    paths = [pkgs.firefox];
-    postBuild = ''
-      CHROME=$out/lib/firefox/browser/defaults/profile/chrome
-      mkdir -p $CHROME
-      cat > $CHROME/userChrome.css <<EOF
-      .titlebar-buttonbox-container { display: none !important; }
-      .titlebar-spacer { display: none !important; }
-      EOF
-
-      PREFS=$out/lib/firefox/browser/defaults/profile
-      mkdir -p $PREFS
-      cat > $PREFS/user.js <<EOF
-      user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-      EOF
-    '';
-  };
-in {
+{pkgs, ...}: {
   my.impermanence.enable = true;
   my.autoUpgrade = {
     enable = true;
@@ -34,7 +15,26 @@ in {
   services.cage = {
     enable = true;
     user = "kiosk";
-    program = "${firefox-kiosk}/bin/firefox --private-window https://hjv.dk";
+    program = "${pkgs.firefox}/bin/firefox --private-window https://hjv.dk";
+  };
+
+  # Configure Kiosk user natively using Home Manager
+  home-manager.users.kiosk = _: {
+    home.stateVersion = "25.11"; # Match your system default
+    programs.firefox = {
+      enable = true;
+      profiles.kiosk = {
+        id = 0;
+        isDefault = true;
+        settings = {
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        };
+        userChrome = ''
+          .titlebar-buttonbox-container { display: none !important; }
+          .titlebar-spacer { display: none !important; }
+        '';
+      };
+    };
   };
 
   # Restart Cage (and Firefox) if it ever exits

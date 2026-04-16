@@ -53,7 +53,6 @@
 
     environment.systemPackages = with pkgs; [
       protonup-qt
-      gamescope
       faudio
       protontricks
       steam-run

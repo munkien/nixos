@@ -1,16 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: let
-  users = ["munkien"];
-in {
-  home-manager.users = builtins.listToAttrs (map (u: {
-      name = u;
-      value = import ../../users/${u}/home.nix {inherit pkgs;};
-    })
-    users);
-
+{lib, ...}: {
   # Bootloader override
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
@@ -25,6 +13,9 @@ in {
     enable = true;
     flake = "github:munkien/nixos#server-datalix-1";
   };
+
+  # SSH allow root login
+  services.openssh.settings.PermitRootLogin = lib.mkForce "yes";
 
   # Sleep and hibernation
   systemd.targets.sleep.enable = false;

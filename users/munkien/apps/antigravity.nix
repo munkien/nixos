@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   home.packages = with pkgs; [
     alejandra
     nixd
@@ -8,7 +12,6 @@
 
   programs.vscode = {
     enable = true;
-    package = pkgs.vscodium;
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         jnoortheen.nix-ide
@@ -31,10 +34,10 @@
 
         "nix.serverSettings" = {
           nixd = {
-            formatting.command = [ "${pkgs.alejandra}/bin/alejandra" ];
+            formatting.command = ["${pkgs.alejandra}/bin/alejandra"];
             options = {
-              nixos."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options";
-              home-manager."expr" = "(builtins.getFlake \"path:/home/munkien/nixos\").nixosConfigurations.pc-anders.options.home-manager.users.type.functor.wrapped";
+              nixos."expr" = "(builtins.getFlake \"${config.home.homeDirectory}/nixos\").nixosConfigurations.pc-anders.options";
+              home-manager."expr" = "(builtins.getFlake \"${config.home.homeDirectory}/nixos\").nixosConfigurations.pc-anders.options.home-manager.users.type.functor.wrapped";
             };
           };
         };

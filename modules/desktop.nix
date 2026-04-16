@@ -28,7 +28,14 @@
       alsa.support32Bit = true;
       pulse.enable = true;
       wireplumber.enable = true;
+      extraConfig.pipewire."92-low-latency" = {
+        "context.properties" = {
+          "default.clock.rate" = 48000;
+          "default.clock.quantum" = 1024; # Increase to 2048 if scratches persist
+          "default.clock.min-quantum" = 512;
+          "default.clock.max-quantum" = 2048;
+        };
+      };
     };
-    services.pulseaudio.enable = false;
   };
 }

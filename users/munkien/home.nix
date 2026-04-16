@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     ./plasma.nix
 
@@ -8,7 +12,7 @@
     ./apps/thunderbird.nix
     ./apps/quickemu.nix
     ./apps/gaming.nix
-    ./apps/vscodium.nix
+    ./apps/antigravity.nix
     ./apps/irssi.nix
   ];
 
@@ -75,7 +79,9 @@
     localsend
 
     # Programming
+    inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs
     alejandra # your formatter of choice
+    nixd # your language server
     bat # your cat replacement
     deadnix # your nix linting workflow
     eza # your ls replacement
