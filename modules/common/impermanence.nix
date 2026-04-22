@@ -9,14 +9,17 @@
     persistPath = lib.mkOption {
       type = lib.types.str;
       default = "/persist";
+      description = "Path used for persistent storage when impermanence is enabled.";
     };
     extraDirs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
+      description = "Additional directories that should be made persistent under the impermanence root.";
     };
     extraFiles = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
+      description = "Additional files that should be made persistent under the impermanence root.";
     };
   };
 

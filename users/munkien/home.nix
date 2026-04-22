@@ -70,8 +70,12 @@
     vlc
     mpv
 
-    # Audio
-    easyeffects
+    # Video editing
+    kdePackages.kdenlive
+    glaxnimate
+    mediainfo
+    handbrake
+    ffmpeg-full
 
     # Remote Desktop / access
     moonlight-qt

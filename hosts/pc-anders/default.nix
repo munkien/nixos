@@ -12,6 +12,7 @@ _: {
     flake = "github:munkien/nixos#pc-anders";
   };
   my.gaming.enable = true;
+  nixpkgs.config.allowUnfree = true;
 
   networking.networkmanager.enable = true;
   networking.useNetworkd = false;
@@ -20,8 +21,11 @@ _: {
   boot.kernelParams = ["snd_hda_intel.power_save=0" "snd_hda_intel.power_save_controller=N"];
 
   # Services for testing
-  my.containers.enable = true;
-  my.services.frigate.enable = true;
+  my.containers.enable = false;
+  my.services.acme.enable = false;
+  my.services.frigate.enable = false;
+  my.services.ntopng.enable = false;
+  my.services.caddy.enable = false;
 
   # Allow ventoy..
   nixpkgs.config.permittedInsecurePackages = [

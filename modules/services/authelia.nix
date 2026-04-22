@@ -7,7 +7,10 @@
   appUrl = "id.lan.${domain}";
   listenAddr = "127.0.0.1";
   port = 9091;
-  persistDir = "/persist/services/authelia";
+  persistDir =
+    if config.my.impermanence.enable
+    then "${config.my.impermanence.persistPath}/services/authelia"
+    else "/var/lib/authelia";
 in {
   options.my.services.authelia.enable = lib.mkEnableOption "Authelia SSO";
 

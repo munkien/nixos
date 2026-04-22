@@ -10,6 +10,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     import-tree.url = "github:vic/import-tree";
 
@@ -81,6 +86,7 @@
           impermanence.nixosModules.impermanence
           disko.nixosModules.disko
           quadlet-nix.nixosModules.quadlet
+          nix-index-database.nixosModules.nix-index
         ];
 
         sharedHomeModules = with inputs; [

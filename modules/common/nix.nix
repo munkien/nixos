@@ -18,7 +18,10 @@ _: {
 
   nixpkgs.config.allowUnfree = true;
   programs.nix-ld.enable = true;
+
   programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
+
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;

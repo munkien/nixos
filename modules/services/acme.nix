@@ -4,7 +4,7 @@
   ...
 }: let
   domain = "munkie.dk";
-  persistDir = "/persist/services/acme";
+  persistDir = "${config.my.impermanence.persistPath}/services/acme";
 in {
   options.my.services.acme.enable = lib.mkEnableOption "ACME certificate management";
 
@@ -16,15 +16,18 @@ in {
       mode = "0400";
     };
 
-    systemd.tmpfiles.rules = [
-      "d ${persistDir} 0750 acme acme -"
-    ];
+    systemd.tmpfiles.rules =
+      lib.optional config.my.impermanence.enable
+      "d ${persistDir} 0750 acme acme -";
 
     # Bind-mount the persist directory over the ephemeral /var/lib/acme so
     # certificates survive reboots on impermanence setups.
-    fileSystems."/var/lib/acme" = {
-      device = persistDir;
-      options = ["bind" "nofail"];
+    fileSystems = lib.optionalAttrs config.my.impermanence.enable {
+      "/var/lib/acme" = {
+        device = persistDir;
+        fsType = "none";
+        options = ["bind" "nofail"];
+      };
     };
 
     security.acme = {
@@ -35,7 +38,6 @@ in {
         group = "acme";
         environmentFile = config.age.secrets.acme-env.path;
         dnsProvider = "cloudflare";
-        # Wait for DNS propagation before completing the challenge (default: true).
         dnsPropagationCheck = true;
       };
 
@@ -46,8 +48,6 @@ in {
           "*.lan.${domain}"
         ];
 
-        # Reload services after certificate renewal so they pick up the new cert.
-        # Quadlet containers are managed as podman-<name>.service.
         reloadServices = [
           "caddy.service"
           "podman-frigate.service"

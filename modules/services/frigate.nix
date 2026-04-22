@@ -8,7 +8,10 @@
   domain = "munkie.dk";
   appUrl = "frigate.lan.${domain}";
   authUrl = "id.lan.${domain}";
-  persistDir = "/persist/services/frigate";
+  persistDir =
+    if config.my.impermanence.enable
+    then "${config.my.impermanence.persistPath}/services/frigate"
+    else "/var/lib/frigate";
 
   frigateConfig = {
     database.path = "/config/db/frigate.db";
@@ -21,17 +24,16 @@
 
     record = {
       enabled = true;
-      retain = {
-        days = 3;
-        mode = "all";
-      };
-    };
 
-    review = {
+      continuous = {
+        days = 3;
+      };
+
       alerts.retain = {
         days = 30;
         mode = "motion";
       };
+
       detections.retain = {
         days = 7;
         mode = "motion";
@@ -47,22 +49,27 @@
       labelmap_path = "/openvino-model/coco_91cl_bkgr.txt";
     };
 
+    go2rtc = {
+      streams = {
+        driveway = "rtsp://camera-driveway.home.arpa:554/user=admin_password={FRIGATE_CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+        south = "rtsp://camera-south.home.arpa:554/user=admin_password={FRIGATE_CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+      };
+    };
+
     cameras = {
       driveway = {
-        # Password is injected at runtime via CAMERA_DRIVEWAY_PASSWORD env var from the secret file.
         ffmpeg.inputs = [
           {
-            path = "rtsp://192.168.0.201:554/user=admin_password={CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+            path = "rtsp://camera-driveway.home.arpa:554/user=admin_password={FRIGATE_CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
             roles = ["detect" "record"];
           }
         ];
         detect.enabled = true;
       };
       south = {
-        # Password is injected at runtime via CAMERA_SOUTH_PASSWORD env var from the secret file.
         ffmpeg.inputs = [
           {
-            path = "rtsp://192.168.0.200:554/user=admin_password={CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+            path = "rtsp://camera-south.home.arpa:554/user=admin_password={FRIGATE_CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
             roles = ["detect" "record"];
           }
         ];

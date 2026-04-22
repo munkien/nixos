@@ -36,7 +36,7 @@
           name = "org.kde.plasma.icontasks";
           config.General.launchers = [
             "applications:org.kde.dolphin.desktop"
-            "applications:codium.desktop"
+            "applications:code.desktop"
             "applications:kitty.desktop"
             "applications:firefox.desktop"
           ];
@@ -204,6 +204,7 @@ in {
     steam = mkDelayedStart "Steam" 5 "${pkgs.steam}/bin/steam -silent";
     spotify = mkDelayedStart "Spotify" 10 "${pkgs.spotify}/bin/spotify";
     discord = mkDelayedStart "Discord" 15 "${pkgs.discord}/bin/discord";
+    heroic = mkDelayedStart "Heroic" 15 "${pkgs.heroic}/bin/heroic";
   };
 
   # Wipe cache on boot
