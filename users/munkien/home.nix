@@ -14,6 +14,8 @@
     ./apps/gaming.nix
     ./apps/antigravity.nix
     ./apps/irssi.nix
+    ./apps/media.nix
+    ./apps/productivity.nix
   ];
 
   # Home Manager setup
@@ -59,23 +61,6 @@
     # ISO writer to USB
     woeusb-ng
     #ventoy
-
-    # Privacy
-    tor-browser
-
-    # Media & Socials
-    discord
-    spotify
-    libreoffice-qt-fresh
-    vlc
-    mpv
-
-    # Video editing
-    kdePackages.kdenlive
-    glaxnimate
-    mediainfo
-    handbrake
-    ffmpeg-full
 
     # Remote Desktop / access
     moonlight-qt

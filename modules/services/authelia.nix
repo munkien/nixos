@@ -1,47 +1,56 @@
 {
   config,
   lib,
+  inputs,
   ...
 }: let
   domain = "munkie.dk";
   appUrl = "id.lan.${domain}";
   listenAddr = "127.0.0.1";
   port = 9091;
-  persistDir =
-    if config.my.impermanence.enable
-    then "${config.my.impermanence.persistPath}/services/authelia"
-    else "/var/lib/authelia";
+  persistDir = "${config.my.impermanence.persistPath}/services/authelia";
 in {
   options.my.services.authelia.enable = lib.mkEnableOption "Authelia SSO";
 
   config = lib.mkIf config.my.services.authelia.enable {
+    assertions = [
+      {
+        assertion = config.services.caddy.enable or false;
+        message = "Authelia requires Caddy to be enabled.";
+      }
+    ];
+
     age.secrets = {
       authelia-jwt-secret = {
-        rekeyFile = ../../secrets/services/authelia/jwt-secret.age;
+        rekeyFile = inputs.self + "/secrets/services/authelia/jwt-secret.age";
         owner = "authelia-main";
         group = "authelia-main";
         mode = "0400";
       };
       authelia-session-secret = {
-        rekeyFile = ../../secrets/services/authelia/session-secret.age;
+        rekeyFile = inputs.self + "/secrets/services/authelia/session-secret.age";
         owner = "authelia-main";
         group = "authelia-main";
         mode = "0400";
       };
       authelia-storage-encryption-key = {
-        rekeyFile = ../../secrets/services/authelia/storage-encryption-key.age;
+        rekeyFile = inputs.self + "/secrets/services/authelia/storage-encryption-key.age";
         owner = "authelia-main";
         group = "authelia-main";
         mode = "0400";
       };
     };
 
-    systemd.tmpfiles.rules = [
-      "d ${persistDir} 0750 authelia-main authelia-main -"
-    ];
+    systemd.tmpfiles.rules =
+      lib.optional config.my.impermanence.enable
+      "d ${persistDir} 0750 authelia-main authelia-main -";
 
-    systemd.services.authelia-main.serviceConfig = {
-      ReadWritePaths = [persistDir];
+    fileSystems = lib.optionalAttrs config.my.impermanence.enable {
+      "/var/lib/authelia-main" = {
+        device = persistDir;
+        fsType = "none";
+        options = ["bind" "nofail"];
+      };
     };
 
     services.caddy.virtualHosts.${appUrl} = {
@@ -71,7 +80,7 @@ in {
         authentication_backend = {
           password_reset.disable = true;
           file = {
-            path = "${persistDir}/users.yaml";
+            path = "/var/lib/authelia-main/users.yaml";
             watch = true;
             search.email = true;
           };
@@ -91,9 +100,9 @@ in {
 
         # Filesystem notifier writes emails to a file instead of sending them.
         # Switch to an smtp notifier when email delivery is needed.
-        notifier.filesystem.filename = "${persistDir}/notifications.txt";
+        notifier.filesystem.filename = "/var/lib/authelia-main/notifications.txt";
 
-        storage.local.path = "${persistDir}/db.sqlite3";
+        storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
         access_control = {
           default_policy = "deny";

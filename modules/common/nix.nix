@@ -1,4 +1,11 @@
-_: {
+{ config, lib, ... }: {
+  options.my.flakeDir = lib.mkOption {
+    type = lib.types.str;
+    default = "/home/munkien/nixos";
+    description = "Path to the system flake directory";
+  };
+
+  config = {
   nix.settings = {
     keep-outputs = true;
     keep-derivations = true;
@@ -27,11 +34,12 @@ _: {
     nix-direnv.enable = true;
   };
 
-  programs.nh = {
-    enable = true;
-    clean.enable = true;
-    clean.dates = "daily";
-    clean.extraArgs = "--keep-since 30d --keep 10";
-    flake = "/home/munkien/nixos"; # worth making this an option
+    programs.nh = {
+      enable = true;
+      clean.enable = true;
+      clean.dates = "daily";
+      clean.extraArgs = "--keep-since 30d --keep 10";
+      flake = config.my.flakeDir;
+    };
   };
 }

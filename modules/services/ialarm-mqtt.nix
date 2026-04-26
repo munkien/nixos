@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  inputs,
   ...
 }: let
   common = import ./_base-quadlet.nix {inherit lib config;};
@@ -12,7 +13,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     age.secrets."ialarm-config" = {
-      rekeyFile = ../../secrets/services/ialarm/ialarm.age;
+      rekeyFile = inputs.self + "/secrets/services/ialarm/ialarm.age";
       owner = "root";
       group = "root";
       mode = "0400";

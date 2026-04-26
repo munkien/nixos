@@ -1,15 +1,20 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }: {
   options.my.desktop = {
     enable = lib.mkEnableOption "activate a desktop manager with audio";
   };
   config = lib.mkIf config.my.desktop.enable {
+    environment.systemPackages = [pkgs.tokyo-night-sddm];
+
     services.displayManager.sddm = {
       enable = true;
       autoNumlock = true;
+      wayland.enable = true;
+      theme = "tokyo-night-sddm";
     };
     services.desktopManager.plasma6.enable = true;
     services.xserver = {

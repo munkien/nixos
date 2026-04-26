@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  inputs,
   ...
 }: let
   domain = "munkie.dk";
@@ -10,7 +11,7 @@ in {
 
   config = lib.mkIf config.my.services.acme.enable {
     age.secrets.acme-env = {
-      rekeyFile = ../../secrets/services/acme/env.age;
+      rekeyFile = inputs.self + "/secrets/services/acme/env.age";
       owner = "acme";
       group = "acme";
       mode = "0400";

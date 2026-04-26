@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: let
   common = import ./_base-quadlet.nix {inherit lib config;};
@@ -84,8 +85,15 @@ in {
   options.my.services.frigate.enable = lib.mkEnableOption "Frigate NVR";
 
   config = lib.mkIf config.my.services.frigate.enable {
+    assertions = [
+      {
+        assertion = config.services.caddy.enable or false;
+        message = "Frigate requires Caddy to be enabled.";
+      }
+    ];
+
     age.secrets.frigate-env = {
-      rekeyFile = ../../secrets/services/frigate/env.age;
+      rekeyFile = inputs.self + "/secrets/services/frigate/env.age";
       owner = "root";
       mode = "0400";
     };
