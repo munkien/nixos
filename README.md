@@ -64,3 +64,5 @@ cp result/iso/*.iso .
 - **Secrets**: Always use `inputs.self + "/secrets/..."` for `rekeyFile` to ensure paths don't break when modules are imported from different directories.
 - **Impermanence**: When creating state directories for services, prefer using systemd's `StateDirectory` combined with `fileSystems` bind mounts from the persist path (e.g., `${config.my.impermanence.persistPath}/services/<name>`) over `tmpfiles.rules` where possible.
 - **Packages**: User GUI packages are logically grouped in `users/munkien/apps/*.nix`.
+
+- Flakes: Always run "git add ." when adding new files to the repository

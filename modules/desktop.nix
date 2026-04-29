@@ -2,13 +2,24 @@
   lib,
   config,
   pkgs,
+  inputs,
   ...
 }: {
   options.my.desktop = {
     enable = lib.mkEnableOption "activate a desktop manager with audio";
   };
   config = lib.mkIf config.my.desktop.enable {
-    environment.systemPackages = [pkgs.tokyo-night-sddm];
+    environment.systemPackages = [
+      (pkgs.stdenvNoCC.mkDerivation {
+        name = "tokyo-night-sddm";
+        src = inputs.tokyo-night-sddm;
+        dontBuild = true;
+        installPhase = ''
+          mkdir -p $out/share/sddm/themes/tokyo-night-sddm
+          cp -r . $out/share/sddm/themes/tokyo-night-sddm/
+        '';
+      })
+    ];
 
     services.displayManager.sddm = {
       enable = true;

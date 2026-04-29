@@ -1,6 +1,11 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   programs.firefox = {
     enable = true;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
     policies = {
       DisplayBookmarksToolbar = "always";
       DisableMasterPasswordCreation = true;

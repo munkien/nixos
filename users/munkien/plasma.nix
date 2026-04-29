@@ -92,6 +92,7 @@ in {
     workspace = {
       lookAndFeel = "org.kde.breezedark.desktop"; # Use standard Breeze as base
       colorScheme = "TokyoNight"; # Apply our extracted colors
+      splashScreen.theme = "Breeze Dark"; # Dark splash screen to match Tokyo Night
       iconTheme = "Papirus-Dark"; # Matches dark themes perfectly
       cursor.theme = "Bibata-Modern-Ice"; # Matches the Tokyo Night blue/white text
       wallpaper = ./default-wallpaper.jpg;

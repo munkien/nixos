@@ -53,6 +53,10 @@
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     impermanence.url = "github:nix-community/impermanence";
+    tokyo-night-sddm = {
+      url = "github:siddrs/tokyo-night-sddm";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {flake-parts, ...}:

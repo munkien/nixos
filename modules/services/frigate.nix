@@ -54,6 +54,8 @@
       streams = {
         driveway = "rtsp://camera-driveway.home.arpa:554/user=admin_password={FRIGATE_CAMERA_DRIVEWAY_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
         south = "rtsp://camera-south.home.arpa:554/user=admin_password={FRIGATE_CAMERA_SOUTH_PASSWORD}_channel=0_stream=0&onvif=0.sdp?real_stream";
+        "attic_main" = "rtsp://admin:admin@192.168.88.244:554/user=bsha_password=SbuehjeE_channel=0_stream=0&onvif=0.sdp?real_stream";
+        "attic_sub" = "rtsp://admin:admin@192.168.88.244:554/user=bsha_password=SbuehjeE_channel=0_stream=1&onvif=0.sdp?real_stream";
       };
     };
 
@@ -75,6 +77,20 @@
           }
         ];
         detect.enabled = true;
+      };
+      attic = {
+        ffmpeg.inputs = [
+          {
+            path = "rtsp://127.0.0.1:8554/attic_sub";
+            input_args = "preset-rtsp-restream";
+            roles = ["detect"];
+          }
+          {
+            path = "rtsp://127.0.0.1:8554/attic_main";
+            input_args = "preset-rtsp-restream";
+            roles = ["record"];
+          }
+        ];
       };
     };
   };
