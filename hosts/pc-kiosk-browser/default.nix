@@ -1,4 +1,5 @@
 {pkgs, ...}: {
+  my.profiles.desktop.enable = true;
   my.impermanence.enable = true;
   my.autoUpgrade = {
     enable = true;

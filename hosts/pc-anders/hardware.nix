@@ -29,6 +29,8 @@
     "nvme.max_host_mem_size_mb=64"
     "pcie_aspm=off"
     "usbcore.autosuspend=-1"
+    "snd_hda_intel.power_save=0"
+    "snd_hda_intel.power_save_controller=N"
   ];
 
   boot.kernel.sysctl = {

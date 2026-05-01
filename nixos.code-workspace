@@ -27,6 +27,16 @@
 					}
 				}
 			}
+		},
+		"chat.tools.terminal.autoApprove": {
+			"/^git status --short && nix flake show$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^nix flake check --no-build --show-trace$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
 		}
 	}
 }

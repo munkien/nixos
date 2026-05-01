@@ -23,10 +23,7 @@
       (lib.attrNames (builtins.readDir ../../config/homeassistant)));
 
   importedFragments =
-    map (
-      fragment:
-        import fragment
-    )
+    map import
     homeassistantFragments;
 
   homeassistantConfig =

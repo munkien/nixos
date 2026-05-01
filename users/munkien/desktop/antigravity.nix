@@ -1,5 +1,6 @@
 {
   pkgs,
+  inputs,
   config,
   ...
 }: {
@@ -8,6 +9,7 @@
     nixd
     direnv
     gh
+    inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs
   ];
 
   programs.vscode = {

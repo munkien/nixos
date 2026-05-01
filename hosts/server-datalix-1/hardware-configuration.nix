@@ -2,9 +2,7 @@
 # and may be overwritten by future invocations.  Please make changes
 # to /etc/nixos/configuration.nix instead.
 {
-  config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -17,11 +15,23 @@
   boot.kernelModules = [];
   boot.extraModulePackages = [];
 
+  ##########
+  # Impermanence
+  #########
   fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=755"];
+    neededForBoot = true;
+  };
+  fileSystems."/nix" = {
     device = "/dev/disk/by-uuid/91de1bf8-e8ce-4c3b-a22a-9ba38dee9d66";
     fsType = "ext4";
   };
-
+  fileSystems."/persist" = {
+    device = "/dev/disk/by-uuid/91de1bf8-e8ce-4c3b-a22a-9ba38dee9d66";
+    fsType = "ext4";
+  };
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/91de1bf8-e8ce-4c3b-a22a-9ba38dee9d66";
     fsType = "ext4";
