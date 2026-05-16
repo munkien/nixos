@@ -5,7 +5,6 @@
 }: let
   bootUuid = "C1A0-38E8";
   sysUuid = "69147e59-47cc-40a0-8f7d-6da287866591";
-  # Da bcachefs enheden refereres flere steder
   bcachefs_device = "/dev/disk/by-uuid/${sysUuid}";
 in {
   boot.supportedFilesystems = ["bcachefs"];
@@ -73,6 +72,7 @@ in {
     device = "none";
     fsType = "tmpfs";
     options = ["defaults" "size=4G" "mode=755"];
+    neededForBoot = true;
   };
 
   ##########
@@ -86,7 +86,7 @@ in {
       POOL="/mnt/bcachefs"
 
       # Opret mapperne hvis de ikke findes på bcachefs
-      mkdir -p $POOL/{nix,persist,log}
+      mkdir -p $POOL/nix $POOL/persist $POOL/log
 
       # Sæt globale indstillinger for filsystemet
       $TOOL set-fs-option \

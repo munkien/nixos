@@ -9,7 +9,12 @@
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.initrd.systemd.enable = lib.mkForce false;
+  age.rekey.hostPubkey = "PASTE_YOUR_HOST_PUBKEY_HERE"; # Run: cat /etc/ssh/ssh_host_ed25519_key.pub on the machine
+
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    mkdir -p /mnt-root/etc
+    touch /mnt-root/etc/machine-id
+  '';
 
   # Options
   my.impermanence.enable = true;
