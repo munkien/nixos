@@ -1,4 +1,9 @@
 {pkgs, ...}: {
+  imports = [
+    ./filesystem.nix
+    ./hardware-configuration.nix
+  ];
+
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Options
