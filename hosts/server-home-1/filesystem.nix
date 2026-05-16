@@ -58,10 +58,4 @@ in {
     fsType = "bcachefs";
     options = ["defaults" "subvol=media" "nofail"];
   };
-
-  # Da root er tmpfs, skal vi sikre at et machine-id kan genereres.
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    mkdir -p /mnt-root/etc
-    touch /mnt-root/etc/machine-id
-  '';
 }
