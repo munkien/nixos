@@ -9,6 +9,7 @@
   bcachefs_device = "/dev/disk/by-uuid/${sysUuid}";
 in {
   boot.supportedFilesystems = ["bcachefs"];
+  boot.initrd.supportedFilesystems = ["bcachefs"];
 
   ##########
   # BOOT (EFI)
@@ -43,7 +44,7 @@ in {
   # BCACHEFS BIND MOUNTS (Subvolumes/Mapper)
   ##########
   fileSystems."/nix" = {
-    device = "/mnt/bcachefs/nix"; # Bemærk: ingen @ hvis du ikke har omdøbt dem
+    device = "/mnt/bcachefs/nix";
     fsType = "none";
     options = ["bind"];
     neededForBoot = true;
@@ -62,7 +63,6 @@ in {
     device = "/mnt/bcachefs/log";
     fsType = "none";
     options = ["bind"];
-    neededForBoot = true;
     depends = ["/mnt/bcachefs"];
   };
 
@@ -72,8 +72,7 @@ in {
   fileSystems."/" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=2G" "mode=755"];
-    neededForBoot = true;
+    options = ["defaults" "size=4G" "mode=755"];
   };
 
   ##########
