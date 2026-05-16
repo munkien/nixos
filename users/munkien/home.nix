@@ -9,7 +9,7 @@
   home = {
     username = "munkien";
     homeDirectory = "/home/munkien";
-    stateVersion = "24.11";
+    stateVersion = "26.05";
   };
 
   programs.home-manager.enable = true;
@@ -26,9 +26,9 @@
       ./common/terminal.nix
     ]
     ++ lib.optionals hostConfig.profiles.desktop.enable [
-      # These files are completely ignored on headless servers
       ./desktop/antigravity.nix
       ./desktop/firefox.nix
+      ./desktop/logitech.nix
       ./desktop/irssi.nix
       ./desktop/media.nix
       ./desktop/plasma.nix
@@ -48,6 +48,7 @@
       bat
       deadnix
       eza
+      kdePackages.kio-extras
       statix
       treefmt
       pre-commit
@@ -64,5 +65,8 @@
       rustdesk
       localsend
       freerdp
+      zenmap
+      podman-desktop
+      pods
     ];
 }

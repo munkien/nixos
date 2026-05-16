@@ -8,7 +8,6 @@ lib.mkIf config.my.profiles.desktop.enable {
     enable = true;
     autoNumlock = true;
     wayland.enable = true;
-    theme = "dark-matter-sddm";
   };
   services.desktopManager.plasma6.enable = true;
   services.xserver = {

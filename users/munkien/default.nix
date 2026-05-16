@@ -17,8 +17,26 @@ in {
 
   # Open ports
   networking.firewall = {
-    allowedTCPPorts = [53317]; # LocalSend
-    allowedUDPPorts = [53317]; # LocalSend
+    enable = true;
+
+    allowedTCPPorts = [
+      53317 # LocalSend
+      8043 # Omada Web UI
+      8088 # Omada HTTP Portal
+      8843 # Omada HTTPS Portal
+      29811
+      29812
+      29813
+      29814
+      29815
+      29816 # Omada Management & Discovery
+      29817 # Omada Controller Telemetry
+    ];
+
+    allowedUDPPorts = [
+      53317 # LocalSend
+      29810 # Omada Discovery
+    ];
   };
 
   users.users.munkien = {

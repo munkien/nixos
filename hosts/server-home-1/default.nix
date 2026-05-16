@@ -1,4 +1,6 @@
-_: {
+{pkgs}: {
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   # Options
   my.impermanence.enable = true;
   my.autoUpgrade = {

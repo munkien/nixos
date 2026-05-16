@@ -24,6 +24,14 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/plasma-integration/latest.xpi";
           installation_mode = "force_installed";
         };
+        "sponsorBlocker@ajay.app" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
+          installation_mode = "force_installed";
+        };
+        "dearrow@ajay.app" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/dearrow/latest.xpi";
+          installation_mode = "force_installed";
+        };
       };
     };
 
@@ -34,6 +42,11 @@
       name = "munkien";
       id = 0;
       path = "munkien";
+
+      settings = {
+        "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+        "widget.use-xdg-desktop-portal.file-picker" = 1;
+      };
 
       search = {
         force = true;
@@ -71,6 +84,17 @@
             ];
           }
           {
+            name = "Gaming";
+            toolbar = true;
+            bookmarks = [
+              {
+                name = "Stardew Valley Expanded Wiki";
+                url = "https://stardewvalleyexpanded.wiki.gg/";
+                tags = ["gaming" "wiki"];
+              }
+            ];
+          }
+          {
             name = "Entertainment";
             toolbar = true;
             bookmarks = [
@@ -79,6 +103,12 @@
                 url = "https://youtube.com/";
                 tags = ["entertainment"];
               }
+            ];
+          }
+          {
+            name = "Development";
+            toolbar = true;
+            bookmarks = [
               {
                 name = "NixOS Search";
                 url = "https://search.nixos.org/packages";

@@ -9,12 +9,10 @@ _: {
       format = "ssh";
     };
 
-    extraConfig = {
+    settings = {
       gpg.format = "ssh";
       commit.gpgsign = true;
       user.signingkey = "~/.ssh/id_ed25519.pub";
-    };
-    settings = {
       url."git@github.com:".insteadOf = "https://github.com/";
       user = {
         name = "munkien";

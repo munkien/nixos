@@ -1,13 +1,18 @@
-_: let
+{lib, ...}: let
   bootUuid = "52A2-1526";
   sysUuid = "b8005c52-43ec-490a-9dde-328c7d617a61";
   storageVideoUuid = "d8d0ee41-7dc0-4fa7-ae8d-934f7549e186";
 in {
-  services.btrfs.autoScrub = {
-    enable = true;
-    interval = "weekly";
-    fileSystems = [
-      "/"
+  # Sikrer at bcachefs-tools er tilgængelige
+  boot.supportedFilesystems = ["bcachefs"];
+
+  # Impermanent Root på RAM (tmpfs)
+  fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = [
+      "size=2G"
+      "mode=755"
     ];
   };
 
@@ -21,75 +26,42 @@ in {
     neededForBoot = true;
   };
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=root"
-      "compress=zstd"
-      "noatime"
-      "discard=async"
-    ];
-    neededForBoot = true;
-  };
-
-  fileSystems."/etc/nixos" = {
-    device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=nixos"
-      "compress=zstd"
-      "noatime"
-      "discard=async"
-    ];
-    neededForBoot = true;
-  };
-
+  # Persistent Nix Store på bcachefs
   fileSystems."/nix" = {
     device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=nix"
-      "compress=zstd"
-      "noatime"
-      "discard=async"
-    ];
+    fsType = "bcachefs";
+    # På bcachefs monterer vi subvolumes via 'subvol=' i options,
+    # ligesom btrfs, forudsat de er oprettet korrekt.
+    options = ["defaults" "subvol=nix"];
     neededForBoot = true;
   };
 
+  # Persistent Data
   fileSystems."/persist" = {
     device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=persist"
-      "compress=zstd"
-      "noatime"
-      "discard=async"
-    ];
+    fsType = "bcachefs";
+    options = ["defaults" "subvol=persist"];
     neededForBoot = true;
   };
 
+  # Logs
   fileSystems."/var/log" = {
     device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=log"
-      "compress=zstd"
-      "noatime"
-    ];
+    fsType = "bcachefs";
+    options = ["defaults" "subvol=log"];
     neededForBoot = true;
   };
 
+  # Storage disk (Hvis denne disk er bcachefs, ellers ret fsType tilbage til btrfs)
   fileSystems."/mnt/media" = {
     device = "/dev/disk/by-uuid/${storageVideoUuid}";
-    fsType = "btrfs";
-    options = [
-      "subvol=media"
-      "noatime"
-      "nodiscard"
-      "compress=none"
-      "nodatacow"
-      "nofail"
-    ];
+    fsType = "bcachefs";
+    options = ["defaults" "subvol=media" "nofail"];
   };
+
+  # Da root er tmpfs, skal vi sikre at et machine-id kan genereres.
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    mkdir -p /mnt-root/etc
+    touch /mnt-root/etc/machine-id
+  '';
 }
