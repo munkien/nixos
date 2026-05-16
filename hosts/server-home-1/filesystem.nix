@@ -1,61 +1,100 @@
-{lib, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   bootUuid = "C1A0-38E8";
   sysUuid = "69147e59-47cc-40a0-8f7d-6da287866591";
-  storageVideoUuid = "d8d0ee41-7dc0-4fa7-ae8d-934f7549e186";
+  # Da bcachefs enheden refereres flere steder
+  bcachefs_device = "/dev/disk/by-uuid/${sysUuid}";
 in {
-  # Sikrer at bcachefs-tools er tilgængelige
   boot.supportedFilesystems = ["bcachefs"];
 
-  # Impermanent Root på RAM (tmpfs)
-  fileSystems."/" = {
-    device = "none";
-    fsType = "tmpfs";
-    options = [
-      "size=2G"
-      "mode=755"
-    ];
-  };
-
+  ##########
+  # BOOT (EFI)
+  ##########
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/${bootUuid}";
     fsType = "vfat";
+    options = ["fmask=0077" "dmask=0077"];
+    neededForBoot = true;
+  };
+
+  ##########
+  # BCACHEFS MASTER MOUNT (Poolen)
+  ##########
+  # Vi mounter selve partitionen ét sted først.
+  fileSystems."/mnt/bcachefs" = {
+    device = bcachefs_device;
+    fsType = "bcachefs";
     options = [
-      "fmask=0077"
-      "dmask=0077"
+      "defaults"
+      "noatime"
+      "discard"
     ];
     neededForBoot = true;
   };
 
-  # Persistent Nix Store på bcachefs
+  # Aktiver automatisk scrub af dit bcachefs pool
+  services.bcachefs.autoScrub.fileSystems = ["/mnt/bcachefs"];
+  services.bcachefs.autoScrub.interval = "weekly";
+
+  ##########
+  # BCACHEFS BIND MOUNTS (Subvolumes/Mapper)
+  ##########
   fileSystems."/nix" = {
-    device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "bcachefs";
-    # På bcachefs monterer vi subvolumes via 'subvol=' i options,
-    # ligesom btrfs, forudsat de er oprettet korrekt.
-    options = ["defaults" "subvol=nix"];
+    device = "/mnt/bcachefs/nix"; # Bemærk: ingen @ hvis du ikke har omdøbt dem
+    fsType = "none";
+    options = ["bind"];
     neededForBoot = true;
+    depends = ["/mnt/bcachefs"];
   };
 
-  # Persistent Data
   fileSystems."/persist" = {
-    device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "bcachefs";
-    options = ["defaults" "subvol=persist"];
+    device = "/mnt/bcachefs/persist";
+    fsType = "none";
+    options = ["bind"];
     neededForBoot = true;
+    depends = ["/mnt/bcachefs"];
   };
 
-  # Logs
   fileSystems."/var/log" = {
-    device = "/dev/disk/by-uuid/${sysUuid}";
-    fsType = "bcachefs";
-    options = ["defaults" "subvol=log"];
+    device = "/mnt/bcachefs/log";
+    fsType = "none";
+    options = ["bind"];
+    neededForBoot = true;
+    depends = ["/mnt/bcachefs"];
+  };
+
+  ##########
+  # IMPERMANENCE (RAM disk)
+  ##########
+  fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=2G" "mode=755"];
     neededForBoot = true;
   };
 
-  # Storage disk (Hvis denne disk er bcachefs, ellers ret fsType tilbage til btrfs)
-  fileSystems."/mnt/media" = {
-    device = "/dev/disk/by-uuid/${storageVideoUuid}";
-    fsType = "bcachefs";
-    options = ["defaults" "subvol=media" "nofail"];
+  ##########
+  # BCACHEFS INFRASTRUCTURE SCRIPT
+  ##########
+  # Sørger for at mapperne findes og sætter filsystem-indstillinger
+  system.activationScripts.bcachefs-infrastructure = {
+    text = ''
+      echo "Konfigurerer bcachefs infrastruktur..."
+      TOOL=${pkgs.bcachefs-tools}/bin/bcachefs
+      POOL="/mnt/bcachefs"
+
+      # Opret mapperne hvis de ikke findes på bcachefs
+      mkdir -p $POOL/{nix,persist,log}
+
+      # Sæt globale indstillinger for filsystemet
+      $TOOL set-fs-option \
+        --errors=fix_safe \
+        --compression=lz4 \
+        --background_compression=zstd \
+        ${bcachefs_device} || true
+    '';
   };
 }
