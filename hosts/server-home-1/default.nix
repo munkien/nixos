@@ -5,6 +5,7 @@
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.initrd.systemd.enable = false;
 
   # Options
   my.impermanence.enable = true;
