@@ -1,11 +1,15 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ./filesystem.nix
     ./hardware-configuration.nix
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.initrd.systemd.enable = false;
+  boot.initrd.systemd.enable = lib.mkForce false;
 
   # Options
   my.impermanence.enable = true;
