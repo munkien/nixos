@@ -92,11 +92,14 @@
           };
         };
 
-        devshells.default = pkgs.mkShell {
-          packages = [pkgs.git pkgs.age];
-          shellHook = ''
-            ${config.pre-commit.installationScript}
-          '';
+        devshells.default = {
+          commands = [
+            {package = pkgs.git;}
+            {package = pkgs.age;}
+            {package = inputs.agenix-rekey.packages.${pkgs.system}.default;}
+          ];
+          # This replaces the shellHook
+          devshell.startup.pre-commit.text = config.pre-commit.installationScript;
         };
       };
     };

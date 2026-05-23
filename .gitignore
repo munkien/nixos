@@ -1,0 +1,53 @@
+# --- Nix ---
+# Build outputs
+result
+result-*
+
+# Direnv
+.direnv/
+# Many Nix setups track .envrc (e.g., if it only contains `use flake`). 
+# Since you have it ignored, consider tracking it and ignoring `.envrc.local` instead.
+.envrc.local
+
+# --- Secrets & Keys ---
+# Never commit plaintext passwords, keys, or env files
+*.env
+*.key
+*.pem
+
+# Agenix specific (master keys)
+secrets/**/*.key
+secrets/**/*.pem
+secrets/**/*.env
+
+# --- OS-specific ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Editors & IDEs ---
+# VSCodium / VS Code / Antigravity IDE
+# Ignore local workspace state, but track shared settings & extensions
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Vim / Emacs
+*~
+*.swp
+*.swo
+\#*\#
+.\#*
+
+# JetBrains
+.idea/
+*.iml
