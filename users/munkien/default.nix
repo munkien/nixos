@@ -108,6 +108,7 @@
         headsetcontrol
         kdePackages.kate
         winbox4
+        keepassxc
         woeusb-ng
         moonlight-qt
         rustdesk

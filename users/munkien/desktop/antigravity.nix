@@ -38,8 +38,12 @@
           nixd = {
             formatting.command = ["${pkgs.alejandra}/bin/alejandra"];
             options = {
-              nixos."expr" = "(builtins.getFlake \"${config.home.homeDirectory}/nixos\").nixosConfigurations.pc-anders.options";
-              home-manager."expr" = "(builtins.getFlake \"${config.home.homeDirectory}/nixos\").nixosConfigurations.pc-anders.options.home-manager.users.type.functor.wrapped";
+              "nixos" = {
+                "expr" = "(builtins.getFlake \"/home/munkien/nixos\").nixosConfigurations.pc-anders.options";
+              };
+              "home-manager" = {
+                "expr" = "(builtins.getFlake \"/home/munkien/nixos\").homeConfigurations.pc-anders.options";
+              };
             };
           };
         };

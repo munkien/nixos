@@ -75,8 +75,8 @@
           src = ./.;
           hooks = {
             alejandra.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
+            deadnix.enable = false;
+            statix.enable = false;
             check-symlinks.enable = true;
             check-yaml.enable = true;
             check-added-large-files = {
@@ -95,11 +95,14 @@
         devshells.default = {
           commands = [
             {package = pkgs.git;}
+            {package = pkgs.nh;}
             {package = pkgs.age;}
+            {package = pkgs.mkpasswd;}
             {package = inputs.agenix-rekey.packages.${pkgs.system}.default;}
           ];
-          # This replaces the shellHook
+
           devshell.startup.pre-commit.text = config.pre-commit.installationScript;
+          devshell.startup.ssh-add.text = ''ssh-add'';
         };
       };
     };

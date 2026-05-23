@@ -1,11 +1,15 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ./filesystem.nix
     ./hardware-configuration.nix
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  age.rekey.hostPubkey = "PASTE_YOUR_HOST_PUBKEY_HERE";
+  age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
 
   # Sleep and hibernation
   systemd.targets.sleep.enable = false;

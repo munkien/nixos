@@ -5,7 +5,7 @@
 }: {
   home.packages = with pkgs; [
     heroic
-    dwarf-fortress-full
+    #dwarf-fortress-full
     liquidwar
     tbe
   ];

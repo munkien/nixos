@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   options.my.flakeDir = lib.mkOption {
@@ -25,10 +26,40 @@
       warn-dirty = false;
       download-buffer-size = 67108864;
       tarball-ttl = 604800;
+      extra-substituters = [
+        "https://nix-community.cachix.org"
+      ];
+      extra-trusted-public-keys = [
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
     };
 
     nixpkgs.config.allowUnfree = true;
     programs.nix-ld.enable = true;
+    programs.nix-ld.libraries = with pkgs; [
+      stdenv.cc.cc
+      openssl
+      libGL
+      libgpg-error
+      libxml2
+      libX11
+      libXext
+      libXcursor
+      libXinerama
+      libXi
+      libXrandr
+      libXrender
+      libXScrnSaver
+      libXxf86vm
+      libxkbcommon
+      libpulseaudio
+      alsa-lib
+    ];
+
+    systemd.services.nix-daemon.serviceConfig = {
+      Nice = lib.mkForce 19;
+      IOSchedulingClass = lib.mkForce "idle";
+    };
 
     programs.nix-index.enable = true;
     programs.nix-index-database.comma.enable = true;
