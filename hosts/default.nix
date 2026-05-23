@@ -22,10 +22,14 @@
 in {
   pc-anders = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    specialArgs = {inherit inputs;};
+    specialArgs = {
+      inherit inputs;
+      isDesktop = true;
+    };
     modules = [
-      ./hosts/pc-anders
       globalModules
+      ./pc-anders
+      ../users/munkien/default.nix
     ];
   };
 }

@@ -51,7 +51,6 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux"];
 
-      # Native agenix-rekey integration
       imports = [
         inputs.agenix-rekey.flakeModule
         inputs.disko.flakeModules.default
@@ -61,17 +60,10 @@
         inputs.agenix-shell.flakeModules.default
       ];
 
-      # Configure agenix-rekey globally across the flake
-      agenix-rekey = {
-        masterIdentities = [./secrets/master.pub];
-      };
-
-      # System-independent outputs (Your NixOS Hosts)
       flake = {
         nixosConfigurations = import ./hosts {inherit inputs;};
       };
 
-      # 3. System-dependent outputs (DevShells, Apps)
       perSystem = {
         config,
         pkgs,
@@ -79,7 +71,7 @@
       }: {
         formatter = pkgs.alejandra;
 
-        pre-commit = {
+        pre-commit.settings = {
           src = ./.;
           hooks = {
             alejandra.enable = true;
@@ -100,7 +92,7 @@
           };
         };
 
-        devShells.default = pkgs.mkShell {
+        devshells.default = pkgs.mkShell {
           packages = [pkgs.git pkgs.age];
           shellHook = ''
             ${config.pre-commit.installationScript}
