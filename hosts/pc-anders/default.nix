@@ -12,6 +12,10 @@
     ../../modules/common/desktop.nix
     ../../modules/common/gaming.nix
     ../../modules/common/impermanence.nix
+
+    ../../modules/services/authelia.nix
+    ../../modules/services/caddy.nix
+    ../../modules/services/frigate.nix
   ];
 
   networking.hostName = "pc-anders";

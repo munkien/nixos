@@ -41,6 +41,13 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    extraPackages = with pkgs; [
+      rocmPackages.clr.icd
+    ];
+  };
+  # For VA-API (Video Acceleration)
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "radeonsi";
   };
 
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
