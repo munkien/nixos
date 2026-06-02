@@ -13,7 +13,7 @@
     ../../modules/common/gaming.nix
     ../../modules/common/impermanence.nix
 
-    ../../modules/services/authelia.nix
+    ../../modules/services/mosquitto.nix
     ../../modules/services/caddy.nix
     ../../modules/services/frigate.nix
   ];
@@ -23,5 +23,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  system.stateVersion = "26.05";
+  boot.loader.systemd-boot.configurationLimit = 60;
+
+  #services.frigate.vaapiDriver = "radeonsi";
 }

@@ -15,6 +15,15 @@
       widgets = [
         "org.kde.plasma.kickoff"
         "org.kde.plasma.appmenu"
+        {
+          name = "org.kde.plasma.icontasks";
+          config.General.launchers = [
+            "applications:proton-pass.desktop"
+            "applications:proton-mail.desktop"
+            "applications:proton-drive.desktop"
+            "applications:proton-vpn.desktop"
+          ];
+        }
         "org.kde.plasma.panelspacer"
         "org.kde.plasma.systemtray"
         "org.kde.plasma.digitalclock"

@@ -8,6 +8,7 @@
     #dwarf-fortress-full
     liquidwar
     tbe
+    rimsort
   ];
 
   home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -29,6 +30,7 @@
       "com.remnantsoftheprecursors.ROTP"
       "info.beyondallreason.bar"
       "com.revolutionarygamesstudio.ThriveLauncher"
+      "net.lutris.Lutris"
     ];
   };
 }

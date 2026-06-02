@@ -115,6 +115,7 @@
         localsend
         freerdp
         signal-desktop
+        obsidian
         zenmap
         podman-desktop
         pods

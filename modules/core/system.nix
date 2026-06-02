@@ -81,5 +81,5 @@
 
   users.users.root.hashedPassword = "$y$jFT$G4A4efQj5fPKiajbtllMI.$0.ejwCo57NJ5Vw0plf9lK9cIp3rVIeqfMKwZeJCDUXD";
 
-  system.stateVersion = "26.05";
+  system.stateVersion = "26.11";
 }
