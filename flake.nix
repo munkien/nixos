@@ -4,10 +4,15 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    ez-configs.url = "github:ehllie/ez-configs";
 
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    preservation = {
+      url = "github:nix-community/preservation";
     };
 
     agenix.url = "github:ryantm/agenix";
@@ -33,13 +38,14 @@
     git-hooks-nix.url = "github:cachix/git-hooks.nix";
     git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
 
-    plasma-manager.url = "github:nix-community/plasma-manager";
-    plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
-    plasma-manager.inputs.home-manager.follows = "home-manager";
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    impermanence.url = "github:nix-community/impermanence";
 
     stylix = {
       url = "github:nix-community/stylix";
@@ -52,6 +58,7 @@
       systems = ["x86_64-linux" "aarch64-linux"];
 
       imports = [
+        inputs.ez-configs.flakeModule
         inputs.agenix-rekey.flakeModule
         inputs.disko.flakeModules.default
         inputs.devshell.flakeModule
@@ -60,8 +67,9 @@
         inputs.agenix-shell.flakeModules.default
       ];
 
-      flake = {
-        nixosConfigurations = import ./hosts {inherit inputs;};
+      ezConfigs = {
+        root = ./.;
+        globalArgs = {inherit inputs;};
       };
 
       perSystem = {
@@ -75,19 +83,13 @@
           src = ./.;
           hooks = {
             alejandra.enable = true;
-            deadnix.enable = false;
-            statix.enable = false;
+            deadnix.enable = true;
+            statix.enable = true;
             check-symlinks.enable = true;
             check-yaml.enable = true;
             check-added-large-files = {
               enable = true;
               args = ["--maxkb=2000"];
-            };
-            flake-check = {
-              enable = true;
-              name = "Fast Flake Check";
-              entry = "nix flake check --no-build";
-              pass_filenames = false;
             };
           };
         };
