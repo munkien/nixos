@@ -4,22 +4,24 @@
   ...
 }: {
   imports = [
-    ../../nixos-modules/base-system.nix
-    ../../home-modules/munkien
+    ../../common/core
+    ../../users/munkien
 
     ./hardware.nix
     ./filesystem.nix
     ./wifi.nix
 
-    ../../nixos-modules/common/desktop.nix
-    ../../nixos-modules/common/gaming.nix
-    ../../nixos-modules/common/impermanence.nix
+    ../../common/profiles/graphical/desktop.nix
+    ../../common/profiles/graphical/gaming.nix
+    ../../common/impermanence.nix
   ];
 
-  nixpkgs.hostPlatform = "x86_64-linux";
+  my = {
+    graphical.enable = true;
+    gaming.enable = true;
+  };
 
-  isDesktop = true;
-  isGaming = true;
+  nixpkgs.hostPlatform = "x86_64-linux";
 
   virtualisation.podman = {
     enable = true;
@@ -33,6 +35,9 @@
 
   networking.hostName = "pc-anders";
   age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
+
+  systemd.services.systemd-machine-id-commit.enable = false;
+  environment.etc."machine-id".text = "5f8c8eac5b85429fb8dc3d633e5b42e6";
 
   boot.loader = {
     systemd-boot = {

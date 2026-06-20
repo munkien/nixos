@@ -1,110 +1,219 @@
 {
-  description = "Flake-parts NixOS & Home Manager Configuration";
+  description = "Munkiens Fleet: Strictly Declarative Multi-Arch NixOS";
 
   inputs = {
+    # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    ez-configs.url = "github:ehllie/ez-configs";
 
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    preservation = {
-      url = "github:nix-community/preservation";
-    };
-
-    agenix.url = "github:ryantm/agenix";
-    agenix-rekey = {
-      url = "github:oddlama/agenix-rekey";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix-shell.url = "github:aciceri/agenix-shell";
-
-    antigravity-nix.url = "github:jacopone/antigravity-nix";
-    antigravity-nix.inputs.nixpkgs.follows = "nixpkgs";
-
-    nix-index-database.url = "github:nix-community/nix-index-database";
-    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-
-    devshell.url = "github:numtide/devshell";
-
+    # Deployments & Hardware Context
+    colmena.url = "github:zhaofengli/colmena";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    # State & Partitioning
+    preservation.url = "github:WilliButz/preservation";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
-    git-hooks-nix.url = "github:cachix/git-hooks.nix";
-    git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
+    # Secrets Management
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    agenix.inputs.darwin.follows = "";
+    agenix-rekey.url = "github:oddlama/agenix-rekey";
+    agenix-rekey.inputs.nixpkgs.follows = "nixpkgs";
 
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
-
-    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+    # Home Manager & User Environment
+    home-manager.url = "github:nix-community/home-manager/master";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    plasma-manager.url = "github:nix-community/plasma-manager";
+    plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
+    plasma-manager.inputs.home-manager.follows = "home-manager";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    stylix = {
-      url = "github:nix-community/stylix";
-      inputs.nixpkgs.follows = "nixpkgs";
+    # System Utilities & Tooling
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+    antigravity-nix.url = "github:jacopone/antigravity-nix";
+    antigravity-nix.inputs.nixpkgs.follows = "nixpkgs";
+    nixvim = {
+      url = "github:nix-community/nixvim";
     };
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    git-hooks.url = "github:cachix/git-hooks.nix";
+    git-hooks.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ {flake-parts, ...}:
+  outputs = inputs @ {
+    self,
+    flake-parts,
+    nixpkgs,
+    ...
+  }:
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux"];
 
-      imports = [
-        inputs.ez-configs.flakeModule
-        inputs.agenix-rekey.flakeModule
-        inputs.disko.flakeModules.default
-        inputs.devshell.flakeModule
-        inputs.git-hooks-nix.flakeModule
-        inputs.home-manager.flakeModules.home-manager
-        inputs.agenix-shell.flakeModules.default
-      ];
+      imports = [inputs.agenix-rekey.flakeModule];
 
-      ezConfigs = {
-        root = ./.;
-        globalArgs = {inherit inputs;};
+      flake = let
+        # --- 1. THE DEPLOYED FLEET ---
+        hosts = {
+          pc-anders = {
+            system = "x86_64-linux";
+            tags = ["workstations"];
+          };
+          server-home-1 = {
+            system = "x86_64-linux";
+            tags = ["servers"];
+          };
+          #           pc-kiosk-browser = {
+          #             system = "x86_64-linux";
+          #             tags = ["workstations" "kiosks"];
+          #           };
+          #           server-datalix-1 = {
+          #             system = "x86_64-linux";
+          #             tags = ["servers"];
+          #           };
+        };
+
+        # --- 2. THE UNIVERSAL PAYLOAD ---
+        sharedModules = [
+          inputs.disko.nixosModules.disko
+          inputs.agenix.nixosModules.default
+          inputs.agenix-rekey.nixosModules.default
+          inputs.preservation.nixosModules.preservation
+          inputs.nix-index-database.nixosModules.nix-index
+          inputs.nix-flatpak.nixosModules.nix-flatpak
+          inputs.quadlet-nix.nixosModules.quadlet
+
+          ./common/options.nix
+
+          ({config, ...}: {
+            age.rekey = {
+              masterIdentities = ["~/.ssh/id_ed25519"];
+              storageMode = "local";
+              localStorageDir = ./hosts/${config.networking.hostName}/secrets;
+            };
+            users.users.root.hashedPassword = "$y$jFT$G4A4efQj5fPKiajbtllMI.$0.ejwCo57NJ5Vw0plf9lK9cIp3rVIeqfMKwZeJCDUXD";
+          })
+
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {inherit inputs;};
+            home-manager.sharedModules = [
+              inputs.plasma-manager.homeModules.plasma-manager
+              inputs.nix-flatpak.homeManagerModules.nix-flatpak
+              inputs.agenix.homeManagerModules.default
+              inputs.nixvim.homeModules.nixvim
+            ];
+          }
+        ];
+
+        # --- 3. THE BUILDERS ---
+        mkHost = name: host:
+          nixpkgs.lib.nixosSystem {
+            inherit (host) system;
+            specialArgs = {inherit inputs;};
+            modules =
+              sharedModules
+              ++ [
+                ./hosts/${name}
+                {networking.hostName = name;}
+              ];
+          };
+
+        mkColmenaNode = name: host: {
+          imports =
+            sharedModules
+            ++ [
+              ./hosts/${name}
+              {networking.hostName = name;}
+            ];
+          deployment = {
+            targetHost = name;
+            tags = host.tags;
+          };
+        };
+
+        # Evaluate the main fleet configurations
+        fleetConfigurations = builtins.mapAttrs mkHost hosts;
+      in {
+        # --- 4. EXPORTED CONFIGURATIONS ---
+
+        # Merge the heavy fleet with the lightweight rescue ISO
+        nixosConfigurations =
+          fleetConfigurations;
+        # // {
+        #   rescue = nixpkgs.lib.nixosSystem {
+        #     system = "x86_64-linux";
+        #     specialArgs = {inherit inputs;};
+        #     modules = [./hosts/rescue/default.nix];
+        #   };
+        # };
+
+        homeConfigurations.munkien = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import inputs.nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+          extraSpecialArgs = {
+            inherit inputs;
+            osConfig = {
+              my.graphical.enable = true;
+              my.gaming.enable = true;
+            };
+          };
+          modules =
+            [
+              ./users/munkien/home.nix
+            ]
+            ++ [
+              inputs.plasma-manager.homeModules.plasma-manager
+              inputs.nix-flatpak.homeManagerModules.nix-flatpak
+              inputs.agenix.homeManagerModules.default
+            ];
+        };
+
+        # Colmena only maps the deployed fleet
+        colmenaHive = inputs.colmena.lib.makeHive ({
+            meta = {
+              nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
+              nodeNixpkgs = builtins.mapAttrs (name: host: import inputs.nixpkgs {system = host.system;}) hosts;
+              specialArgs = {inherit inputs;};
+            };
+          }
+          // builtins.mapAttrs mkColmenaNode hosts);
       };
 
+      # --- 5. DEVELOPER ENVIRONMENT ---
       perSystem = {
         config,
         pkgs,
+        system,
         ...
       }: {
-        formatter = pkgs.alejandra;
+        # Inject the fleet into Agenix (excluding the rescue ISO)
+        agenix-rekey.nodes = builtins.removeAttrs self.nixosConfigurations ["rescue"];
 
-        pre-commit.settings = {
+        checks.pre-commit-check = inputs.git-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
             alejandra.enable = true;
             deadnix.enable = true;
             statix.enable = true;
             check-symlinks.enable = true;
-            check-yaml.enable = true;
-            check-added-large-files = {
-              enable = true;
-              args = ["--maxkb=2000"];
-            };
           };
         };
 
-        devshells.default = {
-          commands = [
-            {package = pkgs.git;}
-            {package = pkgs.nh;}
-            {package = pkgs.age;}
-            {package = pkgs.mkpasswd;}
-            {package = inputs.agenix-rekey.packages.${pkgs.system}.default;}
-          ];
-
-          devshell.startup.pre-commit.text = config.pre-commit.installationScript;
-          devshell.startup.ssh-add.text = ''ssh-add'';
+        devShells.default = pkgs.mkShell {
+          inherit (config.checks.pre-commit-check) shellHook;
+          buildInputs =
+            config.checks.pre-commit-check.enabledPackages
+            ++ [
+              config.agenix-rekey.package
+              inputs.colmena.packages.${system}.colmena
+            ];
         };
       };
     };

@@ -15,15 +15,6 @@
       widgets = [
         "org.kde.plasma.kickoff"
         "org.kde.plasma.appmenu"
-        {
-          name = "org.kde.plasma.icontasks";
-          config.General.launchers = [
-            "applications:proton-pass.desktop"
-            "applications:proton-mail.desktop"
-            "applications:proton-drive.desktop"
-            "applications:proton-vpn.desktop"
-          ];
-        }
         "org.kde.plasma.panelspacer"
         "org.kde.plasma.systemtray"
         "org.kde.plasma.digitalclock"
@@ -44,7 +35,7 @@
           config.General.launchers = [
             "applications:org.kde.dolphin.desktop"
             "applications:code.desktop"
-            "applications:kitty.desktop"
+            "applications:org.wezfurlong.wezterm.desktop"
             "applications:firefox.desktop"
           ];
         }
@@ -53,22 +44,21 @@
     }
   ];
 
-  mkDelayedStart = name: delay: exec: {
-    Unit = {
-      Description = "${name} Autostart";
-      After = ["graphical-session.target"];
-    };
-    Service = {
-      ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString delay}";
-      ExecStart = "${exec}";
-      Restart = "on-failure";
-    };
-    Install = {WantedBy = ["graphical-session.target"];};
+  tokyoNightTheme = pkgs.fetchFromGitHub {
+    owner = "Jayy-Dev";
+    repo = "Plasma-Tokyo-Night";
+    rev = "master"; # Or a specific commit hash for immutability
+    sha256 = "sha256-Y+ta28tOYA5woAj9bcTunz5+9o3QUdKgeBAB//c48gk="; # Update with actual hash
   };
 in {
   home.packages = with pkgs; [
     wl-clipboard
   ];
+
+  home.file.".local/share/plasma/look-and-feel/com.github.Jayy-Dev.Plasma.Tokyo.Night" = {
+    source = "${tokyoNightTheme}/plasma/look-and-feel/com.github.Jayy-Dev.Plasma.Tokyo.Night";
+    recursive = true;
+  };
 
   programs.plasma = {
     enable = true;
@@ -80,7 +70,7 @@ in {
     ];
 
     workspace = {
-      lookAndFeel = "org.kde.breezedark.desktop";
+      lookAndFeel = "com.github.Jayy-Dev.Plasma.Tokyo.Night";
       wallpaper = "${./default-wallpaper.jpg}";
     };
 
@@ -170,38 +160,4 @@ in {
       };
     };
   };
-
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = [pkgs.kdePackages.xdg-desktop-portal-kde];
-      config.common.default = "kde";
-    };
-
-    mimeApps = {
-      enable = true;
-      defaultApplications = {
-        "text/html" = "firefox.desktop";
-        "x-scheme-handler/http" = "firefox.desktop";
-        "x-scheme-handler/https" = "firefox.desktop";
-        "x-scheme-handler/about" = "firefox.desktop";
-        "x-scheme-handler/unknown" = "firefox.desktop";
-      };
-    };
-    configFile."mimeapps.list".force = true;
-  };
-
-  systemd.user.services = {
-    steam = mkDelayedStart "Steam" 5 "${pkgs.steam}/bin/steam -silent";
-    spotify = mkDelayedStart "Spotify" 10 "${pkgs.spotify}/bin/spotify";
-    discord = mkDelayedStart "Discord" 15 "${pkgs.discord}/bin/discord";
-    heroic = mkDelayedStart "Heroic" 20 "${pkgs.heroic}/bin/heroic";
-  };
-
-  home.activation.clearPlasmaCache = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    $DRY_RUN_CMD rm -rf $HOME/.cache/plasmashell*
-    $DRY_RUN_CMD rm -rf $HOME/.cache/ksycoca6*
-    $DRY_RUN_CMD rm -rf $HOME/.cache/org.kde.dirmodel-cache.kcache
-    $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user restart plasma-plasmashell.service
-  '';
 }

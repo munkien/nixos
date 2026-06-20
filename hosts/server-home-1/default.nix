@@ -4,7 +4,7 @@
   ...
 }: {
   imports = [
-    ../../nixos-modules/base-system.nix
+    ../../common/core
     ./filesystem.nix
     ./hardware-configuration.nix
   ];

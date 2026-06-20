@@ -1,9 +1,13 @@
-_: {
+{pkgs, ...}: {
+  imports = [./ananicy.nix];
+
   services = {
     displayManager.sddm = {
       enable = true;
       autoNumlock = true;
       wayland.enable = true;
+      theme = "sugar-dark";
+      extraPackages = [pkgs.sddm-sugar-dark];
     };
 
     desktopManager.plasma6.enable = true;

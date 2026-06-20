@@ -1,11 +1,11 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   home.packages = with pkgs; [
     heroic
-    #dwarf-fortress-full
     satisfactorymodmanager
     liquidwar
     tbe
@@ -13,7 +13,7 @@
   ];
 
   home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    ln -sfn /scratch/battle.net $VERBOSE_ARG /home/munkien/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
+    ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
   '';
 
   services.flatpak = {

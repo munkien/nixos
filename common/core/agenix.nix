@@ -26,7 +26,6 @@ in {
   };
 
   age.identityPaths = ["${statePath}/ssh_host_ed25519_key" "/etc/ssh/ssh_host_ed25519_key"];
-  age.rekey.storageMode = "derivation";
 
   services.openssh.hostKeys = [
     {
