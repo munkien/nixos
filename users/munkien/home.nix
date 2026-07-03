@@ -20,6 +20,13 @@
     ../../common/home
   ];
 
+  age.rekey = {
+    hostPubkey = ./userPubkey.pub;
+    masterIdentities = ["~/.ssh/id_ed25519"];
+    storageMode = "local";
+    localStorageDir = ./secrets;
+  };
+
   services.ssh-agent.enable = true;
 
   programs.git = {
@@ -74,21 +81,12 @@
 
   home.packages = with pkgs;
     lib.optionals osConfig.my.graphical.enable [
-      inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs
-      alejandra
-      nixd
       bat
-      deadnix
       eza
       kdePackages.kio-extras
-      statix
-      treefmt
-      pre-commit
       deploy-rs
       wl-clipboard
-      btrfs-assistant
       headsetcontrol
-      kdePackages.kate
       winbox4
       keepassxc
       woeusb-ng
@@ -112,10 +110,7 @@
     ];
 
   my.autostart =
-    [
-      # Applications only launched if target capabilities are active on the host
-    ]
-    ++ lib.optionals osConfig.my.graphical.enable [
+    lib.optionals osConfig.my.graphical.enable [
       {
         name = "Spotify";
         exec = "${pkgs.spotify}/bin/spotify";
@@ -136,7 +131,7 @@
       }
       {
         name = "Lutris";
-        exec = "${pkgs.lutris}/bin/lutris";
+        exec = "${pkgs.lutris}/bin/flatpak run --branch=stable --arch=x86_64 --command=lutris --file-forwarding net.lutris.Lutris @@u %U @@";
       }
     ];
 }

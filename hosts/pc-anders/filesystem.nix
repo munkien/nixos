@@ -1,6 +1,19 @@
 {pkgs, ...}: let
   bcachefs_device = "UUID=fe8de683-7e92-4cc0-ace2-8ce2bccfa296";
 in {
+  environment.systemPackages = with pkgs; [
+    bcachefs-tools
+    gparted
+  ];
+
+  # Swap Config
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    priority = 100;
+  };
+
+  # File System
   fileSystems = {
     # BOOT
     "/boot" = {

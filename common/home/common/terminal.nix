@@ -16,9 +16,9 @@
       enable = true;
       shellAliases = {
         gcp = "git status && git add . && git commit -m 'WIP' && git push";
-        ls = "eza --icons --group-directories-first"; # Modern replacement for ls
-        cat = "bat"; # Modern replacement for cat (matches Tokyo Night)
-        grep = "rg"; # Replaces legacy grep with ripgrep
+        ls = "eza --icons --group-directories-first";
+        cat = "bat";
+        grep = "rg";
         find = "fd";
       };
 
@@ -54,9 +54,9 @@
         shell_integration = "enabled";
 
         # Visuals
-        # background_opacity = "0.85"; # Matches your KWin rules
+        background_opacity = "0.85";
         dynamic_background_opacity = "yes";
-        hide_window_decorations = "no"; # Keep decorations for consistency with KWin
+        hide_window_decorations = "no";
         window_padding_width = 4;
 
         # UX
@@ -116,7 +116,6 @@
           style = "bold red";
         };
 
-        # Show 'nix-shell' when inside a dev shell (Critical for NixOS users)
         nix_shell = {
           symbol = "❄️ ";
           style = "bold cyan";

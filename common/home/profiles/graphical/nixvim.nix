@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   enable = true;
 
   colorschemes.catppuccin.enable = true;
@@ -10,8 +6,10 @@
   plugins = {
     neo-tree = {
       enable = true;
-      enableDiagnostics = true;
-      enableGitStatus = true;
+      settings = {
+        enable_diagnostics = true;
+        enable_git_status = true;
+      };
     };
     telescope.enable = true;
     lualine.enable = true;

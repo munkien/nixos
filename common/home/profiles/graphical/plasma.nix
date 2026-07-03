@@ -34,7 +34,7 @@
           name = "org.kde.plasma.icontasks";
           config.General.launchers = [
             "applications:org.kde.dolphin.desktop"
-            "applications:code.desktop"
+            "applications:codium.desktop"
             "applications:org.wezfurlong.wezterm.desktop"
             "applications:firefox.desktop"
           ];
@@ -55,11 +55,6 @@ in {
     wl-clipboard
   ];
 
-  home.file.".local/share/plasma/look-and-feel/com.github.Jayy-Dev.Plasma.Tokyo.Night" = {
-    source = "${tokyoNightTheme}/plasma/look-and-feel/com.github.Jayy-Dev.Plasma.Tokyo.Night";
-    recursive = true;
-  };
-
   programs.plasma = {
     enable = true;
     overrideConfig = true;
@@ -70,7 +65,7 @@ in {
     ];
 
     workspace = {
-      lookAndFeel = "com.github.Jayy-Dev.Plasma.Tokyo.Night";
+      lookAndFeel = "breeze-dark";
       wallpaper = "${./default-wallpaper.jpg}";
     };
 

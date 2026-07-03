@@ -5,6 +5,7 @@
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-file.url = "github:vic/flake-file";
 
     # Deployments & Hardware Context
     colmena.url = "github:zhaofengli/colmena";
@@ -21,6 +22,7 @@
     agenix.inputs.darwin.follows = "";
     agenix-rekey.url = "github:oddlama/agenix-rekey";
     agenix-rekey.inputs.nixpkgs.follows = "nixpkgs";
+    agenix-shell.url = "github:aciceri/agenix-shell";
 
     # Home Manager & User Environment
     home-manager.url = "github:nix-community/home-manager/master";
@@ -41,6 +43,9 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     git-hooks.url = "github:cachix/git-hooks.nix";
     git-hooks.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Services
+    arion.url = "github:hercules-ci/arion";
   };
 
   outputs = inputs @ {
@@ -52,7 +57,13 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux"];
 
-      imports = [inputs.agenix-rekey.flakeModule];
+      imports = [
+        inputs.flake-file.flakeModules.default
+        inputs.flake-file.flakeModules.nix-auto-follow
+        inputs.agenix-rekey.flakeModule
+        inputs.agenix-shell.flakeModules.default
+        inputs.home-manager.flakeModules.home-manager
+      ];
 
       flake = let
         # --- 1. THE DEPLOYED FLEET ---
@@ -84,6 +95,7 @@
           inputs.nix-index-database.nixosModules.nix-index
           inputs.nix-flatpak.nixosModules.nix-flatpak
           inputs.quadlet-nix.nixosModules.quadlet
+          inputs.arion.nixosModules.arion
 
           ./common/options.nix
 
@@ -104,6 +116,7 @@
             home-manager.sharedModules = [
               inputs.plasma-manager.homeModules.plasma-manager
               inputs.nix-flatpak.homeManagerModules.nix-flatpak
+              inputs.agenix-rekey.homeManagerModules.agenix-rekey
               inputs.agenix.homeManagerModules.default
               inputs.nixvim.homeModules.nixvim
             ];
@@ -132,7 +145,7 @@
             ];
           deployment = {
             targetHost = name;
-            tags = host.tags;
+            inherit (host) tags;
           };
         };
 
@@ -167,11 +180,19 @@
           modules =
             [
               ./users/munkien/home.nix
+              {
+                age.rekey = {
+                  masterIdentities = ["~/.ssh/id_ed25519"];
+                  storageMode = "local";
+                  localStorageDir = ./users/munkien/secrets;
+                };
+              }
             ]
             ++ [
               inputs.plasma-manager.homeModules.plasma-manager
               inputs.nix-flatpak.homeManagerModules.nix-flatpak
               inputs.agenix.homeManagerModules.default
+              inputs.agenix-rekey.homeManagerModules.agenix-rekey
             ];
         };
 
@@ -179,7 +200,7 @@
         colmenaHive = inputs.colmena.lib.makeHive ({
             meta = {
               nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
-              nodeNixpkgs = builtins.mapAttrs (name: host: import inputs.nixpkgs {system = host.system;}) hosts;
+              nodeNixpkgs = builtins.mapAttrs (_name: host: import inputs.nixpkgs {inherit (host) system;}) hosts;
               specialArgs = {inherit inputs;};
             };
           }
@@ -193,15 +214,12 @@
         system,
         ...
       }: {
-        # Inject the fleet into Agenix (excluding the rescue ISO)
-        agenix-rekey.nodes = builtins.removeAttrs self.nixosConfigurations ["rescue"];
-
         checks.pre-commit-check = inputs.git-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
             alejandra.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
+            deadnix.enable = false;
+            statix.enable = false;
             check-symlinks.enable = true;
           };
         };

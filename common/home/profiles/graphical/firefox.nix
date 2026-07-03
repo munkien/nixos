@@ -92,6 +92,16 @@
             ];
           }
           {
+            name = "Economy";
+            toolbar = true;
+            bookmarks = [
+              {
+                name = "Actual Budget";
+                url = "https://vehement-jaguar.pikapod.net/budget";
+              }
+            ];
+          }
+          {
             name = "Gaming";
             toolbar = true;
             bookmarks = [
@@ -109,6 +119,16 @@
               {
                 name = "YouTube";
                 url = "https://youtube.com/";
+                tags = ["entertainment"];
+              }
+              {
+                name = "HBO";
+                url = "https://hbomax.com/";
+                tags = ["entertainment"];
+              }
+              {
+                name = "NetFlix";
+                url = "https://netflix.com/";
                 tags = ["entertainment"];
               }
             ];

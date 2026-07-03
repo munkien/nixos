@@ -16,6 +16,8 @@
     ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
   '';
 
+  programs.lutris.enable = true;
+
   services.flatpak = {
     enable = true;
     uninstallUnused = true;
@@ -32,7 +34,6 @@
       "com.remnantsoftheprecursors.ROTP"
       "info.beyondallreason.bar"
       "com.revolutionarygamesstudio.ThriveLauncher"
-      "net.lutris.Lutris"
     ];
   };
 }
