@@ -16,9 +16,4 @@ _: {
       workstation = true;
     };
   };
-
-  services.journald.extraConfig = ''
-    SystemMaxUse=200M
-    MaxFileSec=14day
-  '';
 }

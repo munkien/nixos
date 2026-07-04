@@ -17,6 +17,11 @@
   ];
 
   services = {
+    journald.extraConfig = ''
+      SystemMaxUse=200M
+      MaxFileSec=14day
+    '';
+
     locate = {
       enable = true;
       package = pkgs.plocate;

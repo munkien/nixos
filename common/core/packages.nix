@@ -10,5 +10,6 @@
     gping
     trashy
     bcachefs-tools
+    just
   ];
 }
