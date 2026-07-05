@@ -6,7 +6,7 @@
   ...
 }: {
   age.secrets."munkien_password_hashed" = {
-    file = ./password.age;
+    rekeyFile = ./password.age;
   };
 
   services.jotta-cli.enable = true;

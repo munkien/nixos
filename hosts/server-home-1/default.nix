@@ -5,6 +5,7 @@
 }: {
   imports = [
     ../../common/core
+    ../../users/munkien
     ./filesystem.nix
     ./hardware-configuration.nix
   ];
