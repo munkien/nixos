@@ -10,23 +10,22 @@
     };
   };
 
+  commonModules = name: [
+    ../hosts/${name}
+    {networking.hostName = name;}
+
+    (inputs.import-tree ../modules/nixos)
+  ];
+
   mkHost = name: host:
     inputs.nixpkgs.lib.nixosSystem {
       inherit (host) system;
       specialArgs = {inherit inputs;};
-      modules = [
-        ../common/core # Your sharedModules moved here
-        ../hosts/${name}
-        {networking.hostName = name;}
-      ];
+      modules = commonModules name;
     };
 
   mkColmenaNode = name: host: {
-    imports = [
-      ../modules/core
-      ../hosts/${name}
-      {networking.hostName = name;}
-    ];
+    imports = commonModules name;
     deployment = {
       targetHost = name;
       inherit (host) tags;

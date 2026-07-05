@@ -18,14 +18,8 @@
 
   imports = [
     ../../common/home
+    (inputs.import-tree ../../modules/home)
   ];
-
-  age.rekey = {
-    hostPubkey = ./userPubkey.pub;
-    masterIdentities = ["~/.ssh/id_ed25519"];
-    storageMode = "local";
-    localStorageDir = ./secrets;
-  };
 
   services.ssh-agent.enable = true;
 
@@ -51,12 +45,6 @@
       core.editor = "nano";
       push.autoSetupRemote = "true";
     };
-  };
-
-  programs.ssh.settings."homelab-local" = {
-    hostname = "192.168.0.50";
-    user = "munkien";
-    identityFile = "~/.ssh/id_ed25519";
   };
 
   xdg = {

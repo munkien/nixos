@@ -20,6 +20,7 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     git-hooks.url = "github:cachix/git-hooks.nix";
     arion.url = "github:hercules-ci/arion";
+    import-tree.url = "github:denful/import-tree";
   };
 
   systems = inputs.nixpkgs.lib.systems.flakeExposed;
@@ -33,7 +34,7 @@
 
     # The modular handoffs
     ./hosts.nix
-    ./users.nix
+    #./users.nix
     ./shell.nix
   ];
 }

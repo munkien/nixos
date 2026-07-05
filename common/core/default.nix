@@ -16,7 +16,6 @@
 
     ./agenix.nix
     ./boot.nix
-    ./options.nix
     ./locale.nix
     ./networking.nix
     ./nix.nix
@@ -29,12 +28,6 @@
   # Global System Settings
   users.users.root.hashedPassword = "$y$jFT$G4A4efQj5fPKiajbtllMI.$0.ejwCo57NJ5Vw0plf9lK9cIp3rVIeqfMKwZeJCDUXD";
 
-  age.rekey = {
-    masterIdentities = ["~/.ssh/id_ed25519"];
-    storageMode = "local";
-    localStorageDir = ../../hosts/${config.networking.hostName}/secrets;
-  };
-
   # Global Home Manager Integration
   home-manager = {
     useGlobalPkgs = true;
@@ -43,7 +36,6 @@
     sharedModules = [
       inputs.plasma-manager.homeModules.plasma-manager
       inputs.nix-flatpak.homeManagerModules.nix-flatpak
-      inputs.agenix-rekey.homeManagerModules.agenix-rekey
       inputs.agenix.homeManagerModules.default
       inputs.nixvim.homeModules.nixvim
     ];

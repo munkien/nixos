@@ -15,9 +15,11 @@ switch:
 update:
   nix flake update
   nix run .#write-flake
-  nix run .#write-flake
-  nh os build
   nix flake check
+
+deploy:
+  agenix rekey -a
+  colmena apply
 
 push: 
   nix flake check
