@@ -34,7 +34,6 @@
 
     # The modular handoffs
     ./hosts.nix
-    #./users.nix
     ./shell.nix
   ];
 }
