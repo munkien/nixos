@@ -69,10 +69,7 @@
 
   home.packages = with pkgs;
     lib.optionals osConfig.my.graphical.enable [
-      bat
-      eza
       kdePackages.kio-extras
-      deploy-rs
       wl-clipboard
       headsetcontrol
       winbox4
@@ -81,7 +78,6 @@
       moonlight-qt
       rustdesk
       localsend
-      freerdp
       signal-desktop
       obsidian
       zenmap
@@ -95,6 +91,10 @@
       libreoffice-qt-fresh
       tor-browser
       wezterm
+    ]
+    ++ [
+      bat
+      eza
     ];
 
   my.autostart =

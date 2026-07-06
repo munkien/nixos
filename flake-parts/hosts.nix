@@ -3,10 +3,16 @@
     pc-anders = {
       system = "x86_64-linux";
       tags = ["workstations"];
+      targetHost = "127.0.0.1";
+      targetUser = "munkien";
+      privilegeEscalationCommand = ["sudo" "-H" "--"];
     };
     server-home-1 = {
       system = "x86_64-linux";
       tags = ["servers"];
+      targetHost = "192.168.88.218";
+      targetUser = "munkien";
+      privilegeEscalationCommand = ["sudo" "-H" "--"];
     };
   };
 
