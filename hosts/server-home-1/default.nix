@@ -9,6 +9,8 @@
     ./filesystem.nix
     ./hardware-configuration.nix
 
+    ../../common/impermanence.nix
+
     # Services
     ../../common/services/arion.nix
     #../../common/services/caddy.nix
