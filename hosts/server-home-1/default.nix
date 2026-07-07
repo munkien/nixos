@@ -21,12 +21,6 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
 
-  preservation.preserveAt."/persist" = {
-    directories = [
-      "/var/lib/docker"
-    ];
-  };
-
   # Sleep and hibernation
   systemd.targets = {
     sleep.enable = false;

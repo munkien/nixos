@@ -8,6 +8,9 @@ _: {
       directories = [
         "/home/munkien/nixos"
         "/home/munkien/.ssh"
+
+        "/var/lib/docker"
+
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
