@@ -8,7 +8,7 @@
   virtualisation.podman.enable = false;
   virtualisation.podman.dockerSocket.enable = true;
 
-  users.extraUsers.munkien.extraGroups = ["podman"];
+  users.extraUsers.munkien.extraGroups = ["podman" "docker"];
 
   virtualisation.arion.backend = "docker";
   virtualisation.arion.projects.home-infra.settings = {
