@@ -21,7 +21,7 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
 
-  preservation.preserveAt = {
+  preservation.preserveAt."/persist" = {
     directories = [
       "/var/lib/docker"
     ];
