@@ -30,6 +30,11 @@ _: {
           configureParent = true;
         }
         {
+          file = "/etc/ssh/ssh_host_ed25519_key.pub";
+          how = "symlink";
+          configureParent = true;
+        }
+        {
           file = "/etc/machine-id";
           inInitrd = true;
         }
