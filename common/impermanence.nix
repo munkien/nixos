@@ -7,6 +7,7 @@ _: {
     preserveAt."/persist" = {
       directories = [
         "/home/munkien/nixos"
+        "/home/munkien/.ssh"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
