@@ -16,7 +16,6 @@ _: {
         "/var/lib/bluetooth"
         "/var/lib/systemd/timers"
         "/var/lib/tailscale"
-        "/etc/ssh"
       ];
 
       files = [
