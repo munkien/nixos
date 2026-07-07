@@ -3,7 +3,7 @@
     pc-anders = {
       system = "x86_64-linux";
       tags = ["workstations"];
-      targetHost = "127.0.0.1";
+      targetHost = null;
       targetUser = "munkien";
       privilegeEscalationCommand = ["sudo" "-H" "--"];
     };

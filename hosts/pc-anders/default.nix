@@ -13,11 +13,6 @@
     ../../common/profiles/graphical/desktop.nix
     ../../common/profiles/graphical/gaming.nix
     ../../common/impermanence.nix
-
-    ../../common/services/arion.nix
-    #../../common/services/caddy.nix
-    ../../common/services/fail2ban.nix
-    ../../common/services/frigate.nix
   ];
 
   my = {

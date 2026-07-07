@@ -8,6 +8,12 @@
     ../../users/munkien
     ./filesystem.nix
     ./hardware-configuration.nix
+
+    # Services
+    ../../common/services/arion.nix
+    #../../common/services/caddy.nix
+    ../../common/services/fail2ban.nix
+    ../../common/services/frigate.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
