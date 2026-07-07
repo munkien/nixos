@@ -6,6 +6,7 @@ _: {
     enable = true;
     preserveAt."/persist" = {
       directories = [
+        "/home/munkien/nixos"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
