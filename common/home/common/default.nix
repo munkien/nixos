@@ -3,5 +3,6 @@ _: {
     ./terminal.nix
     ./ssh.nix
     ./autostart.nix
+    ./rustscan.nix
   ];
 }
