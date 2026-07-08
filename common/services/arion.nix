@@ -4,8 +4,8 @@
     pkgs.docker-client
   ];
 
-  virtualisation.docker.enable = true;
-  virtualisation.podman.enable = false;
+  virtualisation.docker.enable = false;
+  virtualisation.podman.enable = true;
   virtualisation.podman.dockerSocket.enable = true;
 
   users.extraUsers.munkien.extraGroups = ["podman" "docker"];
