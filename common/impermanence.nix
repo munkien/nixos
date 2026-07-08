@@ -18,7 +18,6 @@ _: {
           mode = "0700";
         }
 
-        "/var/lib/docker"
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
         "/var/lib/systemd/timers"
