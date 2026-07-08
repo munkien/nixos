@@ -10,6 +10,11 @@
 
   users.extraUsers.munkien.extraGroups = ["podman" "docker"];
 
+  systemd.services."arion-home-infra" = {
+    after = ["network-online.target"];
+    wants = ["network-online.target"];
+  };
+
   virtualisation.arion.backend = "podman-socket";
   virtualisation.arion.projects.home-infra.settings = {
     networks.internal_net = {};
