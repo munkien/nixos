@@ -10,7 +10,7 @@
 
   users.extraUsers.munkien.extraGroups = ["podman" "docker"];
 
-  virtualisation.arion.backend = "podman";
+  virtualisation.arion.backend = "podman-socket";
   virtualisation.arion.projects.home-infra.settings = {
     networks.internal_net = {};
   };
