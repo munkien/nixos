@@ -13,7 +13,7 @@
 
     # Services
     ../../common/services/arion.nix
-    #../../common/services/caddy.nix
+    ../../common/services/caddy.nix
     ../../common/services/fail2ban.nix
     ../../common/services/frigate.nix
   ];
