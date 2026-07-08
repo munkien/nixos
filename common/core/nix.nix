@@ -70,7 +70,7 @@
 
       nh = {
         enable = true;
-        flake = config.my.flakeDir;
+        flake = config.my.flakeDir or "/home/munkien/nixos";
         clean = {
           enable = true;
           dates = "daily";

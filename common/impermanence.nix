@@ -6,16 +6,25 @@ _: {
     enable = true;
     preserveAt."/persist" = {
       directories = [
-        "/home/munkien/nixos"
-        "/home/munkien/.ssh"
+        {
+          directory = "/home/munkien/nixos";
+          user = "munkien";
+          group = "users";
+        }
+        {
+          directory = "/home/munkien/.ssh";
+          user = "munkien";
+          group = "users";
+          mode = "0700";
+        }
 
         "/var/lib/docker"
-
-        "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
         "/var/lib/systemd/timers"
         "/var/lib/tailscale"
+        "/var/log/journal"
+        "/var/lib/containers"
       ];
 
       files = [
@@ -39,7 +48,7 @@ _: {
           inInitrd = true;
         }
         {
-          file = "/etc/adjtime-id";
+          file = "/etc/adjtime";
           inInitrd = true;
         }
       ];

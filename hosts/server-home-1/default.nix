@@ -33,5 +33,4 @@
 
   # Naming
   networking.hostName = "server-home-1";
-  my.flakeDir = "/etc/nixos";
 }

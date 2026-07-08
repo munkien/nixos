@@ -45,6 +45,14 @@
       core.editor = "nano";
       push.autoSetupRemote = "true";
     };
+
+    extraConfig = {
+      safe = {
+        directory = [
+          "/home/munkien/nixos"
+        ];
+      };
+    };
   };
 
   xdg = {
