@@ -20,6 +20,6 @@
 
   services.caddy.package = pkgs.caddy.withPlugins {
     plugins = ["github.com/caddy-dns/cloudflare@v0.2.4"];
-    hash = "sha256-8yZDrejNKsaUnUaTUFYbarWNmxafqp2z2rWo+XRsxV8=";
+    hash = "sha256-pB7YlSeVXyYahCDYKDmEtY39Wtr0kKWd1w2Bs2qMEfY=";
   };
 }
