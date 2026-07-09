@@ -16,6 +16,8 @@
   age.secrets."caddy-env" = {
     rekeyFile = ../../secrets/services/caddy-env.age;
     mode = "0400";
+    owner = "caddy";
+    group = "caddy";
   };
   systemd.services.caddy.serviceConfig.EnvironmentFile = config.age.secrets."caddy-env".path;
 
