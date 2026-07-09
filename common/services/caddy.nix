@@ -8,7 +8,10 @@
 
     globalConfig = ''
       email me@example.com
-      acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+      tls {
+      	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+      }
     '';
   };
 
