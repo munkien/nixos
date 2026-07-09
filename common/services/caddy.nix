@@ -5,9 +5,9 @@
 }: {
   services.caddy = {
     enable = true;
-    debug = true;
 
     globalConfig = ''
+      debug
       email me@example.com
       acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
     '';
