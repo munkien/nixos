@@ -5,13 +5,11 @@
 }: {
   services.caddy = {
     enable = true;
+    debug = true;
 
     globalConfig = ''
       email me@example.com
-
-      tls {
-      	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-      }
+      acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
     '';
   };
 
