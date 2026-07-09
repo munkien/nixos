@@ -9,7 +9,7 @@
     globalConfig = ''
       debug
       email me@example.com
-      acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+      acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
     '';
   };
 
