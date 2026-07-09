@@ -5,6 +5,7 @@
 }: {
   services.caddy = {
     enable = true;
+    openFirewall = true;
 
     globalConfig = ''
       debug
