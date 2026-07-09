@@ -3,15 +3,30 @@
   pkgs,
   ...
 }: let
-  # Define your Frigate YAML configuration here
   frigateYaml = pkgs.writeText "frigate-config.yml" ''
-    # Replace this with your actual Frigate configuration
     mqtt:
       host: home-server-1.home.arpa
-    cameras: {}
+
+    record:
+      enabled: True
+      retain:
+        days: 7
+        mode: motion
+
+        cameras:
+          driveway:
+            ffmpeg:
+              inputs:
+                - path: rtsp://{DRIVEWAY_USER}:{DRIVEWAY_PASS}@{DRIVEWAY_IP}:554/live/ch00_0
+                  roles:
+                    - detect
+                    - record
+            detect:
+              width: 1920
+              height: 1080
+              fps: 5
   '';
 in {
-  # Copies the Nix-defined config to a mutable path on every rebuild
   system.activationScripts.frigateConfig = ''
     mkdir -p /var/lib/frigate/config
     cp -f ${frigateYaml} /var/lib/frigate/config/config.yml
@@ -21,6 +36,11 @@ in {
   networking.firewall.allowedTCPPorts = [5000];
   networking.firewall.allowedUDPPorts = [5000 8554];
 
+  age.secrets."frigate" = {
+    rekeyFile = ../../secrets/services/frigate.age;
+    mode = "0400";
+  };
+
   virtualisation.arion.projects.home-infra.settings.services.frigate.service = {
     image = "ghcr.io/blakeblackshear/frigate:stable";
     privileged = true;
@@ -29,6 +49,9 @@ in {
       "/var/lib/frigate/config/config.yml:/config/config.yml"
       "/var/lib/frigate/storage:/media/frigate"
       "/etc/localtime:/etc/localtime:ro"
+    ];
+    env_file = [
+      "/run/secrets/frigate.env"
     ];
     ports = [
       "8554:8554"
