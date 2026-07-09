@@ -51,7 +51,7 @@ in {
       "/etc/localtime:/etc/localtime:ro"
     ];
     env_file = [
-      "/run/secrets/frigate.env"
+      config.age.secrets."frigate".path
     ];
     ports = [
       "8554:8554"
