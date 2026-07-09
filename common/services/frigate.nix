@@ -17,9 +17,6 @@
 
   services.caddy.virtualHosts."frigate.munkie.dk" = {
     extraConfig = ''
-      tls {
-        dns cloudflare 123
-      }
       reverse_proxy 127.0.0.1:5000
     '';
   };
