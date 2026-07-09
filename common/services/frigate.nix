@@ -9,6 +9,7 @@
     ];
     ports = [
       "8554:8554"
+      "5000:5000"
     ];
     networks = ["internal_net"];
     restart = "always";

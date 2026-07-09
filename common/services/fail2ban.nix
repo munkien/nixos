@@ -5,7 +5,7 @@
     capabilities.NET_ADMIN = true;
     capabilities.NET_RAW = true;
     volumes = [
-      "/var/log/caddy:/var/log/caddy:ro" # Mount proxy logs as read-only
+      "/var/log/caddy:/var/log/caddy:ro"
       "/var/lib/fail2ban:/data"
     ];
     restart = "always";
