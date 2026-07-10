@@ -10,6 +10,12 @@
     ffmpeg:
       hwaccel_args: preset-vaapi
 
+    detect:
+      enabled: true
+
+    snapshots:
+      enabled: true
+
     objects:
       track:
         - person
@@ -17,7 +23,7 @@
         - dog
 
     record:
-      enabled: True
+      enabled: true
       retain:
         days: 3
         mode: all
@@ -39,8 +45,9 @@
               roles:
                 - detect
         detect:
-          width: 640
-          height: 360
+          enabled: true
+          width: 1920
+          height: 1080
           fps: 5
   '';
 in {
