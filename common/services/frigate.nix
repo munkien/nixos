@@ -7,23 +7,40 @@
     mqtt:
       host: home-server-1.home.arpa
 
+    ffmpeg:
+      hwaccel_args: preset-vaapi
+
+    objects:
+      track:
+        - person
+        - car
+        - dog
+
     record:
       enabled: True
       retain:
-        days: 7
-        mode: motion
+        days: 3
+        mode: all
+      events:
+        retain:
+          default: 14
+          mode: motion
 
     cameras:
       driveway:
         ffmpeg:
           inputs:
+            # High-resolution main stream -> ONLY for recording
             - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0
               roles:
-                - detect
                 - record
+            # Low-resolution sub-stream (usually ch01_0 or similar) -> ONLY for detect
+            - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch01_0
+              roles:
+                - detect
         detect:
-          width: 1920
-          height: 1080
+          width: 640
+          height: 360
           fps: 5
   '';
 in {
@@ -53,6 +70,9 @@ in {
   virtualisation.arion.projects.home-infra.settings.services.frigate.service = {
     image = "ghcr.io/blakeblackshear/frigate:stable";
     privileged = true;
+    devices = [
+      "/dev/dri/renderD128:/dev/dri/renderD128"
+    ];
     volumes = [
       # Mount the mutable file without the :ro flag
       "/var/lib/frigate/config/config.yml:/config/config.yml"
