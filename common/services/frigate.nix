@@ -17,7 +17,7 @@
       driveway:
         ffmpeg:
           inputs:
-            - path: rtsp://{DRIVEWAY_USER}:{DRIVEWAY_PASS}@{DRIVEWAY_IP}:554/live/ch00_0
+            - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0
               roles:
                 - detect
                 - record
