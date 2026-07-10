@@ -11,10 +11,10 @@
       hwaccel_args: preset-vaapi
 
     detect:
-      enabled: true
+      enabled: True
 
     snapshots:
-      enabled: true
+      enabled: True
 
     objects:
       track:
@@ -22,8 +22,11 @@
         - car
         - dog
 
+    genai:
+      enabled: True
+
     record:
-      enabled: true
+      enabled: True
       retain:
         days: 3
         mode: all
@@ -41,7 +44,6 @@
                 - record
                 - detect
         detect:
-          enabled: true
           width: 1920
           height: 1080
           fps: 5
