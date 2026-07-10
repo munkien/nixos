@@ -24,4 +24,17 @@
     stop_grace_period = "60s";
     restart = "always";
   };
+
+  networking.firewall.allowedTCPPorts = [
+    8088 # HTTP Web UI
+    8043 # HTTPS Web UI
+    8843 # Guest Portal HTTPS
+    29811 # Management / Discovery
+    29812 # Adoption / Management
+    29813 # Firmware Upgrade
+    29814 # Management
+  ];
+  networking.firewall.allowedUDPPorts = [
+    29810 # Device Discovery
+  ];
 }
