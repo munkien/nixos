@@ -16,21 +16,21 @@
     snapshots:
       enabled: True
 
-      record:
-        enabled: True
+    record:
+      enabled: True
 
-        continuous:
-          days: 3
+      continuous:
+        days: 3
 
-        alerts:
-          retain:
-            days: 14
-            mode: motion
+      alerts:
+        retain:
+          days: 14
+          mode: motion
 
-        detections:
-          retain:
-            days: 14
-            mode: motion
+      detections:
+        retain:
+          days: 14
+          mode: motion
 
     cameras:
       driveway:
