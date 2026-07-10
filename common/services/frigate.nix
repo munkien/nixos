@@ -16,15 +16,6 @@
     snapshots:
       enabled: True
 
-    objects:
-      track:
-        - person
-        - car
-        - dog
-
-    genai:
-      enabled: True
-
     record:
       enabled: True
       retain:
@@ -47,6 +38,11 @@
           width: 1920
           height: 1080
           fps: 5
+        objects:
+          track:
+            - person
+            - car
+            - dog
 
       attic1:
         ffmpeg:
@@ -59,6 +55,11 @@
           width: 1920
           height: 1080
           fps: 5
+        objects:
+          track:
+            - bird
+            - cat
+            - mouse
   '';
 in {
   system.activationScripts.frigateConfig = ''
