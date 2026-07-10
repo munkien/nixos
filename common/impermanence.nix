@@ -24,6 +24,8 @@ _: {
         "/var/lib/tailscale"
         "/var/log/journal"
         "/var/lib/containers"
+
+        "/var/lib/omada"
       ];
 
       files = [
