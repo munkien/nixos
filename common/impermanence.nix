@@ -26,6 +26,8 @@ _: {
         "/var/lib/containers"
 
         "/var/lib/omada"
+        "/var/lib/homeasisstant"
+        "/var/lib/authelia"
       ];
 
       files = [
