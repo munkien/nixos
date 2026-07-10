@@ -52,9 +52,9 @@
         ffmpeg:
           inputs:
             - path: rtsp://{FRIGATE_ATTIC1_USER}:{FRIGATE_ATTIC1_PASS}@{FRIGATE_ATTIC1_IP}:554/live/ch00_0
-          roles:
-            - record
-            - detect
+              roles:
+                - record
+                - detect
         detect:
           width: 1920
           height: 1080
