@@ -33,6 +33,9 @@
     29812 # Adoption / Management
     29813 # Firmware Upgrade
     29814 # Management
+    29815 # Device Mgmt
+    29816 # Device Mgmt
+    29817 # Device Mgmt
   ];
   networking.firewall.allowedUDPPorts = [
     29810 # Device Discovery
