@@ -16,6 +16,7 @@
     ../../common/services/caddy.nix
     ../../common/services/fail2ban.nix
     ../../common/services/frigate.nix
+    ../../common/services/omada.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
