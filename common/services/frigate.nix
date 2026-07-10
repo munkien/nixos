@@ -41,15 +41,24 @@ in {
     mode = "0400";
   };
 
+  systemd.mounts = [
+    {
+      what = "tmpfs";
+      where = "/var/lib/frigate/shm";
+      type = "tmpfs";
+      options = "size=1G,mode=1777";
+    }
+  ];
+
   virtualisation.arion.projects.home-infra.settings.services.frigate.service = {
     image = "ghcr.io/blakeblackshear/frigate:stable";
     privileged = true;
-    shm_size = "1gb";
     volumes = [
       # Mount the mutable file without the :ro flag
       "/var/lib/frigate/config/config.yml:/config/config.yml"
       "/var/lib/frigate/storage:/media/frigate"
       "/etc/localtime:/etc/localtime:ro"
+      "/var/lib/frigate/shm:/dev/shm"
     ];
     env_file = [
       config.age.secrets."frigate".path
