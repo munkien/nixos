@@ -54,6 +54,13 @@ in {
       depends = ["/mnt/bcachefs"];
     };
 
+    "/media" = {
+      device = "/mnt/bcachefs/media";
+      fsType = "none";
+      options = ["bind"];
+      depends = ["/mnt/bcachefs"];
+    };
+
     # IMPERMANENCE (RAM disk)
     "/" = {
       device = "none";
@@ -62,6 +69,12 @@ in {
       neededForBoot = true;
     };
   };
+
+  # Special rules for /media - no CoW
+  systemd.tmpfiles.rules = [
+    "d /mnt/bcachefs/media 0755 root root - -"
+    "h /mnt/bcachefs/media - - - - +C"
+  ];
 
   # Enable automatic scrub of bcachefs pool
   services.bcachefs.autoScrub = {
@@ -80,7 +93,12 @@ in {
       POOL="/mnt/bcachefs"
 
       # Opret mapperne hvis de ikke findes på bcachefs
-      mkdir -p $POOL/nix $POOL/persist $POOL/log
+      mkdir -p $POOL/nix $POOL/persist $POOL/log $POOL/media
+
+      # Routing
+      bcachefs set-file-option --data_replicas=2 --promote_target=/dev/nvme0n1p4  --foreground_target=/dev/nvme0n1p4 --background_target=hdd $POOL/persist || true
+      bcachefs set-file-option --data_replicas=2 --promote_target=/dev/nvme0n1p4  --foreground_target=/dev/nvme0n1p4 --background_target=/dev/nvme0n1p4 $POOL/nix || true
+      bcachefs set-file-option --data_replicas=1 --promote_target=hdd --foreground_target=hdd --background_target=hdd $POOL/media || true
 
       # Sæt globale indstillinger for filsystemet
       $TOOL set-fs-option \
