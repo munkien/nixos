@@ -36,13 +36,9 @@
       driveway:
         ffmpeg:
           inputs:
-            # High-resolution main stream -> ONLY for recording
             - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0
               roles:
                 - record
-            # Low-resolution sub-stream (usually ch01_0 or similar) -> ONLY for detect
-            - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch01_0
-              roles:
                 - detect
         detect:
           enabled: true
