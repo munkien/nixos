@@ -47,6 +47,18 @@
           width: 1920
           height: 1080
           fps: 5
+
+      attic1:
+        ffmpeg:
+          inputs:
+            - path: rtsp://{FRIGATE_ATTIC1_USER}:{FRIGATE_ATTIC1_PASS}@{FRIGATE_ATTIC1_IP}:554/live/ch00_0
+            roles:
+              - record
+              - detect
+        detect:
+          width: 1920
+          height: 1080
+          fps: 5
   '';
 in {
   system.activationScripts.frigateConfig = ''
