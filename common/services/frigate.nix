@@ -44,6 +44,7 @@ in {
   virtualisation.arion.projects.home-infra.settings.services.frigate.service = {
     image = "ghcr.io/blakeblackshear/frigate:stable";
     privileged = true;
+    shm_size = "1gb";
     volumes = [
       # Mount the mutable file without the :ro flag
       "/var/lib/frigate/config/config.yml:/config/config.yml"
