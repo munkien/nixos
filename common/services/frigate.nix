@@ -74,8 +74,8 @@ in {
     chmod 0644 /var/lib/frigate/config/config.yml
   '';
 
-  networking.firewall.allowedTCPPorts = [5000];
-  networking.firewall.allowedUDPPorts = [5000 8554];
+  networking.firewall.allowedTCPPorts = [5000 8554 1984];
+  networking.firewall.allowedUDPPorts = [5000 8554 1984];
 
   age.secrets."frigate" = {
     rekeyFile = ../../secrets/services/frigate.age;
