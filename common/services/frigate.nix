@@ -82,6 +82,10 @@ in {
     mode = "0400";
   };
 
+  systemd.tmpfiles.rules = [
+    "d /var/lib/frigate/shm 1777 root root -"
+    "d /var/lib/frigate/config 0755 root root -"
+  ];
   systemd.mounts = [
     {
       what = "tmpfs";
@@ -98,7 +102,6 @@ in {
       "/dev/dri/renderD128:/dev/dri/renderD128"
     ];
     volumes = [
-      # Mount the mutable file without the :ro flag
       "/var/lib/frigate/config/config.yml:/config/config.yml"
       "/var/lib/frigate/storage:/media/frigate"
       "/etc/localtime:/etc/localtime:ro"
