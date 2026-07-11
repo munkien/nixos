@@ -7,7 +7,7 @@
     ../../common/core
     ../../users/munkien
     ./filesystem.nix
-    ./hardware-configuration.nix
+    #./hardware-configuration.nix
 
     ../../common/impermanence.nix
 
@@ -20,6 +20,13 @@
     ../../common/services/homeassistant.nix
     ../../common/services/authelia.nix
   ];
+
+  hardware = {
+    facter = {
+      enable = true;
+      reportPath = ./facter.json;
+    };
+  };
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
