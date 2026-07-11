@@ -60,8 +60,8 @@ in {
     overrideConfig = true;
 
     panels = lib.flatten [
-      (map (p: p // {screen = 0;}) standardPanel)
-      (map (p: p // {screen = 1;}) standardPanel)
+      (map (p: p // {screen = "DP-1";}) standardPanel)
+      (map (p: p // {screen = "DP-2";}) standardPanel)
     ];
 
     workspace = {
