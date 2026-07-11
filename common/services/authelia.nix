@@ -18,10 +18,12 @@
         path: /secrets/users_database.yml
 
     session:
-      name: authelia_session
       cookies:
-        - domain: 'munkie.dk'
-          authelia_url: 'https://auth.munkie.dk'
+        - name: 'authelia_session'
+          domain: 'example.com'  # Should match whatever your root protected domain is
+          authelia_url: 'https://authelia.example.com'
+          expiration: '1 hour'
+          inactivity: '5 minutes'
 
     storage:
       local:
