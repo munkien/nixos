@@ -7,7 +7,6 @@
     ../../common/core
     ../../users/munkien
     ./filesystem.nix
-    #./hardware-configuration.nix
 
     ../../common/impermanence.nix
 
