@@ -21,6 +21,7 @@
       name: authelia_session
       cookies:
         - domain: 'munkie.dk'
+          authelia_url: 'https://auth.munkie.dk'
 
     storage:
       local:
