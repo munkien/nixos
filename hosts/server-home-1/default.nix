@@ -18,7 +18,7 @@
     ../../common/services/frigate.nix
     ../../common/services/omada.nix
     ../../common/services/homeassistant.nix
-    ../../common/services/authelia.nix
+    #../../common/services/authelia.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
