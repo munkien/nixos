@@ -85,6 +85,7 @@ in {
   systemd.tmpfiles.rules = [
     "d /var/lib/frigate/shm 1777 root root -"
     "d /var/lib/frigate/config 0755 root root -"
+    "d /var/lib/frigate/storage 0755 root root -"
   ];
   systemd.mounts = [
     {
@@ -102,8 +103,8 @@ in {
       "/dev/dri/renderD128:/dev/dri/renderD128"
     ];
     volumes = [
-      "/var/lib/frigate/config/config.yml:/config/config.yml"
-      "/var/lib/frigate/storage:/media/frigate"
+      "/var/lib/frigate/config:/config"
+      "/media/frigate:/media/frigate"
       "/etc/localtime:/etc/localtime:ro"
       "/var/lib/frigate/shm:/dev/shm"
     ];
