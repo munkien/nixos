@@ -20,8 +20,13 @@
     session:
       cookies:
         - name: 'authelia_session'
-          domain: 'example.com'  # Should match whatever your root protected domain is
-          authelia_url: 'https://authelia.example.com'
+          domain: 'munkie.dk'
+          authelia_url: 'https://authelia.munkie.dk'
+          expiration: '1 hour'
+          inactivity: '5 minutes'
+        - name: 'authelia_session'
+          domain: 'server-home-1.home.arpa'
+          authelia_url: 'http://server-home-1.home.arpa'
           expiration: '1 hour'
           inactivity: '5 minutes'
 
