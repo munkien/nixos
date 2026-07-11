@@ -53,7 +53,7 @@
       attic1:
         ffmpeg:
           inputs:
-            - path: rtsp://{FRIGATE_ATTIC}
+            - path: {FRIGATE_ATTIC1_PATH}
               roles:
                 - record
                 - detect

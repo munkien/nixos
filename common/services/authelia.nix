@@ -29,12 +29,12 @@
           authelia_url: 'http://server-home-1.home.arpa'
           expiration: '1 hour'
           inactivity: '5 minutes'
+          insecure: true
 
     storage:
       local:
         path: /config/db.sqlite3
 
-    # A notifier is mandatory to boot. This saves emails to a local file.
     notifier:
       filesystem:
         filename: /config/notifications.txt
