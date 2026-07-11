@@ -36,7 +36,7 @@
       driveway:
         ffmpeg:
           inputs:
-            - path: rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0 # /LowResolutionVideo
+            - path: "rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0" # /LowResolutionVideo
               roles:
                 - record
                 - detect
@@ -53,7 +53,7 @@
       attic1:
         ffmpeg:
           inputs:
-            - path: {FRIGATE_ATTIC1_PATH}
+            - path: "{FRIGATE_ATTIC1_PATH}"
               roles:
                 - record
                 - detect
