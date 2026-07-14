@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: {
   system.activationScripts.omadaDirs = ''
     mkdir -p /var/lib/omada/{data,work,logs}
   '';
@@ -40,4 +45,10 @@
   networking.firewall.allowedUDPPorts = [
     29810 # Device Discovery
   ];
+
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/omada"
+    ];
+  };
 }

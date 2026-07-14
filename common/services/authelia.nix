@@ -50,6 +50,12 @@ in {
     "d /var/lib/authelia 0755 root root -"
   ];
 
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/authelia"
+    ];
+  };
+
   system.activationScripts.autheliaConfig = ''
     cp -f ${autheliaConfig} /var/lib/authelia/configuration.yml
     chmod 0644 /var/lib/authelia/configuration.yml

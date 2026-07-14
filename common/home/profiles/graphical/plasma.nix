@@ -43,13 +43,6 @@
       ];
     }
   ];
-
-  tokyoNightTheme = pkgs.fetchFromGitHub {
-    owner = "Jayy-Dev";
-    repo = "Plasma-Tokyo-Night";
-    rev = "master"; # Or a specific commit hash for immutability
-    sha256 = "sha256-Y+ta28tOYA5woAj9bcTunz5+9o3QUdKgeBAB//c48gk="; # Update with actual hash
-  };
 in {
   home.packages = with pkgs; [
     wl-clipboard
@@ -59,10 +52,7 @@ in {
     enable = true;
     overrideConfig = true;
 
-    panels = lib.flatten [
-      (map (p: p // {screen = "DP-1";}) standardPanel)
-      (map (p: p // {screen = "DP-2";}) standardPanel)
-    ];
+    panels = map (p: p // {screen = "all";}) standardPanel;
 
     workspace = {
       lookAndFeel = "breeze-dark";
@@ -93,6 +83,17 @@ in {
       windowTitle = {
         family = "Noto Sans";
         pointSize = 10;
+      };
+    };
+
+    input = {
+      keyboard = {
+        layouts = [
+          {
+            layout = "dk";
+            variant = "";
+          }
+        ];
       };
     };
 

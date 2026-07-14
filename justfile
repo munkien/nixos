@@ -27,3 +27,10 @@ push:
   git commit -m "just push"
   git push
 
+# Lock UID/GID maps against automatic regeneration
+protect-maps:
+  sudo chattr +i /var/lib/nixos/uid-map /var/lib/nixos/gid-map
+
+# Unprotect UID/GID maps for deployment
+unprotect-maps:
+  sudo chattr -i /var/lib/nixos/uid-map /var/lib/nixos/gid-map

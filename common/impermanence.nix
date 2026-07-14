@@ -1,33 +1,21 @@
-_: {
-  fileSystems."/persist".neededForBoot = true;
-  users.mutableUsers = false;
+{
+  lib,
+  config,
+  ...
+}: {
+  fileSystems."/persist".neededForBoot = lib.mkIf (config.preservation.enable) true;
+  users.mutableUsers = lib.mkIf (config.preservation.enable) true;
 
   preservation = {
-    enable = true;
+    enable = lib.mkDefault true;
     preserveAt."/persist" = {
       directories = [
-        {
-          directory = "/home/munkien/nixos";
-          user = "munkien";
-          group = "users";
-        }
-        {
-          directory = "/home/munkien/.ssh";
-          user = "munkien";
-          group = "users";
-          mode = "0700";
-        }
-
         "/var/lib/systemd/coredump"
         "/var/lib/bluetooth"
         "/var/lib/systemd/timers"
         "/var/lib/tailscale"
         "/var/log/journal"
-        "/var/lib/containers"
-
-        "/var/lib/omada"
-        "/var/lib/homeassistant"
-        "/var/lib/authelia"
+        "/var/lib/nixos"
       ];
 
       files = [

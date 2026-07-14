@@ -19,4 +19,10 @@
   virtualisation.arion.projects.home-infra.settings = {
     networks.internal_net = {};
   };
+
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/containers"
+    ];
+  };
 }

@@ -21,6 +21,7 @@
     git-hooks.url = "github:cachix/git-hooks.nix";
     arion.url = "github:hercules-ci/arion";
     import-tree.url = "github:denful/import-tree";
+    comin.url = "github:nlewo/comin";
   };
 
   systems = inputs.nixpkgs.lib.systems.flakeExposed;

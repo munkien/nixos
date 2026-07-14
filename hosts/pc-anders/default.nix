@@ -20,6 +20,17 @@
     gaming.enable = true;
   };
 
+  services.comin = {
+    enable = true;
+    remotes = [
+      {
+        name = "origin";
+        url = "https://github.com/munkien/nixos.git";
+        branches.main.name = "main";
+      }
+    ];
+  };
+
   hardware = {
     facter = {
       enable = true;

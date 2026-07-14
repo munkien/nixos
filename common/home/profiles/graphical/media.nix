@@ -10,7 +10,7 @@
     kdePackages.kdenlive
     glaxnimate
     mediainfo
-    handbrake
     ffmpeg-full
+    #handbrake: Errors out 12-07-2026
   ];
 }

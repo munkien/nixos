@@ -30,4 +30,10 @@
 
   # Open the port if you ever need to bypass Caddy locally
   networking.firewall.allowedTCPPorts = [8123];
+
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/homeassistant"
+    ];
+  };
 }

@@ -11,5 +11,6 @@
     trashy
     bcachefs-tools
     just
+    e2fsprogs # chattr command
   ];
 }

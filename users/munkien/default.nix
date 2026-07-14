@@ -21,6 +21,22 @@
     openssh.authorizedKeys.keys = [(lib.strings.trim (builtins.readFile ./userkey.pub))];
   };
 
+  preservation.preserveAt."/persist" = {
+    directories = [
+      {
+        directory = "/home/munkien/nixos";
+        user = "munkien";
+        group = "users";
+      }
+      {
+        directory = "/home/munkien/.ssh";
+        user = "munkien";
+        group = "users";
+        mode = "0700";
+      }
+    ];
+  };
+
   home-manager.users.munkien = {
     imports = [
       inputs.plasma-manager.homeModules.plasma-manager
