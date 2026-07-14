@@ -5,8 +5,7 @@
 }: {
   imports = [
     inputs.disko.nixosModules.disko
-    inputs.agenix.nixosModules.default
-    inputs.agenix-rekey.nixosModules.default
+
     inputs.preservation.nixosModules.preservation
     inputs.nix-index-database.nixosModules.nix-index
     inputs.nix-flatpak.nixosModules.nix-flatpak
@@ -14,7 +13,6 @@
     inputs.arion.nixosModules.arion
     inputs.home-manager.nixosModules.home-manager
 
-    ./agenix.nix
     ./boot.nix
     ./locale.nix
     ./networking.nix
