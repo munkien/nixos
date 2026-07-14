@@ -4,11 +4,8 @@
   ...
 }: {
   imports = [
-    ../../common/core
     ../../users/munkien
     ./filesystem.nix
-
-    ../../common/impermanence.nix
 
     # Services
     ../../common/services/arion.nix

@@ -7,6 +7,14 @@
     inputs.comin.nixosModules.comin
   ];
 
+  preservation = {
+    preserveAt."/persist" = {
+      directories = [
+        "/var/lib/comin"
+      ];
+    };
+  };
+
   services.comin = {
     enable = lib.mkDefault false;
     remotes = [

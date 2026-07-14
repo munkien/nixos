@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
+  imports = [inputs.arion.nixosModules.arion];
+
   environment.systemPackages = [
     pkgs.arion
     pkgs.docker-client

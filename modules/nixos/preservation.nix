@@ -1,10 +1,14 @@
 {
+  inputs,
   lib,
   config,
   ...
 }: {
-  fileSystems."/persist".neededForBoot = lib.mkIf (config.preservation.enable) true;
-  users.mutableUsers = lib.mkIf (config.preservation.enable) true;
+  imports = [
+    inputs.preservation.nixosModules.preservation
+  ];
+
+  fileSystems."/persist".neededForBoot = lib.mkDefault (lib.mkIf (config.preservation.enable) true);
 
   preservation = {
     enable = lib.mkDefault true;

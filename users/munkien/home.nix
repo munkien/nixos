@@ -23,6 +23,8 @@
 
   services.ssh-agent.enable = true;
 
+  my.user.media.enable = true;
+
   programs.git = {
     enable = true;
 
@@ -76,7 +78,7 @@
   };
 
   home.packages = with pkgs;
-    lib.optionals osConfig.my.graphical.enable [
+    lib.optionals osConfig.my.desktop.enable [
       kdePackages.kio-extras
       wl-clipboard
       headsetcontrol
@@ -106,7 +108,7 @@
     ];
 
   my.autostart =
-    lib.optionals osConfig.my.graphical.enable [
+    lib.optionals osConfig.my.desktop.enable [
       {
         name = "Spotify";
         exec = "${pkgs.spotify}/bin/spotify";

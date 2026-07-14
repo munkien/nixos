@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: {
   options.my.flakeDir = lib.mkOption {
@@ -9,6 +10,11 @@
     default = "/home/munkien/nixos";
     description = "Path to the system flake directory";
   };
+
+  imports = [
+    inputs.nix-index-database.nixosModules.nix-index
+    inputs.nix-flatpak.nixosModules.nix-flatpak
+  ];
 
   config = {
     nix.settings = {

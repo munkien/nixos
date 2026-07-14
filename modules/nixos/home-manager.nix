@@ -1,7 +1,15 @@
-{inputs, ...}: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
   ];
+
+  environment = {
+    systemPackages = [pkgs.home-manager];
+  };
 
   # Global Home Manager Integration
   home-manager = {
@@ -13,6 +21,8 @@
       inputs.nix-flatpak.homeManagerModules.nix-flatpak
       inputs.agenix.homeManagerModules.default
       inputs.nixvim.homeModules.nixvim
+
+      (inputs.import-tree ../home)
     ];
   };
 }

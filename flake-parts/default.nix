@@ -14,7 +14,6 @@
     home-manager.url = "github:nix-community/home-manager/master";
     plasma-manager.url = "github:nix-community/plasma-manager";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     antigravity-nix.url = "github:jacopone/antigravity-nix";
     nixvim.url = "github:nix-community/nixvim";
     nix-index-database.url = "github:nix-community/nix-index-database";

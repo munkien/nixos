@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  osConfig,
+  ...
+}:
+lib.mkIf osConfig.my.desktop.enable {
   home.packages = with pkgs; [
     # Media & Socials
     discord

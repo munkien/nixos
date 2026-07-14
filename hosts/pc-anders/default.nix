@@ -4,32 +4,22 @@
   ...
 }: {
   imports = [
-    ../../common/core
     ../../users/munkien
 
     ./filesystem.nix
     ./wifi.nix
 
-    ../../common/profiles/graphical/desktop.nix
     ../../common/profiles/graphical/gaming.nix
-    ../../common/impermanence.nix
   ];
 
+  system.stateVersion = "26.11";
+
   my = {
-    graphical.enable = true;
+    desktop.enable = true;
     gaming.enable = true;
   };
 
-  services.comin = {
-    enable = true;
-    remotes = [
-      {
-        name = "origin";
-        url = "https://github.com/munkien/nixos.git";
-        branches.main.name = "main";
-      }
-    ];
-  };
+  services.comin.enable = true;
 
   hardware = {
     facter = {

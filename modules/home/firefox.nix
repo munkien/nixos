@@ -1,14 +1,17 @@
 {
   pkgs,
   config,
+  lib,
+  osConfig,
   ...
-}: {
+}:
+lib.mkIf osConfig.my.desktop.enable {
   home.packages = with pkgs; [
     pywalfox-native
   ];
 
   programs.firefox = {
-    enable = true;
+    enable = lib.mkDefault true;
     configPath = "${config.xdg.configHome}/mozilla/firefox";
     policies = {
       DisplayBookmarksToolbar = "always";
