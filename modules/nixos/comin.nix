@@ -1,5 +1,6 @@
 {
   lib,
+  config,
   inputs,
   ...
 }: {
@@ -17,6 +18,10 @@
 
   services.comin = {
     enable = lib.mkDefault false;
+    desktop = {
+      enable = config.my.desktop;
+      title = "Comin Auto-update";
+    };
     remotes = [
       {
         name = "origin";
