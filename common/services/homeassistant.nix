@@ -1,8 +1,4 @@
 {pkgs, ...}: {
-  system.activationScripts.homeassistantDirs = ''
-    mkdir -p /var/lib/homeassistant
-  '';
-
   virtualisation.arion.projects.home-infra.settings.services.homeassistant.service = {
     image = "ghcr.io/home-assistant/home-assistant:stable";
     container_name = "homeassistant";

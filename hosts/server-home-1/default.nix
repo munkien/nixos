@@ -15,6 +15,7 @@
     ../../common/services/omada.nix
     ../../common/services/homeassistant.nix
     ../../common/services/authelia.nix
+    ../../common/services/mosquitto.nix
   ];
 
   system.stateVersion = "26.11";
