@@ -9,6 +9,7 @@
     pwgen
     gping
     trashy
+    usbutils
     bcachefs-tools
     just
     e2fsprogs # chattr command
