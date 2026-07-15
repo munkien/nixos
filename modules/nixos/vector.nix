@@ -4,17 +4,20 @@
   lib,
   ...
 }: {
+  age.generators.alnum-ntfy = {pkgs, ...}: ''
+    echo -n "NTFY_URL=https://ntfy.sh/"
+    head /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9' | head -c 32
+  '';
   age.secrets.vector-uri = {
     rekeyFile = "${inputs.self}/secrets/common/vector-uri.age";
     mode = "0400";
-    owner = "vector";
-    group = "vector";
-    generator.script = "alnum";
+    generator.script = "alnum-ntfy";
   };
+  systemd.services.vector.serviceConfig.EnvironmentFile = config.age.secrets.vector-uri.path;
 
   services.vector = {
     enable = true;
-    # Ensure Vector has permission to read the system journal
+    validateConfig = false;
     journaldAccess = true;
 
     settings = {
@@ -26,21 +29,25 @@
       transforms.error_filter = {
         type = "filter";
         inputs = ["journald"];
-        condition = ".priority <= 3";
+        condition = ".priority <= 5";
       };
 
       # Sink: Forward to ntfy
       sinks.ntfy = {
         type = "http";
         inputs = ["error_filter"];
-        uri = "https://ntfy.sh/your-secret-topic";
+        uri = ''${file:/run/agenix/vector-uri}'';
         method = "post";
         encoding = {
           codec = "json";
         };
-        # Optional: Auth if you use a self-hosted ntfy instance with access control
-        # auth = { strategy = "bearer"; token = "YOUR_TOKEN"; };
       };
     };
+  };
+
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/vector"
+    ];
   };
 }
