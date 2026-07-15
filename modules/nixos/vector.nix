@@ -80,6 +80,9 @@
       sinks.local_debug = {
         type = "console";
         inputs = ["throttle"];
+        encoding = {
+          codec = "text";
+        };
       };
 
       # sinks.ntfy = {
