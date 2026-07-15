@@ -17,6 +17,15 @@
     ../../common/services/authelia.nix
   ];
 
+  system.stateVersion = "26.11";
+
+  my = {
+    desktop.enable = false;
+    gaming.enable = false;
+  };
+
+  services.comin.enable = true;
+
   hardware = {
     facter = {
       enable = true;

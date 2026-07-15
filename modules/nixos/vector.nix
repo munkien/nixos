@@ -73,25 +73,25 @@
       transforms.rate_limit = {
         type = "throttle";
         inputs = ["map_priority"];
-        window_secs = 10;
-        threshold = 1;
+        window_secs = 3456;
+        threshold = 10;
       };
 
-      sinks.ntfy = {
-        type = "http";
-        inputs = ["rate_limit"];
-        #uri = ''${file:/run/agenix/vector-uri}'';
-        uri = "https://ntfy.sh/c9yfH2zh2S6P2DFXtHEUxVFT49A5opk8";
-        method = "put";
-        request.headers = {
-          "Title" = ''${file:/run/agenix/vector-uri}'';
-          "Priority" = "{{ .ntfy_priority }}";
-          "Tags" = "warning, skull";
-        };
-        encoding = {
-          codec = "text";
-        };
-      };
+      # sinks.ntfy = {
+      #   type = "http";
+      #   inputs = ["rate_limit"];
+      #   #uri = ''${file:/run/agenix/vector-uri}'';
+      #   uri = "https://ntfy.sh/c9yfH2zh2S6P2DFXtHEUxVFT49A5opk8";
+      #   method = "put";
+      #   request.headers = {
+      #     "Title" = ''${file:/run/agenix/vector-uri}'';
+      #     "Priority" = "{{ .ntfy_priority }}";
+      #     "Tags" = "warning, skull";
+      #   };
+      #   encoding = {
+      #     codec = "text";
+      #   };
+      # };
     };
   };
 }
