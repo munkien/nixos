@@ -77,6 +77,11 @@
         threshold = 10;
       };
 
+      sinks.local_debug = {
+        type = "console";
+        inputs = ["throttle"];
+      };
+
       # sinks.ntfy = {
       #   type = "http";
       #   inputs = ["rate_limit"];
