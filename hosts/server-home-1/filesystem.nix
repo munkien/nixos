@@ -3,6 +3,11 @@
   sysUuid = "69147e59-47cc-40a0-8f7d-6da287866591";
   bcachefs_device = "/dev/disk/by-uuid/${sysUuid}";
 in {
+  environment.systemPackages = with pkgs; [
+    bcachefs-tools
+    gparted
+  ];
+
   boot = {
     supportedFilesystems = ["bcachefs"];
     initrd.supportedFilesystems = ["bcachefs"];
