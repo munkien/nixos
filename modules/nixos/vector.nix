@@ -13,7 +13,12 @@
     mode = "0400";
     generator.script = "alnum-ntfy";
   };
-  systemd.services.vector.serviceConfig.EnvironmentFile = config.age.secrets.vector-uri.path;
+
+  systemd.services.vector.serviceConfig = {
+    EnvironmentFile = config.age.secrets.vector-uri.path;
+    # Wait for local filesystems to be ready
+    RequiresMountsFor = ["/var/lib/vector"];
+  };
 
   services.vector = {
     enable = true;
@@ -25,14 +30,21 @@
         type = "journald";
       };
 
-      # Filter: Keep only Emergency(0), Alert(1), Critical(2), Error(3)
       transforms.error_filter = {
         type = "filter";
         inputs = ["journald"];
-        condition = ".priority <= 5";
+        condition = ''
+          if exists(.priority) {
+            # Try to cast to int. If it fails, default to 0 (Emergency) so it passes the <= 5 check.
+            p = to_int(.priority) ?? 0
+            p <= 5
+          } else {
+            # If the priority field is completely missing, send the log to be safe.
+            true
+          }
+        '';
       };
 
-      # Sink: Forward to ntfy
       sinks.ntfy = {
         type = "http";
         inputs = ["error_filter"];
