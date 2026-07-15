@@ -13,7 +13,6 @@
 
   imports = [
     inputs.nix-index-database.nixosModules.nix-index
-    inputs.nix-flatpak.nixosModules.nix-flatpak
   ];
 
   config = {
