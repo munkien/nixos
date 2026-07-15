@@ -14,5 +14,6 @@
     e2fsprogs # chattr command
     libnotify
     kdePackages.kdialog
+    jq
   ];
 }
