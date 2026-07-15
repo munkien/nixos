@@ -12,5 +12,7 @@
     bcachefs-tools
     just
     e2fsprogs # chattr command
+    libnotify
+    kdePackages.kdialog
   ];
 }
