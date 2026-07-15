@@ -8,8 +8,6 @@
 
     ./filesystem.nix
     ./wifi.nix
-
-    ../../common/profiles/graphical/gaming.nix
   ];
 
   system.stateVersion = "26.11";

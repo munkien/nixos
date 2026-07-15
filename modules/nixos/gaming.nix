@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+lib.mkIf config.my.gaming.enable {
   programs = {
     steam = {
       enable = true;
@@ -22,8 +28,6 @@
       rocmPackages.clr
     ];
   };
-
-  services.flatpak.enable = true;
 
   networking.firewall = {
     # Port 24642 is the default for Stardew Valley multiplayer

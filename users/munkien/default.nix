@@ -37,13 +37,5 @@
     ];
   };
 
-  home-manager.users.munkien = {
-    imports = [
-      inputs.plasma-manager.homeModules.plasma-manager
-      inputs.nix-flatpak.homeManagerModules.nix-flatpak
-      inputs.agenix.homeManagerModules.default
-      inputs.agenix-rekey.homeManagerModules.agenix-rekey
-      ./home.nix
-    ];
-  };
+  home-manager.users.munkien.imports = [./home.nix];
 }

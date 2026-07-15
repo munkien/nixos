@@ -1,19 +1,24 @@
 {
+  inputs,
+  config,
   lib,
   osConfig,
   ...
-}:
-lib.mkIf osConfig.my.desktop.enable {
-  services.flatpak = {
-    enable = true;
-    uninstallUnused = true;
+}: {
+  imports = [
+    inputs.nix-flatpak.homeManagerModules.nix-flatpak
+  ];
 
-    update = {
-      onActivation = true;
-
-      auto = {
-        enable = true;
-        onCalendar = "daily";
+  config = lib.mkIf osConfig.my.desktop.enable {
+    services.flatpak = {
+      enable = true;
+      uninstallUnused = true;
+      update = {
+        onActivation = true;
+        auto = {
+          enable = true;
+          onCalendar = "daily";
+        };
       };
     };
   };

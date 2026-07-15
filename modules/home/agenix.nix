@@ -1,4 +1,13 @@
-{config, ...}: {
+{
+  config,
+  inputs,
+  ...
+}: {
+  imports = [
+    inputs.agenix.homeManagerModules.default
+    inputs.agenix-rekey.homeManagerModules.agenix-rekey
+  ];
+
   age.rekey = {
     masterIdentities = ["~/.ssh/id_ed25519"];
     storageMode = "local";
