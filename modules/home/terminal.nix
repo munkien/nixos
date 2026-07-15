@@ -8,7 +8,7 @@
     ripgrep
   ];
 
-  # 1. Shell
+  # Shell
   programs = {
     bash.enable = true; # Fallback
 

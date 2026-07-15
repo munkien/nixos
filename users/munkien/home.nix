@@ -3,6 +3,7 @@
   lib,
   inputs,
   osConfig,
+  config,
   ...
 }: {
   programs.home-manager.enable = true;
@@ -17,7 +18,6 @@
   ];
 
   imports = [
-    ../../common/home
     (inputs.import-tree ../../modules/home)
   ];
 
@@ -35,6 +35,20 @@
       "heroic"
     ];
   };
+
+  services.flatpak.packages = [
+    "net.openra.OpenRA"
+    "com.play0ad.zeroad"
+    "com.remnantsoftheprecursors.ROTP"
+    "info.beyondallreason.bar"
+    "com.revolutionarygamesstudio.ThriveLauncher"
+  ];
+
+  programs.lutris.enable = true;
+
+  home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
+  '';
 
   programs.git = {
     enable = true;
@@ -109,6 +123,13 @@
       libreoffice-qt-fresh
       tor-browser
       wezterm
+
+      # Gaming
+      heroic
+      satisfactorymodmanager
+      liquidwar
+      tbe
+      rimsort
     ]
     ++ [
       bat
