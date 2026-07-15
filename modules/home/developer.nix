@@ -1,8 +1,12 @@
 {
   pkgs,
   inputs,
+  lib,
+  osConfig,
+  config,
   ...
-}: {
+}:
+lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
   home.packages = with pkgs; [
     alejandra
     statix

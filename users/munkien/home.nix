@@ -23,7 +23,18 @@
 
   services.ssh-agent.enable = true;
 
-  my.user.media.enable = true;
+  my.user = {
+    media.enable = true;
+    developer.enable = true;
+    autostart = [
+      "spotify"
+      "vscodium"
+      "discord"
+      "steam"
+      "lutris"
+      "heroic"
+    ];
+  };
 
   programs.git = {
     enable = true;
@@ -46,9 +57,6 @@
       pull.rebase = true;
       core.editor = "nano";
       push.autoSetupRemote = "true";
-    };
-
-    extraConfig = {
       safe = {
         directory = [
           "/home/munkien/nixos"
@@ -105,31 +113,5 @@
     ++ [
       bat
       eza
-    ];
-
-  my.autostart =
-    lib.optionals osConfig.my.desktop.enable [
-      {
-        name = "Spotify";
-        exec = "${pkgs.spotify}/bin/spotify";
-      }
-      {
-        name = "Discord";
-        exec = "${pkgs.discord}/bin/discord";
-      }
-    ]
-    ++ lib.optionals osConfig.my.gaming.enable [
-      {
-        name = "Steam";
-        exec = "${pkgs.steam}/bin/steam -silent";
-      }
-      {
-        name = "Heroic";
-        exec = "${pkgs.heroic}/bin/heroic";
-      }
-      {
-        name = "Lutris";
-        exec = "${pkgs.lutris}/bin/flatpak run --branch=stable --arch=x86_64 --command=lutris --file-forwarding net.lutris.Lutris @@u %U @@";
-      }
     ];
 }
