@@ -79,7 +79,7 @@
 
       sinks.local_debug = {
         type = "console";
-        inputs = ["throttle"];
+        inputs = ["rate_limit"];
         encoding = {
           codec = "text";
         };
