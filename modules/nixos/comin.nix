@@ -19,7 +19,7 @@
   services.comin = {
     enable = lib.mkDefault false;
     desktop = {
-      enable = config.my.desktop;
+      enable = config.my.desktop.enable;
       title = "Comin Auto-update";
     };
     remotes = [
