@@ -2,6 +2,7 @@ _: {
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
+    startAgent = true;
 
     settings = {
       "github.com" = {
