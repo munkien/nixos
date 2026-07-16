@@ -16,7 +16,7 @@
     ../../common/services/homeassistant.nix
     ../../common/services/authelia.nix
     ../../common/services/mosquitto.nix
-    ../../common/services/zigbee2mqtt.nix
+    #../../common/services/zigbee2mqtt.nix
   ];
 
   system.stateVersion = "26.11";
