@@ -41,7 +41,7 @@
     ];
   };
 
-  services.flatpak.packages = [
+  services.flatpak.packages = lib.mkIf osConfig.my.desktop.enable [
     "net.openra.OpenRA"
     "com.play0ad.zeroad"
     "com.remnantsoftheprecursors.ROTP"
@@ -49,11 +49,12 @@
     "com.revolutionarygamesstudio.ThriveLauncher"
   ];
 
-  programs.lutris.enable = true;
+  programs.lutris.enable = lib.mkIf osConfig.my.gaming.enable;
 
-  home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
-  '';
+  # home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  #   ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
+  # '';
+  #};
 
   programs.git = {
     enable = true;
