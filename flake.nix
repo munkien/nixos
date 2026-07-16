@@ -28,6 +28,5 @@
     nixvim.url = "github:nix-community/nixvim";
     plasma-manager.url = "github:nix-community/plasma-manager";
     preservation.url = "github:WilliButz/preservation";
-    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
   };
 }
