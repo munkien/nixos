@@ -49,7 +49,7 @@
     "com.revolutionarygamesstudio.ThriveLauncher"
   ];
 
-  programs.lutris.enable = lib.mkIf osConfig.my.gaming.enable;
+  programs.lutris.enable = osConfig.my.gaming.enable;
 
   # home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
   #   ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c
