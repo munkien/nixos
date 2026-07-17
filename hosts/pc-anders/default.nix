@@ -58,11 +58,18 @@
     LIBVA_DRIVER_NAME = "radeonsi";
   };
 
+  preservation.preserveAt."/persist" = {
+    directories = [
+      "/var/lib/ollama"
+    ];
+  };
+
   services = {
     xserver.videoDrivers = ["amdgpu"];
 
     ollama = {
       enable = true;
+      package = "ollama-rocm";
       loadModels = ["llama3" "gemma3" "deepseek-r1:latest"];
     };
 
