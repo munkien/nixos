@@ -2,6 +2,15 @@
   services.mosquitto = {
     enable = true;
     persistence = true;
+    listeners = [
+      {
+        acl = ["pattern readwrite #"];
+        omitPasswordAuth = true; # Warning: Only use this for internal trusted network testing
+        settings = {
+          allow_anonymous = true;
+        };
+      }
+    ];
   };
 
   preservation.preserveAt."/persist" = {
@@ -11,5 +20,4 @@
   };
 
   networking.firewall.allowedTCPPorts = [1883];
-  networking.firewall.allowedUDPPorts = [1883];
 }
