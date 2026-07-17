@@ -67,11 +67,11 @@
   services = {
     xserver.videoDrivers = ["amdgpu"];
 
-    ollama = {
-      enable = true;
-      package = "ollama-rocm";
-      loadModels = ["llama3" "gemma3" "deepseek-r1:latest"];
-    };
+    # ollama = {
+    #   enable = true;
+    #   #package = pkgs.ollama-rocm;
+    #   #loadModels = ["llama3" "gemma3" "deepseek-r1:latest"];
+    # };
 
     pipewire.wireplumber.extraConfig."10-strict-audio-blacklist" = {
       "monitor.alsa.rules" = [

@@ -8,7 +8,7 @@
     };
 
     volumes = [
-      "/var/lib/homeassistant:/config"
+      "/persist/var/lib/homeassistant:/config"
       "/etc/localtime:/etc/localtime:ro"
       "/run/dbus:/run/dbus:ro"
     ];
@@ -26,10 +26,4 @@
 
   # Open the port if you ever need to bypass Caddy locally
   networking.firewall.allowedTCPPorts = [8123];
-
-  preservation.preserveAt."/persist" = {
-    directories = [
-      "/var/lib/homeassistant"
-    ];
-  };
 }
