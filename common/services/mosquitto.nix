@@ -9,4 +9,7 @@
       "/var/lib/mosquitto"
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [1883];
+  networking.firewall.allowedUDPPorts = [1883];
 }
