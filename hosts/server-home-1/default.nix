@@ -16,6 +16,7 @@
     ../../common/services/homeassistant.nix
     ../../common/services/authelia.nix
     ../../common/services/mosquitto.nix
+    ../../common/services/ebusd.nix
     #../../common/services/zigbee2mqtt.nix
   ];
 
