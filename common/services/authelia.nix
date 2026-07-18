@@ -26,10 +26,9 @@
           inactivity: '5 minutes'
         - name: 'authelia_session'
           domain: 'server-home-1.home.arpa'
-          authelia_url: 'http://server-home-1.home.arpa'
+          authelia_url: 'https://server-home-1.home.arpa'
           expiration: '1 hour'
           inactivity: '5 minutes'
-          insecure: true
 
     storage:
       local:
