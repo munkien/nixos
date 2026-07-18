@@ -14,4 +14,6 @@
       "--pollinterval=30"
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [8888 8080];
 }
