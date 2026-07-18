@@ -7,6 +7,7 @@
       host = "localhost";
       port = 1883;
       home-assistant = true;
+      user = "ebusd";
       password = "";
     };
     extraArguments = [
