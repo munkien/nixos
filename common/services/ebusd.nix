@@ -8,7 +8,7 @@
       port = 1883;
       home-assistant = true;
     };
-    extraOptions = [
+    extraArguments = [
       "--mqttjson"
       "--accesslevel=*"
       "--pollinterval=30"
