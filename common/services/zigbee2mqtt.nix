@@ -7,6 +7,7 @@
         server = "mqtt://127.0.0.1:1883";
       };
       serial = {
+        adapter = "zstack";
         port = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
       };
       frontend = {
