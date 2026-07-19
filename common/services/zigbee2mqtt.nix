@@ -6,9 +6,15 @@
         base_topic = "zigbee2mqtt";
         server = "mqtt://127.0.0.1:1883";
       };
+      homeassistant = {
+        enabled = true;
+      };
       serial = {
         adapter = "ezsp";
         port = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
+      };
+      availability = {
+        enabled = true;
       };
       frontend = {
         port = 8321;
