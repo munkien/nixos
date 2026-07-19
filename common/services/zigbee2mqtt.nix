@@ -7,10 +7,8 @@
         server = "mqtt://127.0.0.1:1883";
       };
       serial = {
-        adapter = "zstack";
+        adapter = "ember";
         port = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
-        baudrate = 115200;
-        rtscts = true;
       };
       frontend = {
         port = 8321;
