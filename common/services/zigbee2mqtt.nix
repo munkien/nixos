@@ -9,6 +9,8 @@
       serial = {
         adapter = "zstack";
         port = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
+        baudrate = 115200;
+        rtscts = true;
       };
       frontend = {
         port = 8321;
