@@ -24,6 +24,7 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
 
   programs.vscodium = {
     enable = true;
+    package = pkgs.vscodium-fhsWithPackages (ps: with ps; [rustup zlib]);
 
     profiles.default = {
       # Inject the Nix IDE extension
