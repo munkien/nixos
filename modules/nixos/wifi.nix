@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   networking = {
     wireless.enable = false;
-    wireless.iwd.enable = true;
     networkmanager = {
       enable = true;
       dhcp = "internal";
@@ -17,11 +16,13 @@
   '';
   boot.extraModprobeConfig = ''
     options iwlwifi power_save=0
+    options iwlmvm power_scheme=1
   '';
 
   networking.wireless.iwd.settings = {
     Roam = {
       RoamRetryInterval = 15;
+      RoamThreshold = -75;
     };
   };
 }
