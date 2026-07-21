@@ -30,6 +30,20 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
       # Inject the Nix IDE extension
       extensions = with pkgs.vscode-extensions; [
         jnoortheen.nix-ide
+        continue.continue
+        skellock.just
+        ((pkgs.vscode-utils.extensionFromVscodeMarketplace {
+            name = "open-remote-ssh";
+            publisher = "jeanp413";
+            version = "0.0.45";
+            sha256 = "sha256-YoeUNvxLSmy3OftZp2AnqRU+TKe3KYLt3zZ0B5XGgeE=";
+          }).overrideAttrs (old: {
+            src = pkgs.fetchurl {
+              url = "https://github.com/jeanp413/open-remote-ssh/releases/download/v0.0.45/open-remote-ssh-0.0.45.vsix";
+              hash = "sha256-YoeUNvxLSmy3OftZp2AnqRU+TKe3KYLt3zZ0B5XGgeE=";
+            };
+          }))
+        kamadorueda.alejandra
       ];
 
       # Lock down the settings (prevents manual GUI overrides)
@@ -51,5 +65,18 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
         };
       };
     };
+  };
+
+  home.file.".continue/config.yaml".source = (pkgs.formats.yaml {}).generate "continue-config" {
+    name = "Local Config";
+    version = "1.0.0";
+    schema = "v1";
+    models = [
+      {
+        name = "Autodetect";
+        provider = "ollama";
+        model = "AUTODETECT";
+      }
+    ];
   };
 }
