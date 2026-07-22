@@ -10,6 +10,15 @@
       hooks = {
         alejandra.enable = true;
         check-symlinks.enable = true;
+
+        flake-checker = {
+          enable = true;
+          name = "flake-checker";
+          entry = "nix run github:DeterminateSystems/flake-checker --";
+          files = "flake.lock$";
+          pass_filenames = false;
+          stages = ["pre-push"];
+        };
       };
     };
 

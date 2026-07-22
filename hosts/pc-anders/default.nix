@@ -8,6 +8,8 @@
 
     ./filesystem.nix
     ./wifi.nix
+
+    ./ollama.nix
   ];
 
   system.stateVersion = "26.11";
@@ -58,26 +60,8 @@
     LIBVA_DRIVER_NAME = "radeonsi";
   };
 
-  preservation.preserveAt."/persist" = {
-    directories = [
-      "/var/lib/private/ollama"
-    ];
-  };
-
   services = {
     xserver.videoDrivers = ["amdgpu"];
-
-    ollama = {
-      enable = true;
-
-      package = pkgs.ollama-rocm;
-
-      loadModels = [
-        "llama3"
-        "gemma3"
-        "deepseek-r1:latest"
-      ];
-    };
 
     pipewire.wireplumber.extraConfig."10-strict-audio-blacklist" = {
       "monitor.alsa.rules" = [
