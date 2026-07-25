@@ -43,6 +43,10 @@ lib.mkIf osConfig.my.desktop.enable {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/proton-vpn-firefox-extension/latest.xpi";
           installation_mode = "force_installed";
         };
+        "steamdb" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/file/4891926/steam_database-4.35.xpi";
+          installation_mode = "force_installed";
+        };
       };
     };
 
