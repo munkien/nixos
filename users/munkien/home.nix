@@ -165,7 +165,7 @@
       satisfactorymodmanager
       liquidwar
       tbe
-      rimsort
+      #rimsort
     ]
     ++ [
       bat
