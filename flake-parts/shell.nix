@@ -19,6 +19,11 @@
           pass_filenames = false;
           stages = ["pre-push"];
         };
+
+        truffle = {
+          enable = true;
+          entry = ", truffle git file://.";
+        };
       };
     };
 
