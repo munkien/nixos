@@ -20,9 +20,14 @@
           stages = ["pre-push"];
         };
 
-        truffle = {
+        ripsecrets.enable = true;
+
+        trufflehog = {
           enable = true;
-          entry = ", truffle git file://.";
+          name = "trufflehog";
+          entry = "${pkgs.trufflehog}/bin/trufflehog filesystem . --fail";
+          pass_filenames = false;
+          stages = ["pre-commit" "pre-push"];
         };
       };
     };
