@@ -24,6 +24,8 @@ jobs:
           pr-labels: |                  # Labels to be set on the PR
             dependencies
             automated
+      - name: Run flake generator
+        run: nix run .#write-flake
       - name: Enable Auto-Merge
         if: steps.update.outputs.pull-request-operation == 'created'
         env:
