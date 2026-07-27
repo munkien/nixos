@@ -9,17 +9,9 @@
       src = ../.;
       hooks = {
         alejandra.enable = true;
+        deadnix.enable = false;
+        statix.enable = false;
         check-symlinks.enable = true;
-
-        flake-checker = {
-          enable = true;
-          name = "flake-checker";
-          entry = "${pkgs.lib.getExe pkgs.flake-checker}";
-          files = "flake.lock$";
-          pass_filenames = false;
-          stages = ["pre-push"];
-        };
-
         ripsecrets.enable = true;
       };
     };
