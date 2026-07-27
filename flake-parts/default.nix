@@ -27,7 +27,6 @@
 
   imports = [
     inputs.flake-file.flakeModules.default
-    inputs.flake-file.flakeModules.nix-auto-follow
     inputs.agenix-rekey.flakeModule
     inputs.agenix-shell.flakeModules.default
     inputs.home-manager.flakeModules.home-manager
