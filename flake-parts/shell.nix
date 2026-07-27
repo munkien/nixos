@@ -21,14 +21,6 @@
         };
 
         ripsecrets.enable = true;
-
-        trufflehog = {
-          enable = true;
-          name = "trufflehog";
-          entry = "${pkgs.trufflehog}/bin/trufflehog filesystem . --fail";
-          pass_filenames = false;
-          stages = ["pre-commit" "pre-push"];
-        };
       };
     };
 

@@ -10,6 +10,7 @@
     useRoutingFeatures = "client";
     authKeyFile = config.age.secrets.tailscale-authkey.path;
     extraUpFlags = ["--ssh" "--accept-dns=true"];
+    authKeyParameters.ephemeral = true;
   };
 
   age.secrets.tailscale-authkey = {
