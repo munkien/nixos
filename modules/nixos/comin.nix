@@ -11,7 +11,7 @@
   preservation = {
     preserveAt."/persist" = {
       directories = [
-        "/var/lib/comin"
+        "/persist/comin"
       ];
     };
   };
