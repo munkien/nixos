@@ -159,6 +159,7 @@
       libreoffice-qt-fresh
       tor-browser
       wezterm
+      arp-scan
 
       # Gaming
       heroic
