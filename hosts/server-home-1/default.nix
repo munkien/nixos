@@ -12,6 +12,7 @@
     ../../common/services/caddy.nix
     ../../common/services/fail2ban.nix
     ../../common/services/frigate.nix
+    ../../common/services/glances.nix
     ../../common/services/omada.nix
     ../../common/services/homeassistant.nix
     ../../common/services/authelia.nix
