@@ -3,14 +3,6 @@
   pkgs,
   ...
 }: {
-  systemd.services.agenix = {
-    unitConfig = {
-      after = ["persist.mount"];
-      requires = ["persist.mount"];
-      wantedBy = ["multi-user.target"];
-    };
-  };
-
   age.secrets.ialarm-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
     symlink = false;
