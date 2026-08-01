@@ -26,8 +26,8 @@
   systemd.services.agenix = {
     requires = ["persist.mount"];
     after = ["persist.mount"];
-    wantedBy = ["sysinit.target"];
-    unitConfig.DefaultDependencies = false;
+    #wantedBy = ["sysinit.target"];
+    #unitConfig.DefaultDependencies = false;
   };
 
   age.identityPaths = [
