@@ -23,13 +23,6 @@
 
   fileSystems."/persist".neededForBoot = true;
 
-  systemd.services.agenix = {
-    requires = ["persist.mount"];
-    after = ["persist.mount"];
-    #wantedBy = ["sysinit.target"];
-    #unitConfig.DefaultDependencies = false;
-  };
-
   age.identityPaths = [
     "/persist/etc/ssh/ssh_host_ed25519_key"
   ];
