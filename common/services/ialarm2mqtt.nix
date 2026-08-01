@@ -6,6 +6,8 @@
   # This assumes you have encrypted your complete config.yaml into this .age file
   age.secrets.ialarm-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
+    symlink = false;
+    mode = "0444";
   };
 
   # 2. Bind-mount the decrypted path into your Arion project
