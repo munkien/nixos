@@ -14,7 +14,7 @@
     container_name = "ialarm2mqtt";
 
     volumes = [
-      "${config.age.secrets.ialarm-config.path}:/config/config.json:ro"
+      "${config.age.secrets.ialarm2mqtt-config.path}:/config/config.json:ro"
     ];
   };
 }
