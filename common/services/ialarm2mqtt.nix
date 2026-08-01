@@ -5,8 +5,6 @@
 }: {
   age.secrets.ialarm-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
-    symlink = false;
-    mode = "0444";
   };
 
   virtualisation.arion.projects.home-infra.settings.services.ialarm2mqtt.service = {
