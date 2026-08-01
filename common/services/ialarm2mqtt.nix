@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  age.secrets.ialarm-config = {
+  age.secrets.ialarm2mqtt-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
     mode = "0444";
     symlink = true;
