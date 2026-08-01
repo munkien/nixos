@@ -12,7 +12,7 @@
 
   # 2. Bind-mount the decrypted path into your Arion project
   virtualisation.arion.projects.home-infra.settings.services.ialarm2mqtt.service = {
-    image = "ghcr.io/maxill1/ialarm-mqtt:latest";
+    image = "docker.io/maxill1/ialarm-mqtt:v0.12.0";
     container_name = "ialarm2mqtt";
 
     volumes = [
