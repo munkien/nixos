@@ -14,7 +14,7 @@
     container_name = "ialarm2mqtt";
 
     volumes = [
-      "${config.age.secrets.ialarm-config.path}:/config:ro"
+      "${config.age.secrets.ialarm-config.path}:/config/config.json:ro"
     ];
 
     restart = "always";
