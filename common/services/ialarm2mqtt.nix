@@ -13,8 +13,11 @@
     image = "docker.io/maxill1/ialarm-mqtt:v0.12.0";
     container_name = "ialarm2mqtt";
 
-    volumes = [
-      "${config.age.secrets.ialarm-config.path}:/config/config.json:ro"
+    secrets = [
+      {
+        source = "ialarm_secret";
+        target = "/config/config.yaml";
+      }
     ];
 
     restart = "always";
