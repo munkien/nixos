@@ -21,7 +21,5 @@
     volumes = [
       "${config.age.secrets.ialarm-config.path}:/config/config.json:ro"
     ];
-
-    restart = "always";
   };
 }
