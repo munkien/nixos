@@ -3,11 +3,6 @@
   pkgs,
   ...
 }: {
-  systemd.services.arion-home-infra = {
-    wants = ["agenix.service"];
-    after = ["agenix.service"];
-  };
-
   age.secrets.ialarm-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
     symlink = false;
