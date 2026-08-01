@@ -5,8 +5,9 @@
 }: {
   systemd.services.agenix = {
     unitConfig = {
-      After = ["persist.mount"];
-      Requires = ["persist.mount"];
+      after = ["persist.mount"];
+      requires = ["persist.mount"];
+      wantedBy = ["multi-user.target"];
     };
   };
 
