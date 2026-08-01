@@ -19,6 +19,7 @@
     ../../common/services/mosquitto.nix
     ../../common/services/ebusd.nix
     ../../common/services/zigbee2mqtt.nix
+    ../../common/services/ialarm2mqtt.nix
   ];
 
   system.stateVersion = "26.11";
