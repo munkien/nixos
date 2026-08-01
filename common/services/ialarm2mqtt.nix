@@ -2,7 +2,15 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  # Generate a proper JSON config file declaratively in the Nix store
+  ialarmConfigJson = pkgs.writeText "config.json" (builtins.toJSON {
+    mqtt = {
+      host = "";
+      port = 18034;
+    };
+  });
+in {
   systemd.services.arion-home-infra = {
     wants = ["agenix.service"];
     after = ["agenix.service"];
@@ -19,7 +27,7 @@
     container_name = "ialarm2mqtt";
 
     volumes = [
-      "${config.age.secrets.ialarm-config.path}:/config/config.json:ro"
+      "${ialarmConfigJson}:/config/config.json:ro"
     ];
 
     restart = "always";
