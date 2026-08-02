@@ -3,10 +3,13 @@
   pkgs,
   ...
 }: {
+  systemd.tmpfiles.rules = [
+    "Z /var/lib/mosquitto 0700 mosquitto mosquitto - -"
+  ];
+
   age.secrets.ialarm2mqtt-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
     mode = "0444";
-    symlink = true;
   };
 
   virtualisation.arion.projects.home-infra.settings.services.ialarm2mqtt.service = {
