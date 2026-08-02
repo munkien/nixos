@@ -12,6 +12,7 @@
     };
     extraArguments = [
       "--mqttjson"
+      "--mqttretain"
       "--accesslevel=*"
       "--pollinterval=30"
     ];
