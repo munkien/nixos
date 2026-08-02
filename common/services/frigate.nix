@@ -5,7 +5,9 @@
 }: let
   frigateYaml = pkgs.writeText "frigate-config.yml" ''
     mqtt:
+      enabled: True
       host: home-server-1.home.arpa
+      user: frigate
 
     ffmpeg:
       hwaccel_args: preset-vaapi
