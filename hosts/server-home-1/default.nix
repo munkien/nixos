@@ -20,6 +20,7 @@
     ../../common/services/ebusd.nix
     ../../common/services/zigbee2mqtt.nix
     ../../common/services/ialarm2mqtt.nix
+    ../../common/services/matterjs-server.nix
   ];
 
   system.stateVersion = "26.11";
