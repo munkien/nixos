@@ -18,6 +18,8 @@
     restart = "always";
   };
 
+  services.home-assistant-matter-hub.enable = true;
+
   services.caddy.virtualHosts."ha.munkie.dk" = {
     extraConfig = ''
       reverse_proxy 127.0.0.1:8123
