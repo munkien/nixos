@@ -7,7 +7,9 @@
       host = "localhost";
       port = 1883;
       home-assistant = true;
-      client_id = "ebusd";
+      user = "ebusd";
+      password = "";
+      retain = true;
     };
     extraArguments = [
       "--mqttjson"
