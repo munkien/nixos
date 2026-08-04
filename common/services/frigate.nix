@@ -7,7 +7,7 @@
     mqtt:
       enabled: True
       host: home-server-1.home.arpa
-      user: frigate
+      client_id: frigate
 
     ffmpeg:
       hwaccel_args: preset-vaapi

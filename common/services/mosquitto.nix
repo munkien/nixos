@@ -1,4 +1,11 @@
 {...}: {
+  age.secrets.mosquitto-pw = {
+    rekeyFile = ./secrets/mosquitto-pw.age;
+    mode = "0400";
+    owner = "mosquitto";
+    group = "mosquitto";
+  };
+
   services.mosquitto = {
     enable = true;
     persistence = true;
