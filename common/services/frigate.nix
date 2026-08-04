@@ -12,6 +12,9 @@
     ffmpeg:
       hwaccel_args: preset-vaapi
 
+    audio:
+      enabled: True
+
     detect:
       enabled: True
 
