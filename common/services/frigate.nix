@@ -6,7 +6,7 @@
   frigateYaml = pkgs.writeText "frigate-config.yml" ''
     mqtt:
       enabled: True
-      host: localhost
+      host: server-home-1.home.arpa
       client_id: frigate
 
     ffmpeg:
