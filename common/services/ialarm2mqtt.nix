@@ -3,10 +3,6 @@
   pkgs,
   ...
 }: {
-  systemd.tmpfiles.rules = [
-    "Z /var/lib/mosquitto 0700 mosquitto mosquitto - -"
-  ];
-
   age.secrets.ialarm2mqtt-config = {
     rekeyFile = ../../secrets/services/ialarm2mqtt.age;
     mode = "0444";
@@ -17,7 +13,7 @@
     container_name = "ialarm2mqtt";
 
     volumes = [
-      "${config.age.secrets.ialarm2mqtt-config.path}:/config/config.json:ro"
+      "${config.age.secrets.ialarm2mqtt-config.path}:/config/config.yaml:ro"
     ];
   };
 }
