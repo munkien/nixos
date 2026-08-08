@@ -13,6 +13,10 @@
       "/run/dbus:/run/dbus:ro"
     ];
 
+    labels = {
+      "io.containers.autoupdate" = "registry";
+    };
+
     network_mode = "host";
     privileged = true;
     restart = "always";

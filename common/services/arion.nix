@@ -1,6 +1,8 @@
 {
   pkgs,
   inputs,
+  lib,
+  config,
   ...
 }: {
   imports = [inputs.arion.nixosModules.arion];
@@ -13,6 +15,14 @@
   virtualisation.docker.enable = false;
   virtualisation.podman.enable = true;
   virtualisation.podman.dockerSocket.enable = true;
+
+  systemd.timers."podman-auto-update" = {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+    };
+  };
 
   users.extraUsers.munkien.extraGroups = ["podman" "docker"];
 
