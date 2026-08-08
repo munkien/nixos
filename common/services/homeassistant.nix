@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   virtualisation.arion.projects.home-infra.settings.services.homeassistant.service = {
-    image = "ghcr.io/home-assistant/home-assistant:stable";
+    image = "ghcr.io/home-assistant/home-assistant:2026.8.1";
     container_name = "homeassistant";
 
     environment = {
@@ -12,10 +12,6 @@
       "/etc/localtime:/etc/localtime:ro"
       "/run/dbus:/run/dbus:ro"
     ];
-
-    labels = {
-      "io.containers.autoupdate" = "registry";
-    };
 
     network_mode = "host";
     privileged = true;
