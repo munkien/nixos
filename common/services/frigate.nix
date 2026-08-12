@@ -52,6 +52,23 @@
             - car
             - dog
 
+      garage:
+        ffmpeg:
+          inputs:
+            - path: "{FRIGATE_GARAGE_PATH}"
+              roles:
+                - record
+                - detect
+        detect:
+          width: 1920
+          height: 1080
+          fps: 5
+        objects:
+          track:
+            - person
+            - car
+            - dog
+
       attic1:
         ffmpeg:
           inputs:
