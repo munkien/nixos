@@ -51,6 +51,15 @@
             - person
             - car
             - dog
+        zones:
+          actual_driveway:
+            coordinates:
+              0.043,0.383,0.696,0.584,0.702,0.721,0.853,0.736,0.898,0.658,0.947,0.65,0.926,0.998,0.006,0.997,0.005,0.418
+            loitering_time: 0
+            friendly_name: Actual Driveway
+        review:
+          alerts:
+            required_zones: actual_driveway
 
       garage:
         ffmpeg:
