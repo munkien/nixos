@@ -15,9 +15,18 @@
 
   preservation.preserveAt."/persist" = {
     directories = [
-      "/var/lib/mosquitto"
+      {
+        directory = "/var/lib/mosquitto";
+        user = "mosquitto";
+        group = "mosquitto";
+        mode = "0750";
+      }
     ];
   };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/mosquitto 0750 mosquitto mosquitto - -"
+  ];
 
   networking.firewall.allowedTCPPorts = [1883];
 }

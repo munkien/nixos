@@ -21,6 +21,7 @@
     ../../common/services/zigbee2mqtt.nix
     ../../common/services/ialarm2mqtt.nix
     ../../common/services/matterjs-server.nix
+    ../../common/services/gatus.nix
   ];
 
   system.stateVersion = "26.11";
