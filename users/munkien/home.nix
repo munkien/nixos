@@ -161,6 +161,8 @@
       wezterm
       arp-scan
 
+      qemu
+
       # Gaming
       heroic
       satisfactorymodmanager
