@@ -21,6 +21,8 @@
 
   services.comin.enable = true;
 
+  virtualisation.libvirtd.enable = true;
+
   hardware = {
     facter = {
       enable = true;
