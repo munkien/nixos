@@ -162,6 +162,7 @@
       arp-scan
 
       qemu
+      virt-manager
 
       # Gaming
       heroic
