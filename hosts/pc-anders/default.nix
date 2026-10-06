@@ -21,6 +21,7 @@
 
   services.comin.enable = true;
 
+  virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
 
   hardware = {
