@@ -20,6 +20,7 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
     inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs
     code-cursor
     mqttx
+    claude-code
   ];
 
   programs.vscodium = {

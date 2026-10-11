@@ -30,11 +30,18 @@ lib.mkIf config.my.gaming.enable {
   };
 
   networking.firewall = {
-    # Port 24642 is the default for Stardew Valley multiplayer
-    allowedTCPPorts = [24642];
+    # Stardew Valley and Satisfactory
+    allowedTCPPorts = [
+      24642 # Stardew Valley
+      7777 # Satisfactory
+      8888 # Satisfactory
+    ];
+
     allowedUDPPorts = [
       24642 # Stardew Valley Discovery/Data
       27036 # Steam Remote Play
+      7777 # Satisfactory
+      8888 # Satisfactory
     ];
 
     # Steamworks P2P and Voice Chat ranges
