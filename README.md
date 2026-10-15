@@ -325,14 +325,21 @@ UUIDs and bcachefs multi-device pools in `hosts/*/filesystem.nix`, so a VM canno
 boot them as written. VM boot tests are a follow-on to decoupling the hosts from
 their physical disks, not something that can be bolted on alongside them.
 
-#### Known failure: `check-flake-file`
+#### `check-flake-file` and lockfile flattening
 
-`nix flake check` currently fails on `check-flake-file`, which reports lockfile
-pruning drift: it wants duplicate `nixpkgs` / `nixpkgs-lib` nodes collapsed into a
-single node, but `nix run .#write-lock` does not emit that, so the check and the
-writer disagree. This predates the assertion suite (it fails at commit `a37874b`).
+`flake-file`'s `prune-lock` step runs [`nix-auto-follow`](https://github.com/fzakaria/nix-auto-follow)
+and diffs the result, so `check-flake-file` fails whenever `flake.lock` still
+points several inputs at their own byte-identical copies of `nixpkgs` /
+`nixpkgs-lib`. This happened for months unnoticed; fixed in commit `18ff681`.
 
-`.github/workflows/checks.yml` therefore treats the fleet assertions and the host
-builds as the hard gate, and runs the full `nix flake check` non-blocking
-(`continue-on-error`) so it still reports. Once the lockfile drift is fixed, drop
-that flag to make the full suite a hard gate.
+**If it fails again**, fix it with flake-file's own pruner rather than by hand:
+
+```bash
+nix-auto-follow flake.lock pruned.lock && mv pruned.lock flake.lock
+```
+
+Note that `nix run .#write-flake` does **not** persist this: `prune-lock` runs
+inside a build sandbox and cannot write back to the source tree, so it reports
+success while leaving `flake.lock` unchanged. The flattening is safe — the
+collapse only repoints references between nodes with identical `narHash` and
+`lastModified`, so no versions change.

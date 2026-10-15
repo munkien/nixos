@@ -45,19 +45,19 @@ jobs:
       - name: Dry-run build ${{ matrix.host }}
         run: nix build --dry-run ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel"
 
-  # Full `nix flake check`, including the lint hooks and the flake-file
-  # generator check.
+  # Full `nix flake check`: lint hooks, the flake-file generator check, and the
+  # fleet assertions. This is a hard gate — all checks pass as of commit
+  # 18ff681. (check-flake-file used to fail on lockfile pruning drift; that was
+  # fixed by flattening the duplicate nixpkgs/nixpkgs-lib inputs in flake.lock.)
   #
-  # KNOWN RED: `check-flake-file` currently fails (see README "Tests"). It
-  # reports lockfile pruning drift — duplicate `nixpkgs` / `nixpkgs-lib` nodes
-  # that `nix run .#write-lock` does not collapse, so the check and the writer
-  # disagree. This was already failing at commit a37874b, before the fleet
-  # assertions were added. `continue-on-error` is deliberately set so this job
-  # reports without blocking; remove it once check-flake-file is fixed, so the
-  # full suite becomes a hard gate.
+  # If check-flake-file ever fails again, the cause is almost always a flake.lock
+  # whose duplicate inputs are no longer collapsed. Fix it with flake-file's own
+  # pruner rather than by hand:
+  #     nix-auto-follow flake.lock pruned.lock && mv pruned.lock flake.lock
+  # Note that `nix run .#write-flake` does NOT persist this, because prune-lock
+  # runs in a build sandbox and cannot write back to the source tree.
   flake-check:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: DeterminateSystems/determinate-nix-action@main
