@@ -52,3 +52,12 @@ Desktop.ini
 .idea/
 *.iml
 result
+
+# --- Agent tooling ---
+# Machine-local agent runtime state and caches
+.whale/
+
+# Shared skill library is vendored via skills-lock.json; not part of the
+# NixOS configuration.
+.agents/
+skills-lock.json

@@ -31,7 +31,6 @@
   };
 
   my.user = {
-    media.enable = true;
     developer.enable = true;
     autostart = [
       "spotify"

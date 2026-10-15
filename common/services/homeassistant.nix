@@ -1,4 +1,4 @@
-{...}: {
+_: {
   virtualisation.arion.projects.home-infra.settings.services.homeassistant.service = {
     image = "ghcr.io/home-assistant/home-assistant:2026.8.1";
     container_name = "homeassistant";

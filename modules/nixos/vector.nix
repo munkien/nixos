@@ -1,5 +1,5 @@
 {inputs, ...}: {
-  age.generators.alnum-ntfy = {...}: ''
+  age.generators.alnum-ntfy = _: ''
     printf "https://ntfy.sh/"
     head /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9' | head -c 32
   '';

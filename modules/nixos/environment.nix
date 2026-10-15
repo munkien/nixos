@@ -1,4 +1,4 @@
-{...}: {
+_: {
   security.sudo.wheelNeedsPassword = false;
   programs.git.enable = true;
   programs.fuse.userAllowOther = true;

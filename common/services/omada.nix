@@ -1,4 +1,4 @@
-{...}: {
+_: {
   system.activationScripts.omadaDirs = ''
     mkdir -p /var/lib/omada/{data,work,logs}
   '';

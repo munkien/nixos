@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # 1. Enable the native NixOS Fail2ban service
   services.fail2ban = {
     enable = true;
