@@ -249,3 +249,51 @@ To maintain code quality, the repository uses `git-hooks.nix` in the flake check
 - **Statix**: Lints code style and anti-patterns.
 - **Check-Symlinks**: Ensures broken symlinks do not slip into configurations.
 - **Ripsecrets**: Prevents secrets from being committed in plaintext.
+
+### Tests
+
+`flake-parts/tests.nix` adds a **fleet assertion suite**: evaluation-level checks
+that inspect the fully evaluated `nixosConfigurations.<host>.config` and assert
+invariants the fleet relies on. They do not boot anything, so they run in seconds
+and are cheap enough to gate every push.
+
+```bash
+nix build .#checks.x86_64-linux.fleet-assertions-pc-anders
+nix build .#checks.x86_64-linux.fleet-assertions-server-home-1
+```
+
+Coverage is deliberately split between **relationships** (durable against
+intentional config changes) and **explicit guards** (for specific regressions):
+
+| Kind | Examples |
+|---|---|
+| Fleet invariants | tmpfs root, `/persist` neededForBoot, SSH password auth off, Tailscale and comin enabled |
+| Stateless root | `users.mutableUsers = false` (see below) |
+| Desktop relationships | graphical ⇒ SDDM + Plasma; headless ⇒ no display manager; gaming ⇒ desktop |
+| Server boundaries | home-infra arion services never land on a desktop host; zigbee2mqtt implies a broker |
+| Removed options | `my.server.enable` / `my.user.media.enable` cannot silently return |
+
+**`users.mutableUsers = false` is required.** With a tmpfs root, `/etc` is
+ephemeral; mutable users would write account and password changes to a filesystem
+that disappears on reboot, potentially leaving a host unloggable. All accounts are
+declared in Nix and use `hashedPasswordFile` (agenix). This is enforced by the
+`stateless-root-requires-immutable-users` assertion.
+
+#### Why not VM tests?
+
+`pkgs.testers.runNixOSTest` would be stronger, but both hosts hardcode real disk
+UUIDs and bcachefs multi-device pools in `hosts/*/filesystem.nix`, so a VM cannot
+boot them as written. VM boot tests are a follow-on to decoupling the hosts from
+their physical disks, not something that can be bolted on alongside them.
+
+#### Known failure: `check-flake-file`
+
+`nix flake check` currently fails on `check-flake-file`, which reports lockfile
+pruning drift: it wants duplicate `nixpkgs` / `nixpkgs-lib` nodes collapsed into a
+single node, but `nix run .#write-lock` does not emit that, so the check and the
+writer disagree. This predates the assertion suite (it fails at commit `a37874b`).
+
+`.github/workflows/checks.yml` therefore treats the fleet assertions and the host
+builds as the hard gate, and runs the full `nix flake check` non-blocking
+(`continue-on-error`) so it still reports. Once the lockfile drift is fixed, drop
+that flag to make the full suite a hard gate.

@@ -1,0 +1,66 @@
+name: "Fleet checks"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # The gate that must pass. These are evaluation-level assertions over the
+  # evaluated host configs (see flake-parts/tests.nix). They are cheap, so it is
+  # reasonable to run them on every push to main — which is also the deploy
+  # branch that comin follows, so a red result here is the only thing standing
+  # between a typo and every host self-deploying it.
+  fleet-assertions:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - fleet-assertions-pc-anders
+          - fleet-assertions-server-home-1
+          - fleet-assertions-no-colmena
+          - fleet-assertions-user-options
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/determinate-nix-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Run ${{ matrix.check }}
+        run: nix build -L ".#checks.x86_64-linux.${{ matrix.check }}"
+
+  # Every host configuration must still evaluate and build. This catches a
+  # broken module before a host with comin pulls it from main.
+  hosts-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [pc-anders, server-home-1]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/determinate-nix-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Dry-run build ${{ matrix.host }}
+        run: nix build --dry-run ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel"
+
+  # Full `nix flake check`, including the lint hooks and the flake-file
+  # generator check.
+  #
+  # KNOWN RED: `check-flake-file` currently fails (see README "Tests"). It
+  # reports lockfile pruning drift — duplicate `nixpkgs` / `nixpkgs-lib` nodes
+  # that `nix run .#write-lock` does not collapse, so the check and the writer
+  # disagree. This was already failing at commit a37874b, before the fleet
+  # assertions were added. `continue-on-error` is deliberately set so this job
+  # reports without blocking; remove it once check-flake-file is fixed, so the
+  # full suite becomes a hard gate.
+  flake-check:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/determinate-nix-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: nix flake check
+        run: nix flake check --no-write-lock-file -L
