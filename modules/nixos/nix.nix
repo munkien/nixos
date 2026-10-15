@@ -6,9 +6,18 @@
   ...
 }: {
   options.my.flakeDir = lib.mkOption {
-    type = lib.types.str;
-    default = "/home/munkien/nixos";
-    description = "Path to the system flake directory";
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    example = "/home/munkien/nixos";
+    description = ''
+      Path to a locally checked-out copy of this flake, used only to configure
+      `nh` as a convenience wrapper. Deployment does NOT depend on this: comin
+      deploys from its own clone under /var/lib/comin, and evaluation reads the
+      flake from the nix store.
+
+      Set per host. Defaults to null so a host without a local checkout (e.g. a
+      kiosk) does not get an `nh` pointed at a path that does not exist.
+    '';
   };
 
   imports = [
@@ -75,7 +84,10 @@
 
       nh = {
         enable = true;
-        flake = config.my.flakeDir or "/home/munkien/nixos";
+        # Only point nh at a checkout when the host actually declares one. The
+        # previous `config.my.flakeDir or "..."` was dead code: the option had a
+        # default, so `or` could never fire.
+        flake = lib.mkIf (config.my.flakeDir != null) config.my.flakeDir;
         clean = {
           enable = true;
           dates = "daily";

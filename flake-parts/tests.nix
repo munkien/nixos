@@ -75,9 +75,17 @@
       allowUnfree is expected fleet-wide.
     '')
 
-    (assertTrue "flakeDir-defined-${hostName}" (cfg.my.flakeDir != "") ''
-      my.flakeDir must resolve to a non-empty path.
-    '')
+    # `my.flakeDir` is only used to configure `nh`. It is null on hosts with no
+    # local checkout, so the meaningful invariant is that a declared path is
+    # absolute and actually exists in the store, not that it is set.
+    (assertTrue "flakeDir-sane-${hostName}" (
+        cfg.my.flakeDir
+        == null
+        || (lib.hasPrefix "/" cfg.my.flakeDir)
+      ) ''
+        my.flakeDir must be null (no local checkout) or an absolute path.
+        A relative path would make `nh` unusable.
+      '')
 
     # `users.mutableUsers = true` combined with a tmpfs root is a known trap:
     # /etc is ephemeral, so imperative user/password changes vanish on reboot
@@ -188,6 +196,43 @@
   ];
 
   # ---------------------------------------------------------------------------
+  # Portability: the fleet baseline must not assume a particular human exists or
+  # a particular checkout path is present. These guard the decoupling that makes
+  # adding a host (e.g. a kiosk) cheap.
+  # ---------------------------------------------------------------------------
+  portabilityInvariants = hostName: cfg: [
+    # `my.containers.user` must be null or name a real account. Checking mere
+    # existence is not enough: the arion module itself creates the entry via
+    # `users.extraUsers`, so `hasAttr` is true even for a name that no one
+    # actually declares. `isNormalUser` distinguishes a genuine account from that
+    # artifact.
+    (assertTrue "containers-user-is-real-account-${hostName}" (
+        cfg.my.containers.user
+        == null
+        || (builtins.hasAttr cfg.my.containers.user cfg.users.users
+          && cfg.users.users.${cfg.my.containers.user}.isNormalUser)
+      ) ''
+        my.containers.user is set to "${toString cfg.my.containers.user}" but no
+        interactive account with that name is declared on this host. The arion module
+        would create an empty group-membership stub rather than granting a real user
+        container access. Declare the user, or set my.containers.user = null.
+      '')
+
+    # The baseline must not hardcode a username. A host with no interactive user
+    # (e.g. a kiosk) still has to evaluate, so nothing in modules/ may reference
+    # `users.users.munkien` directly. If such a reference is ever added, this
+    # host-simulation in flake-parts/ would break; assert the option surface
+    # instead: `my.containers.user` is the only user-naming knob in the baseline.
+    (assertTrue "baseline-user-knob-is-nullable-${hostName}" (
+        cfg.my.containers.user
+        == null
+        || builtins.isString cfg.my.containers.user
+      ) ''
+        my.containers.user must be null or a string.
+      '')
+  ];
+
+  # ---------------------------------------------------------------------------
   # Server-only services must never appear on a graphical workstation.
   # ---------------------------------------------------------------------------
   serverOnlyArionServices = ["frigate" "homeassistant" "authelia" "ialarm2mqtt" "matterjs-server" "omada"];
@@ -230,6 +275,7 @@
     fleetInvariants hostName cfg
     ++ desktopInvariants hostName cfg
     ++ rollbackInvariants hostName cfg
+    ++ portabilityInvariants hostName cfg
     ++ serverInvariants hostName cfg
     ++ removedOptionsInvariants hostName cfg;
 

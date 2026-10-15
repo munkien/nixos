@@ -30,6 +30,8 @@
     desktop.enable = false;
     gaming.enable = false;
     healthCheck.enable = true;
+    containers.user = "munkien";
+    flakeDir = "/home/munkien/nixos";
   };
 
   services.comin.enable = true;

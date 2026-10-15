@@ -1,7 +1,8 @@
-# modules/common/wifi-gl3.nix
+# Workstation-only wifi credentials. Kept under secrets/hosts/<host>/ rather
+# than secrets/common/, since no other host uses them.
 {config, ...}: {
   age.secrets.wifi-gl3 = {
-    rekeyFile = ../../secrets/common/wifi-gl3_env.age;
+    rekeyFile = ../../secrets/hosts/pc-anders/wifi-gl3_env.age;
     owner = "root";
     mode = "0600";
   };

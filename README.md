@@ -24,9 +24,52 @@ This repository houses the strictly declarative, multi-architecture configuratio
 │   └── server-home-1/     # Home server (x86_64, single-pool bcachefs, Caddy/MQTT/Frigate)
 ├── users/                 # System user configuration
 │   └── munkien/           # User 'munkien' profile, public keys, home-manager payload
-├── secrets/               # Encrypted (agenix/agenix-rekey) secrets, per host
+├── secrets/               # Encrypted (agenix/agenix-rekey) secret SOURCES
+│   ├── common/            #   used by 2+ hosts (tailscale, vector-uri)
+│   ├── services/          #   single-service secrets (caddy, frigate, authelia, ...)
+│   └── hosts/<host>/      #   host-only secrets (e.g. pc-anders wifi)
 └── justfile               # Deployment & maintenance recipes (test/switch/deploy/update)
 ```
+
+### Adding a host
+
+Adding a machine is meant to be cheap. A new host needs:
+
+1. **`hosts/<name>/default.nix`** — imports `./filesystem.nix`, sets
+   `system.stateVersion`, `networking.hostName`, and `age.rekey.hostPubkey`
+   (reading `./hostPubkey.pub`).
+2. **`hosts/<name>/hostPubkey.pub`** — required, read unconditionally at
+   evaluation time. Get it with `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`.
+3. **`hosts/<name>/filesystem.nix`** — the disk layout. There is no shared
+   default; it is per machine. Note this is why VM tests are not yet possible:
+   the layouts hardcode real UUIDs.
+4. **`hosts/<name>/facter.json`** — `hardware.facter.reportPath` expects it.
+5. **`hosts/<name>/secrets/`** — destination for rekeyed secrets (create empty).
+6. **A registry entry** in `flake-parts/hosts.nix` (`system`, `tags`).
+
+Then `agenix rekey` and commit. Rekeying only touches the new host's
+`secrets/` directory; existing hosts are unaffected, so adding a machine does
+not disturb running ones.
+
+Everything else is opt-in per host:
+
+| Feature | How it is enabled |
+|---|---|
+| Desktop (SDDM + Plasma) | `my.desktop.enable` |
+| Gaming (Steam, GameScope) | `my.gaming.enable` |
+| Boot-health gate | `my.healthCheck.enable` |
+| Container access for a user | `my.containers.user = "<name>"` |
+| `nh` wrapper with a local checkout | `my.flakeDir = "/path/to/checkout"` |
+| The `munkien` user + Home Manager | importing `users/munkien` |
+
+The last row matters: `users/munkien` is **not** part of the fleet baseline, so a
+host with no interactive user (a kiosk, say) simply does not import it. The
+`my.*` options above all have safe defaults (`null`/`false`), so a minimal host
+needs none of them.
+
+Note `my.flakeDir` is only used to configure `nh` as a convenience wrapper.
+Deployment does not depend on it — comin deploys from its own clone under
+`/var/lib/comin`, and evaluation reads the flake from the nix store.
 
 ---
 
