@@ -29,6 +29,7 @@
   my = {
     desktop.enable = false;
     gaming.enable = false;
+    healthCheck.enable = true;
   };
 
   services.comin.enable = true;

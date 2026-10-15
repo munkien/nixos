@@ -120,6 +120,74 @@
   ];
 
   # ---------------------------------------------------------------------------
+  # Rollback safety: Automatic Boot Assessment + the health gate.
+  #
+  # These guard the mechanism that lets an unreachable host recover by itself.
+  # They are deliberately explicit: getting this wrong silently leaves a machine
+  # with no way back, which is worse than an obvious boot failure.
+  # ---------------------------------------------------------------------------
+  rollbackInvariants = hostName: cfg: [
+    (assertTrue "boot-counting-enabled-${hostName}" cfg.boot.loader.systemd-boot.bootCounting.enable ''
+      Automatic Boot Assessment is disabled. Without it a generation that fails to
+      boot is never rolled back automatically. Requires systemd-boot (x86_64).
+    '')
+
+    (assertTrue "boot-counting-tries-positive-${hostName}" (cfg.boot.loader.systemd-boot.bootCounting.tries >= 2) ''
+      bootCounting.tries must be >= 2, otherwise a generation is marked bad after a
+      single failure and a transient problem rolls back a good revision.
+    '')
+
+    (assertTrue "boot-counting-fits-configuration-limit-${hostName}" (
+        cfg.boot.loader.systemd-boot.bootCounting.tries
+        < cfg.boot.loader.systemd-boot.configurationLimit
+      ) ''
+        bootCounting.tries must be lower than configurationLimit, otherwise the
+        previous generation may already have been garbage-collected from /boot and
+        there is nothing to fall back to.
+      '')
+
+    (assertTrue "health-check-enabled-${hostName}" cfg.my.healthCheck.enable ''
+      The health gate is disabled, so boot-complete.target is reached as soon as
+      userspace comes up. A generation that boots but has no network would then be
+      blessed and never rolled back — the exact case for a host you cannot reach.
+    '')
+
+    # The dependency direction that makes the gate actually work. A plain
+    # WantedBy is a WEAK dependency: a failing unit would leave boot-complete
+    # reachable and the generation still blessed. Per systemd.special(7) the
+    # target must Requires= the unit and be ordered after it.
+    (assertTrue "health-check-required-by-boot-complete-${hostName}" (
+        builtins.elem "fleet-health-check.service" (cfg.systemd.targets."boot-complete".requires or [])
+      ) ''
+        boot-complete.target does not Requires= fleet-health-check.service. With only a
+        weak (Wants/WantedBy) relationship, a FAILING health check would still let the
+        target be reached and the generation blessed, defeating the gate entirely.
+      '')
+
+    (assertTrue "health-check-ordered-before-boot-complete-${hostName}" (
+        builtins.elem "boot-complete.target" (cfg.systemd.services.fleet-health-check.before or [])
+      ) ''
+        fleet-health-check.service is not ordered Before=boot-complete.target, so it may
+        run after the boot has already been blessed.
+      '')
+
+    (assertTrue "health-check-runs-after-network-${hostName}" (
+        builtins.elem "network-online.target" (cfg.systemd.services.fleet-health-check.after or [])
+      ) ''
+        fleet-health-check.service does not run after network-online.target, so the
+        default-route check could evaluate before networking is up and false-positive.
+      '')
+
+    (assertTrue "health-check-expects-display-manager-correctly-${hostName}" (
+        cfg.my.healthCheck.expectDisplayManager == cfg.my.desktop.enable
+      ) ''
+        my.healthCheck.expectDisplayManager disagrees with my.desktop.enable. A headless
+        host expecting a display manager (or vice versa) would either never roll back or
+        roll back good generations.
+      '')
+  ];
+
+  # ---------------------------------------------------------------------------
   # Server-only services must never appear on a graphical workstation.
   # ---------------------------------------------------------------------------
   serverOnlyArionServices = ["frigate" "homeassistant" "authelia" "ialarm2mqtt" "matterjs-server" "omada"];
@@ -161,6 +229,7 @@
   allAssertions = hostName: cfg:
     fleetInvariants hostName cfg
     ++ desktopInvariants hostName cfg
+    ++ rollbackInvariants hostName cfg
     ++ serverInvariants hostName cfg
     ++ removedOptionsInvariants hostName cfg;
 

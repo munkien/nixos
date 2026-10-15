@@ -87,6 +87,44 @@ This guarantees that terminal-only headless servers do not waste resources evalu
 
 The fleet implements a **strictly stateless root** design. The root directory `/` is mounted as a volatile `tmpfs` RAM disk of `4GB`, which is wiped on every reboot. This forces complete declarative configuration and avoids configuration drift over time.
 
+Because `/etc` is therefore ephemeral, `users.mutableUsers = false` is set
+fleet-wide (`modules/nixos/system.nix`): mutable users would write account and
+password changes to a filesystem that disappears on reboot. All accounts are
+declared in Nix and use `hashedPasswordFile` (agenix).
+
+### Automatic Rollback
+A stateless root is disposable, but a host that fails to *boot* still needs a way
+back — and a host you cannot walk over to needs one that works without a network.
+
+Two mechanisms, layered:
+
+1. **Automatic Boot Assessment** (`modules/nixos/boot.nix`) —
+   `boot.loader.systemd-boot.bootCounting.enable` gives each new generation 3
+   boot attempts. Each boot decrements a counter; only when the boot reaches
+   `boot-complete.target` does `systemd-bless-boot.service` mark the entry good.
+   A generation whose counter reaches zero is skipped in favour of the previous
+   one. Entirely local: it works even when the broken generation is itself what
+   broke networking.
+
+2. **A health gate** (`modules/nixos/boot-health.nix`) — boot counting alone only
+   proves *userspace came up*. A generation that boots cleanly with no default
+   route, or with `comin` dead, would be blessed and never rolled back — exactly
+   the case that matters for an unreachable host. So `fleet-health-check.service`
+   runs before `boot-complete.target` and withholds the blessing unless
+   networking, the deploy agent, and (on graphical hosts) the display manager are
+   all up.
+
+The dependency direction is deliberate and load-bearing: per `systemd.special(7)`,
+`boot-complete.target` carries `Requires=fleet-health-check.service` and is ordered
+after it. A plain `WantedBy` would be a *weak* dependency, so a failing check
+would leave the target reachable and the generation blessed anyway. Both
+properties are asserted by the test suite. `bootCounting.tries` must also stay
+below `configurationLimit` (30), or the fallback generation may already have been
+garbage-collected from `/boot`.
+
+`systemd-boot` is x86_64-only here, so boot counting applies to x86_64 hosts; the
+ARM path uses `generic-extlinux-compatible` and has no automatic fallback.
+
 ### The `preservation` Module
 We utilize `preservation` (WilliButz/preservation) instead of the traditional `impermanence` module.
 
@@ -269,6 +307,7 @@ intentional config changes) and **explicit guards** (for specific regressions):
 |---|---|
 | Fleet invariants | tmpfs root, `/persist` neededForBoot, SSH password auth off, Tailscale and comin enabled |
 | Stateless root | `users.mutableUsers = false` (see below) |
+| Rollback safety | boot counting on, `tries` within `configurationLimit`, health gate enabled, and the `Requires=`/`Before=` wiring that makes the gate actually block blessing |
 | Desktop relationships | graphical ⇒ SDDM + Plasma; headless ⇒ no display manager; gaming ⇒ desktop |
 | Server boundaries | home-infra arion services never land on a desktop host; zigbee2mqtt implies a broker |
 | Removed options | `my.server.enable` / `my.user.media.enable` cannot silently return |
