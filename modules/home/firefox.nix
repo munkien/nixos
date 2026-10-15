@@ -4,268 +4,205 @@
   lib,
   osConfig,
   ...
-}:
-lib.mkIf osConfig.my.desktop.enable {
-  home.packages = with pkgs; [
-    pywalfox-native
-  ];
+}: let
+  # Force-install an extension from AMO by its slug.
+  amo = slug: {
+    install_url = "https://addons.mozilla.org/firefox/downloads/latest/${slug}/latest.xpi";
+    installation_mode = "force_installed";
+  };
 
-  programs.firefox = {
-    enable = lib.mkDefault true;
-    configPath = "${config.xdg.configHome}/mozilla/firefox";
+  # Prefs shared by every profile.
+  commonSettings = {
+    "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+    "widget.use-xdg-desktop-portal.file-picker" = 1;
+  };
 
-    policies = {
-      DisplayBookmarksToolbar = "always";
-      DisableMasterPasswordCreation = true;
-      PasswordManagerEnabled = false;
-      SkipTermsOfUse = true;
-      ShowHomeButton = true;
-      DisableProfileImport = true;
-      DisableTelemetry = true;
-      DefaultDownloadDirectory = "/scratch/download";
+  # Bookmark helper: bm "Name" "https://..." [ "tag" ]
+  bm = name: url: tags: {inherit name url tags;};
 
-      ExtensionSettings = {
-        "plasma-browser-integration@kde.org" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/plasma-integration/latest.xpi";
-          installation_mode = "force_installed";
-        };
+  # Desktop launcher for a given profile name.
+  mkLauncher = profile: genericName: {
+    name = "Firefox — ${profile}";
+    inherit genericName;
+    exec = ''firefox -P "${profile}" -no-remote %U'';
+    icon = "firefox";
+    terminal = false;
+    categories = ["Network" "WebBrowser"];
+  };
+in
+  lib.mkIf osConfig.my.desktop.enable {
+    home.packages = [pkgs.pywalfox-native];
 
-        "sponsorBlocker@ajay.app" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
-          installation_mode = "force_installed";
-        };
+    programs.firefox = {
+      enable = lib.mkDefault true;
+      configPath = "${config.xdg.configHome}/mozilla/firefox";
 
-        "dearrow@ajay.app" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/dearrow/latest.xpi";
-          installation_mode = "force_installed";
-        };
+      nativeMessagingHosts = [pkgs.kdePackages.plasma-browser-integration];
 
-        "78272b6fa58f4a1abaac99321d503a20@proton.me" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/proton-pass/latest.xpi";
-          installation_mode = "force_installed";
-        };
+      policies = {
+        DisplayBookmarksToolbar = "always";
+        DisableMasterPasswordCreation = true;
+        PasswordManagerEnabled = false;
+        SkipTermsOfUse = true;
+        ShowHomeButton = true;
+        DisableProfileImport = true;
+        DisableTelemetry = true;
+        DefaultDownloadDirectory = "/scratch/download";
 
-        "vpn@proton.ch" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/proton-vpn-firefox-extension/latest.xpi";
-          installation_mode = "force_installed";
-        };
-
-        "steamdb" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/file/4891926/steam_database-4.35.xpi";
-          installation_mode = "force_installed";
+        ExtensionSettings = {
+          "plasma-browser-integration@kde.org" = amo "plasma-integration";
+          "sponsorBlocker@ajay.app" = amo "sponsorblock";
+          "dearrow@ajay.app" = amo "dearrow";
+          "78272b6fa58f4a1abaac99321d503a20@proton.me" = amo "proton-pass";
+          "vpn@proton.ch" = amo "proton-vpn-firefox-extension";
+          "firefox-extension@steamdb.info" = amo "steam-database";
         };
       };
-    };
 
-    nativeMessagingHosts = [
-      pkgs.kdePackages.plasma-browser-integration
-    ];
+      profiles = {
+        Home = {
+          id = 0;
+          name = "Home";
+          path = "munkien";
+          isDefault = true;
+          settings = commonSettings;
 
-    profiles = {
-      Home = {
-        id = 0;
-        name = "Home";
-        path = "munkien";
-        isDefault = true;
+          search = {
+            force = true;
+            default = "ddg";
 
-        settings = {
-          "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
-          "widget.use-xdg-desktop-portal.file-picker" = 1;
-        };
+            engines = {
+              "Nix Packages" = {
+                urls = [{template = "https://search.nixos.org/packages?query={searchTerms}";}];
+                icon = "https://nixos.org/favicon.png";
+                updateInterval = 24 * 60 * 60 * 1000;
+                definedAliases = ["@np"];
+              };
 
-        search = {
-          force = true;
-          default = "ddg";
+              "GitHub" = {
+                urls = [{template = "https://github.com/search?q={searchTerms}&type=repositories";}];
+                definedAliases = ["@gh"];
+              };
 
-          engines = {
-            "Nix Packages" = {
-              urls = [
-                {
-                  template = "https://search.nixos.org/packages?query={searchTerms}";
-                }
-              ];
-              icon = "https://nixos.org/favicon.png";
-              updateInterval = 24 * 60 * 60 * 1000;
-              definedAliases = ["@np"];
+              "google".metaData.hidden = true;
             };
+          };
 
-            "GitHub" = {
-              urls = [
-                {
-                  template = "https://github.com/search?q={searchTerms}&type=repositories";
-                }
-              ];
-              definedAliases = ["@gh"];
-            };
-
-            "google".metaData.hidden = true;
+          bookmarks = {
+            force = true;
+            settings = [
+              {
+                name = "AI";
+                toolbar = true;
+                bookmarks = [
+                  (bm "Gemini" "https://gemini.google.com/" [])
+                  (bm "ChatGPT" "https://chatgpt.com/" [])
+                ];
+              }
+              {
+                name = "Economy";
+                toolbar = true;
+                bookmarks = [
+                  (bm "Actual Budget" "https://vehement-jaguar.pikapod.net/budget" [])
+                ];
+              }
+              {
+                name = "Gaming";
+                toolbar = true;
+                bookmarks = [
+                  (bm "Stardew Valley Expanded Wiki" "https://stardewvalleyexpanded.wiki.gg/" ["gaming" "wiki"])
+                ];
+              }
+              {
+                name = "Entertainment";
+                toolbar = true;
+                bookmarks = [
+                  (bm "YouTube" "https://youtube.com/" ["entertainment"])
+                  (bm "HBO" "https://hbomax.com/" ["entertainment"])
+                  (bm "Netflix" "https://netflix.com/" ["entertainment"])
+                ];
+              }
+              {
+                name = "Development";
+                toolbar = true;
+                bookmarks = [
+                  (bm "NixOS Search" "https://search.nixos.org/packages" ["nix" "dev"])
+                  (bm "NixOS Plasma Manager Search" "https://nix-community.github.io/plasma-manager/options.xhtml" ["nix" "dev"])
+                  (bm "NixOS Home Manager Search" "https://home-manager-options.extranix.com/" ["nix" "dev"])
+                  (bm "NixOS Noogle Search" "https://noogle.dev/" ["nix" "dev"])
+                ];
+              }
+            ];
           };
         };
 
-        bookmarks = {
-          force = true;
-
-          settings = [
-            {
-              name = "AI";
-              toolbar = true;
-              bookmarks = [
-                {
-                  name = "Gemini";
-                  url = "https://gemini.google.com";
-                }
-                {
-                  name = "ChatGPT";
-                  url = "https://chatgpt.com";
-                }
-              ];
-            }
-
-            {
-              name = "Economy";
-              toolbar = true;
-              bookmarks = [
-                {
-                  name = "Actual Budget";
-                  url = "https://vehement-jaguar.pikapod.net/budget";
-                }
-              ];
-            }
-
-            {
-              name = "Gaming";
-              toolbar = true;
-              bookmarks = [
-                {
-                  name = "Stardew Valley Expanded Wiki";
-                  url = "https://stardewvalleyexpanded.wiki.gg/";
-                  tags = ["gaming" "wiki"];
-                }
-              ];
-            }
-
-            {
-              name = "Entertainment";
-              toolbar = true;
-              bookmarks = [
-                {
-                  name = "YouTube";
-                  url = "https://youtube.com/";
-                  tags = ["entertainment"];
-                }
-                {
-                  name = "HBO";
-                  url = "https://hbomax.com/";
-                  tags = ["entertainment"];
-                }
-                {
-                  name = "NetFlix";
-                  url = "https://netflix.com/";
-                  tags = ["entertainment"];
-                }
-              ];
-            }
-
-            {
-              name = "Development";
-              toolbar = true;
-              bookmarks = [
-                {
-                  name = "NixOS Search";
-                  url = "https://search.nixos.org/packages";
-                  tags = ["nix" "dev"];
-                }
-                {
-                  name = "NixOS Plasma Manager Search";
-                  url = "https://nix-community.github.io/plasma-manager/options.xhtml";
-                  tags = ["nix" "dev"];
-                }
-                {
-                  name = "NixOS Home Manager Search";
-                  url = "https://home-manager-options.extranix.com/";
-                  tags = ["nix" "dev"];
-                }
-                {
-                  name = "NixOS Noogle Search";
-                  url = "https://noogle.dev/";
-                  tags = ["nix" "dev"];
-                }
-              ];
-            }
-          ];
+        Work = {
+          id = 1;
+          name = "Work";
+          path = "work";
+          settings = commonSettings;
         };
-      };
 
-      Work = {
-        id = 1;
-        name = "Work";
-        path = "work";
+        Midtfyns = {
+          id = 2;
+          name = "Midtfyns Festival";
+          path = "midtfyns";
+          settings = commonSettings;
 
-        settings = {
-          "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
-          "widget.use-xdg-desktop-portal.file-picker" = 1;
+          bookmarks = {
+            force = true;
+            settings = [
+              {
+                name = "Workspace";
+                toolbar = true;
+                bookmarks = [
+                  (bm "Asana" "https://app.asana.com/" ["work"])
+                  (bm "Outlook" "https://outlook.office.com/mail/" ["work"])
+                  (bm "Teams" "https://teams.microsoft.com/" ["work"])
+                ];
+              }
+              {
+                name = "Development";
+                toolbar = true;
+                bookmarks = [
+                  (bm "MailTrap" "https://mailtrap.io/sandboxes/4555739/settings" ["dev"])
+                  (bm "Claude" "https://claude.ai/" ["dev"])
+                ];
+              }
+              {
+                name = "Sandbox Bagland";
+                toolbar = true;
+                bookmarks = [
+                  (bm "Front" "https://mf-bagland-staging.azurewebsites.net/" ["dev"])
+                  (bm "Admin" "https://mf-bagland-staging.azurewebsites.net/admin" ["dev"])
+                ];
+              }
+            ];
+          };
         };
-      };
 
-      Midtfyns = {
-        id = 2;
-        name = "Midtfyns";
-        path = "midtfyns";
-
-        settings = {
-          "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
-          "widget.use-xdg-desktop-portal.file-picker" = 1;
-        };
-      };
-
-      H = {
-        id = 3;
-        name = "H";
-        path = "h";
-
-        settings = {
-          "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
-          "widget.use-xdg-desktop-portal.file-picker" = 1;
+        H = {
+          id = 3;
+          name = "H";
+          path = "h";
+          settings = commonSettings;
         };
       };
     };
-  };
 
-  xdg.desktopEntries = {
-    firefox-home = {
-      name = "Firefox — Home";
-      genericName = "Personal Browser";
-      exec = "firefox -P Home -no-remote %U";
-      icon = "firefox";
-      terminal = false;
-      categories = ["Network" "WebBrowser"];
-    };
+    xdg.desktopEntries = {
+      firefox-home = mkLauncher "Home" "Personal Browser";
+      firefox-work = mkLauncher "Work" "Work Browser";
+      firefox-midtfyns = mkLauncher "Midtfyns Festival" "Midtfyns Browser";
+      firefox-h = mkLauncher "H" "H Browser";
 
-    firefox-work = {
-      name = "Firefox — Work";
-      genericName = "Work Browser";
-      exec = "firefox -P Work -no-remote %U";
-      icon = "firefox";
-      terminal = false;
-      categories = ["Network" "WebBrowser"];
+      firefox-profile-manager = {
+        name = "Firefox — Profile Manager";
+        genericName = "Manage Firefox Profiles";
+        exec = "firefox -P";
+        icon = "firefox";
+        terminal = false;
+        categories = ["Network" "WebBrowser"];
+      };
     };
-
-    firefox-midtfyns = {
-      name = "Firefox — Midtfyns";
-      genericName = "Midtfyns Browser";
-      exec = "firefox -P Midtfyns -no-remote %U";
-      icon = "firefox";
-      terminal = false;
-      categories = ["Network" "WebBrowser"];
-    };
-
-    firefox-h = {
-      name = "Firefox — H";
-      genericName = "H Browser";
-      exec = "firefox -P H -no-remote %U";
-      icon = "firefox";
-      terminal = false;
-      categories = ["Network" "WebBrowser"];
-    };
-  };
-}
+  }
