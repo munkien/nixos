@@ -7,9 +7,11 @@
     # Architecture-aware bootloader configuration
     loader = {
       # Disable systemd-boot for ARM/Generic, enable for x86_64
-      systemd-boot.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isx86_64;
-      systemd-boot.memtest86.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isx86_64;
-      systemd-boot.configurationLimit = 30;
+      systemd-boot = {
+        enable = lib.mkDefault pkgs.stdenv.hostPlatform.isx86_64;
+        memtest86.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isx86_64;
+        configurationLimit = 30;
+      };
 
       efi.canTouchEfiVariables = lib.mkDefault pkgs.stdenv.hostPlatform.isx86_64;
       generic-extlinux-compatible.enable = lib.mkDefault (!pkgs.stdenv.hostPlatform.isx86_64);

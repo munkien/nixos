@@ -1,8 +1,6 @@
 {
   pkgs,
   inputs,
-  lib,
-  config,
   ...
 }: {
   imports = [inputs.arion.nixosModules.arion];
@@ -12,9 +10,18 @@
     pkgs.docker-client
   ];
 
-  virtualisation.docker.enable = false;
-  virtualisation.podman.enable = true;
-  virtualisation.podman.dockerSocket.enable = true;
+  virtualisation = {
+    docker.enable = false;
+    podman = {
+      enable = true;
+      dockerSocket.enable = true;
+    };
+
+    arion.backend = "podman-socket";
+    arion.projects.home-infra.settings = {
+      networks.internal_net = {};
+    };
+  };
 
   systemd.timers."podman-auto-update" = {
     wantedBy = ["timers.target"];
@@ -29,11 +36,6 @@
   systemd.services."arion-home-infra" = {
     after = ["network-online.target"];
     wants = ["network-online.target"];
-  };
-
-  virtualisation.arion.backend = "podman-socket";
-  virtualisation.arion.projects.home-infra.settings = {
-    networks.internal_net = {};
   };
 
   preservation.preserveAt."/persist" = {

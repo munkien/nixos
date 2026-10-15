@@ -3,10 +3,12 @@
   lib,
   inputs,
   osConfig,
-  config,
   ...
 }: {
-  programs.home-manager.enable = true;
+  programs = {
+    home-manager.enable = true;
+    lutris.enable = osConfig.my.gaming.enable;
+  };
   home = {
     username = "munkien";
     homeDirectory = "/home/munkien";
@@ -48,8 +50,6 @@
     "info.beyondallreason.bar"
     "com.revolutionarygamesstudio.ThriveLauncher"
   ];
-
-  programs.lutris.enable = osConfig.my.gaming.enable;
 
   # home.activation.linkSteamDriveC = lib.hm.dag.entryAfter ["writeBoundary"] ''
   #   ln -sfn /scratch/battle.net $VERBOSE_ARG ${config.home.homeDirectory}/.local/share/Steam/steamapps/compatdata/2232372708/pfx/drive_c

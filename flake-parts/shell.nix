@@ -9,8 +9,8 @@
       src = ../.;
       hooks = {
         alejandra.enable = true;
-        deadnix.enable = false;
-        statix.enable = false;
+        deadnix.enable = true;
+        statix.enable = true;
         check-symlinks.enable = true;
         ripsecrets.enable = true;
       };

@@ -38,7 +38,7 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
             publisher = "jeanp413";
             version = "0.0.45";
             sha256 = "sha256-YoeUNvxLSmy3OftZp2AnqRU+TKe3KYLt3zZ0B5XGgeE=";
-          }).overrideAttrs (old: {
+          }).overrideAttrs (_old: {
             src = pkgs.fetchurl {
               url = "https://github.com/jeanp413/open-remote-ssh/releases/download/v0.0.45/open-remote-ssh-0.0.45.vsix";
               hash = "sha256-YoeUNvxLSmy3OftZp2AnqRU+TKe3KYLt3zZ0B5XGgeE=";

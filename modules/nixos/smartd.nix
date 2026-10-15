@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   services.smartd = lib.mkIf (!config.virtualisation.hypervGuest.enable) {

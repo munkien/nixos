@@ -8,7 +8,7 @@
     inputs.preservation.nixosModules.preservation
   ];
 
-  fileSystems."/persist".neededForBoot = lib.mkDefault (lib.mkIf (config.preservation.enable) true);
+  fileSystems."/persist".neededForBoot = lib.mkDefault (lib.mkIf config.preservation.enable true);
 
   preservation = {
     enable = lib.mkDefault true;

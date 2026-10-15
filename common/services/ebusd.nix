@@ -1,4 +1,4 @@
-{...}: {
+{
   services.ebusd = {
     enable = true;
     device = "ens:192.168.88.248:9999";
