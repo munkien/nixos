@@ -4,7 +4,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-file.url = "github:vic/flake-file";
-    colmena.url = "github:zhaofengli/colmena";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     preservation.url = "github:WilliButz/preservation";
     disko.url = "github:nix-community/disko";

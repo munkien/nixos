@@ -22,7 +22,6 @@
         config.checks.pre-commit-check.enabledPackages
         ++ [
           config.agenix-rekey.package
-          inputs.colmena.packages.${system}.colmena
         ];
     };
   };

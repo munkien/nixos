@@ -17,9 +17,11 @@ update:
   nix run .#write-flake
   nix flake check
 
+# Re-encrypt secrets for all hosts, then publish for comin to pick up.
+# Hosts self-deploy by polling main; see README "Deployment".
 deploy:
   agenix rekey -a
-  colmena apply
+  git push
 
 push: 
   nix flake check

@@ -12,7 +12,7 @@ This repository houses the strictly declarative, multi-architecture configuratio
 ├── outputs.nix            # Flake entrypoint -> flake-parts/
 ├── flake-parts/           # Flake schema: inputs, hosts, devShell & lint hooks
 │   ├── default.nix        #   explicit input declarations + module imports
-│   ├── hosts.nix          #   nixosConfigurations + colmena host/tag definitions
+│   ├── hosts.nix          #   nixosConfigurations + host registry (system/tags)
 │   └── shell.nix          #   devShell and pre-commit lint checks
 ├── modules/               # Reusable modules, auto-imported via import-tree
 │   ├── nixos/             #   system-level: boot, disko, tailscale, desktop, gaming, ...
@@ -63,7 +63,6 @@ graph TD
 The fleet is managed using `flake-parts` to provide a clean schema for multi-architecture systems (`x86_64-linux` and `aarch64-linux`).
 - **NixOS Configurations**: Evaluated per host in the `flake-parts/hosts.nix` outputs (`nixosConfigurations.pc-anders`, `nixosConfigurations.server-home-1`).
 - **Home Manager Configuration**: Exposed via the `home-manager` flake module, and imported into each host through `modules/nixos/home-manager.nix`.
-- **Colmena**: Declared as a flake input and available in the devShell. Note that no `colmenaHive` output or `colmena.nix` currently exists, so `just deploy` / `colmena apply` is **not wired up yet** — see TODO.
 
 ### Fleet-Wide Feature Flags
 We declare custom fleet-wide flags in `modules/nixos/options.nix` (and `modules/home/options.nix` for user-scoped flags) within the `my` namespace:
@@ -230,17 +229,12 @@ just test     # nh os test  — build and activate, rollback unless confirmed
 just switch   # nh os switch
 ```
 
-**Remote hosts** are intended to be deployed with `colmena`:
+**Remote hosts** deploy themselves via [`comin`](https://github.com/nlewo/comin), which polls `main` over git and rebuilds locally:
 ```bash
-just deploy   # agenix rekey -a && colmena apply
+just deploy   # agenix rekey -a && git push  — hosts pick it up from main
 ```
 
-> **Not yet functional.** `colmena apply` requires a colmena hive configuration, and
-> neither a `colmena.nix` nor a `colmenaHive` flake output currently exists — the host
-> `tags` in `flake-parts/hosts.nix` are declared but never consumed, so `--on @servers`
-> has nothing to match. Until this is wired up, deploy hosts via `nh` or `nixos-rebuild`.
-> Separately, both hosts run [`comin`](https://github.com/nlewo/comin) for git-pull-based
-deployment, which is the mechanism actually in use.
+There is no central push tool. `main` is therefore the deploy branch: anything merged to it is applied by every host running comin. Rollback on a bad generation is handled locally by systemd-boot Automatic Boot Assessment (see `modules/nixos/boot.nix`), so a host that fails to reach a healthy state falls back to its previous generation without network access.
 
 ### Nix Garbage Collection (NH Integration)
 Nix generations are managed using `nh` (Nix Helper) in `modules/nixos/nix.nix`.

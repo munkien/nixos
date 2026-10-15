@@ -21,7 +21,6 @@
 - [agenix-shell](https://github.com/aciceri/agenix-shell)
 - [antigravity-nix](https://github.com/jacopone/antigravity-nix)
 - [arion](https://github.com/hercules-ci/arion)
-- [colmena](https://github.com/zhaofengli/colmena)
 - [comin](https://github.com/nlewo/comin)
 - [disko](https://github.com/nix-community/disko)
 - [flake-file](https://github.com/vic/flake-file)
@@ -44,7 +43,6 @@
 - `github:aciceri/agenix-shell`
 - `github:jacopone/antigravity-nix`
 - `github:hercules-ci/arion`
-- `github:zhaofengli/colmena`
 - `github:nlewo/comin`
 - `github:nix-community/disko`
 - `github:vic/flake-file`
