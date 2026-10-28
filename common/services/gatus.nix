@@ -34,6 +34,5 @@ _: {
     };
   };
 
-  # Open the firewall for the Gatus dashboard
-  networking.firewall.allowedTCPPorts = [8080];
+  # Exposure (firewall) is declared by the host via my.services.
 }

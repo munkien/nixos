@@ -108,7 +108,7 @@ The fleet is managed using `flake-parts` to provide a clean schema for multi-arc
 - **Home Manager Configuration**: Exposed via the `home-manager` flake module, and imported into each host through `modules/nixos/home-manager.nix`.
 
 ### Fleet-Wide Feature Flags
-We declare custom fleet-wide flags in `modules/nixos/options.nix` (and `modules/home/options.nix` for user-scoped flags) within the `my` namespace:
+We declare custom fleet-wide flags in `modules/nixos/profile.nix` within the `my` namespace. They live in one module regardless of whether NixOS or Home Manager consumes them, so a host's profile is described in one place:
 - `my.desktop.enable`: Toggles desktop environments, display managers, graphic stacks, and graphical applications.
 - `my.gaming.enable`: Activates gaming optimizations, Steam, GameMode, and GameScope.
 - `my.user.developer.enable`: Toggles user-scoped developer tooling (Home Manager).

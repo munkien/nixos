@@ -18,12 +18,5 @@ _: {
     restart = "always";
   };
 
-  services.caddy.virtualHosts."ha.munkie.dk" = {
-    extraConfig = ''
-      reverse_proxy 127.0.0.1:8123
-    '';
-  };
-
-  # Open the port if you ever need to bypass Caddy locally
-  networking.firewall.allowedTCPPorts = [8123];
+  # Exposure (vhost + firewall) is declared by the host via my.services.
 }

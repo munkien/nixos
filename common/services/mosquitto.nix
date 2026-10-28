@@ -28,5 +28,5 @@
     "d /var/lib/mosquitto 0750 mosquitto mosquitto - -"
   ];
 
-  networking.firewall.allowedTCPPorts = [1883];
+  # Exposure (firewall) is declared by the host via my.services.
 }

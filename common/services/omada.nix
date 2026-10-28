@@ -25,21 +25,7 @@ _: {
     restart = "always";
   };
 
-  networking.firewall.allowedTCPPorts = [
-    8088 # HTTP Web UI
-    8043 # HTTPS Web UI
-    8843 # Guest Portal HTTPS
-    29811 # Management / Discovery
-    29812 # Adoption / Management
-    29813 # Firmware Upgrade
-    29814 # Management
-    29815 # Device Mgmt
-    29816 # Device Mgmt
-    29817 # Device Mgmt
-  ];
-  networking.firewall.allowedUDPPorts = [
-    29810 # Device Discovery
-  ];
+  # Exposure (firewall) is declared by the host via my.services.
 
   preservation.preserveAt."/persist" = {
     directories = [

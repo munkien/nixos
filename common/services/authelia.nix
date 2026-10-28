@@ -60,8 +60,7 @@ in {
     chmod 0644 /var/lib/authelia/configuration.yml
   '';
 
-  networking.firewall.allowedUDPPorts = [9091];
-  networking.firewall.allowedTCPPorts = [9091];
+  # Exposure (firewall) is declared by the host via my.services.
 
   age.secrets."authelia_env" = {
     rekeyFile = ../../secrets/services/authelia_env.age;

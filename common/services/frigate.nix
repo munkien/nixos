@@ -1,109 +1,25 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
-  frigateYaml = pkgs.writeText "frigate-config.yml" ''
-    mqtt:
-      enabled: True
-      host: server-home-1.home.arpa
-      client_id: frigate
-
-    ffmpeg:
-      hwaccel_args: preset-vaapi
-
-    detect:
-      enabled: True
-
-    snapshots:
-      enabled: True
-
-    record:
-      enabled: True
-
-      continuous:
-        days: 3
-
-      alerts:
-        retain:
-          days: 14
-          mode: motion
-
-      detections:
-        retain:
-          days: 14
-          mode: motion
-
-    cameras:
-      driveway:
-        ffmpeg:
-          inputs:
-            - path: "rtsp://{FRIGATE_DRIVEWAY_USER}:{FRIGATE_DRIVEWAY_PASS}@{FRIGATE_DRIVEWAY_IP}:554/live/ch00_0" # /LowResolutionVideo
-              roles:
-                - record
-                - detect
-        detect:
-          width: 1920
-          height: 1080
-          fps: 5
-        objects:
-          track:
-            - person
-            - car
-            - dog
-        zones:
-          actual_driveway:
-            coordinates:
-              0.043,0.383,0.696,0.584,0.702,0.721,0.853,0.736,0.898,0.658,0.947,0.65,0.926,0.998,0.006,0.997,0.005,0.418
-            loitering_time: 0
-            friendly_name: Actual Driveway
-        review:
-          alerts:
-            required_zones: actual_driveway
-
-      garage:
-        ffmpeg:
-          inputs:
-            - path: "{FRIGATE_GARAGE_PATH}"
-              roles:
-                - record
-                - detect
-        detect:
-          width: 1920
-          height: 1080
-          fps: 5
-        objects:
-          track:
-            - person
-            - car
-            - dog
-
-      attic1:
-        ffmpeg:
-          inputs:
-            - path: "{FRIGATE_ATTIC1_PATH}"
-              roles:
-                - record
-                - detect
-        detect:
-          width: 1920
-          height: 1080
-          fps: 5
-        objects:
-          track:
-            - bird
-            - cat
-            - mouse
-  '';
+  # Settings are declared as attrsets in config.nix and rendered here. Writing
+  # frigate's YAML by hand in a Nix string meant a misspelled key was invisible
+  # until frigate failed at runtime; as attrsets it is a type error.
+  frigateYaml = pkgs.writeText "frigate-config.yml" (lib.generators.toYAML {} config.my.frigateSettings);
 in {
+  # Settings live in ./frigate/config.nix. Imported here rather than in the host
+  # so a host keeps importing a single frigate entrypoint.
+  imports = [./frigate/config.nix];
+
   system.activationScripts.frigateConfig = ''
     mkdir -p /var/lib/frigate/config
     cp -f ${frigateYaml} /var/lib/frigate/config/config.yml
     chmod 0644 /var/lib/frigate/config/config.yml
   '';
 
-  networking.firewall.allowedTCPPorts = [5000 8554 1984];
-  networking.firewall.allowedUDPPorts = [5000 8554 1984];
+  # Exposure (vhost + firewall) is declared by the host via my.services.
 
   age.secrets."frigate" = {
     rekeyFile = ../../secrets/services/frigate.age;
@@ -145,11 +61,5 @@ in {
     ];
     networks = ["internal_net"];
     restart = "always";
-  };
-
-  services.caddy.virtualHosts."frigate.munkie.dk" = {
-    extraConfig = ''
-      reverse_proxy 127.0.0.1:5000
-    '';
   };
 }

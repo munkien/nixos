@@ -9,7 +9,7 @@
 in {
   imports = [inputs.arion.nixosModules.arion];
 
-  # `my.containers.user` is declared in modules/nixos/options.nix so it exists on
+  # `my.containers.user` is declared in modules/nixos/profile.nix so it exists on
   # every host, not just those importing arion.
 
   config = {

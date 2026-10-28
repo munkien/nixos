@@ -24,7 +24,7 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [8321];
+  # Exposure (firewall) is declared by the host via my.services.
 
   preservation.preserveAt."/persist" = {
     directories = [

@@ -28,10 +28,50 @@
 }: let
   cfg = config.my.healthCheck;
 
+  # Checks are data, so a module that owns a prerequisite can contribute its own
+  # check instead of the gate having to know about it. Each check is a shell
+  # command that exits 0 when healthy; `message` is what gets logged on failure.
+  defaultChecks = [
+    {
+      name = "default-route";
+      # Without a default route the host cannot be reached and cannot pull a fix,
+      # which is the failure mode this gate exists for.
+      command = "ip route show default | grep -q .";
+      message = "no default route";
+    }
+    {
+      name = "comin-active";
+      # Without comin the host will not self-update, so a bad generation would
+      # never be replaced.
+      command = "systemctl is-active --quiet comin.service";
+      message = "comin.service is not active";
+    }
+  ];
+
+  displayManagerCheck = {
+    name = "display-manager-active";
+    command = "systemctl is-active --quiet display-manager.service";
+    message = "display-manager.service is not active";
+  };
+
+  # The option is the single source of truth. The display-manager check is part
+  # of its default, so appending to the option and reading it back agree.
+  inherit (cfg) checks;
+
+  renderCheck = check: ''
+    # ${check.name}
+    if ${check.command} 2>/dev/null; then
+      printf 'ok: ${check.name}\n'
+    else
+      report "FAIL: ${check.message}"
+      failures=$((failures + 1))
+    fi
+  '';
+
   checkScript = pkgs.writeShellApplication {
     name = "fleet-health-check";
-    # iproute2 provides `ip`, used for the default-route check below. Without it
-    # the check cannot run and the gate would fail on every boot.
+    # iproute2 provides `ip`, used by the default-route check. Without it the
+    # check cannot run and the gate would fail on every boot.
     runtimeInputs = with pkgs; [coreutils iproute2 systemd];
     text = ''
       set -uo pipefail
@@ -43,34 +83,7 @@
         logger -t fleet-health-check -p daemon.err -- "$1" || true
       }
 
-      # 1. Default route present. Without it the host cannot be reached and
-      #    cannot pull a fix, which is the failure mode this gate exists for.
-      if ip route show default 2>/dev/null | grep -q .; then
-        printf 'ok: default route present\n'
-      else
-        report "FAIL: no default route"
-        failures=$((failures + 1))
-      fi
-
-      # 2. Deploy agent. Without comin the host will not self-update, so a bad
-      #    generation would never be replaced.
-      if systemctl is-active --quiet comin.service 2>/dev/null; then
-        printf 'ok: comin active\n'
-      else
-        report "FAIL: comin.service is not active"
-        failures=$((failures + 1))
-      fi
-
-      ${lib.optionalString cfg.expectDisplayManager ''
-        # 3. Display manager, on hosts that are meant to be graphical. A black
-        #    screen is a failed boot even though the system is technically "up".
-        if systemctl is-active --quiet display-manager.service 2>/dev/null; then
-          printf 'ok: display-manager active\n'
-        else
-          report "FAIL: display-manager.service is not active"
-          failures=$((failures + 1))
-        fi
-      ''}
+      ${lib.concatMapStringsSep "\n" renderCheck checks}
 
       if [ "$failures" -eq 0 ]; then
         printf 'fleet-health-check: all checks passed\n'
@@ -84,6 +97,31 @@
 in {
   options.my.healthCheck = {
     enable = lib.mkEnableOption "gate boot-complete.target on fleet health checks";
+
+    checks = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          name = lib.mkOption {
+            type = lib.types.str;
+            description = "Short identifier, used in the log line.";
+          };
+          command = lib.mkOption {
+            type = lib.types.str;
+            description = "Shell command; exit 0 means healthy.";
+          };
+          message = lib.mkOption {
+            type = lib.types.str;
+            description = "What is logged when the check fails.";
+          };
+        };
+      });
+      default = defaultChecks ++ lib.optional config.my.desktop.enable displayManagerCheck;
+      description = ''
+        Prerequisites a boot must satisfy to be blessed. Defaults cover the two
+        cases every host has. A module that owns a prerequisite should append its
+        own check here rather than editing this module.
+      '';
+    };
 
     settleSeconds = lib.mkOption {
       type = lib.types.ints.positive;

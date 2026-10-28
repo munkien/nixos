@@ -53,8 +53,6 @@
     };
   };
 
-  nixpkgs.hostPlatform = "x86_64-linux";
-
   networking.hostName = "pc-anders";
   age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
 
