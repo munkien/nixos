@@ -137,7 +137,6 @@
   home.packages = with pkgs;
     lib.optionals osConfig.my.desktop.enable [
       kdePackages.kio-extras
-      wl-clipboard
       headsetcontrol
       winbox4
       keepassxc
@@ -148,8 +147,6 @@
       signal-desktop
       obsidian
       zenmap
-      podman-desktop
-      pods
       variety
       proton-pass
       protonmail-desktop
