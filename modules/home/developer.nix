@@ -21,6 +21,7 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
     code-cursor
     mqttx
     claude-code
+    opencode
   ];
 
   programs.vscodium = {
