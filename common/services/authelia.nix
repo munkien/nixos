@@ -55,10 +55,13 @@ in {
     ];
   };
 
-  system.activationScripts.autheliaConfig = ''
-    cp -f ${autheliaConfig} /var/lib/authelia/configuration.yml
-    chmod 0644 /var/lib/authelia/configuration.yml
-  '';
+  # The config is bind-mounted from the store rather than copied in by an
+  # activation script. A copy is only correct if something re-runs it, and it
+  # never converges on a running system: without this, `nixos-rebuild switch`
+  # left the container reading the previous generation's config.
+  #
+  # The remaining writable path is /var/lib/authelia, which holds authelia's own
+  # state (db.sqlite3, notifications).
 
   # Exposure (firewall) is declared by the host via my.services.
 
@@ -84,6 +87,7 @@ in {
 
     volumes = [
       "/var/lib/authelia:/config"
+      "${autheliaConfig}:/config/configuration.yml:ro"
       # Mount the immutable secret to a separate path to bypass the chown failure
       "${config.age.secrets."authelia_users".path}:/secrets/users_database.yml:ro"
       "/etc/localtime:/etc/localtime:ro"

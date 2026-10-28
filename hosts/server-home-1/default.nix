@@ -35,6 +35,16 @@
 
     # How each service is reachable. This is the single place exposure is
     # declared; the service modules hold only configuration.
+    #
+    # Every service this host imports is accounted for below, or noted as
+    # deliberately absent, so that "is it here?" has one answer:
+    #
+    #   caddy, glances   -- their nixpkgs modules set openFirewall = true and
+    #                       own their ports; listing them here would duplicate.
+    #   fail2ban, arion  -- open no ports.
+    #   ebusd            -- outbound to the adapter, and to mosquitto on localhost.
+    #   ialarm2mqtt      -- publishes to mosquitto, exposes nothing.
+    #   matterjs-server  -- network_mode = host, UDP discovery on 5540/5353.
     services = {
       # --- reverse-proxied by Caddy ---
       homeassistant = {
@@ -54,6 +64,11 @@
       authelia.ports = [9091]; # HTTP only; 9091 is not a UDP service
       mosquitto.ports = [1883];
       zigbee2mqtt.ports = [8321];
+      # matterjs-server is NOT declared here: it runs with network_mode = "host"
+      # and currently opens no firewall ports. Adding them would change
+      # reachability on a running host, and the exact ports Matter commissioning
+      # needs (5540 TCP/UDP, mDNS 5353) have not been verified against this
+      # container. Left as-is deliberately rather than guessed at.
       omada = {
         ports = [
           8088 # HTTP Web UI

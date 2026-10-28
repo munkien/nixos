@@ -13,12 +13,10 @@ in {
   # so a host keeps importing a single frigate entrypoint.
   imports = [./frigate/config.nix];
 
-  system.activationScripts.frigateConfig = ''
-    mkdir -p /var/lib/frigate/config
-    cp -f ${frigateYaml} /var/lib/frigate/config/config.yml
-    chmod 0644 /var/lib/frigate/config/config.yml
-  '';
-
+  # The config is bind-mounted from the store rather than copied in by an
+  # activation script, which never converges on a running system. Frigate also
+  # writes its own state into /config (the database), so that directory stays a
+  # real volume.
   # Exposure (vhost + firewall) is declared by the host via my.services.
 
   age.secrets."frigate" = {
@@ -30,6 +28,9 @@ in {
     "d /var/lib/frigate/shm 1777 root root -"
     "d /var/lib/frigate/config 0755 root root -"
     "d /var/lib/frigate/storage 0755 root root -"
+    # Remove the config the retired activation script used to copy here. Left in
+    # place it would sit underneath the bind mount and drift silently.
+    "r /var/lib/frigate/config/config.yml"
   ];
   systemd.mounts = [
     {
@@ -48,6 +49,7 @@ in {
     ];
     volumes = [
       "/var/lib/frigate/config:/config"
+      "${frigateYaml}:/config/config.yml:ro"
       "/media/frigate:/media/frigate"
       "/etc/localtime:/etc/localtime:ro"
       "/var/lib/frigate/shm:/dev/shm"
