@@ -93,7 +93,5 @@
     hibernate.enable = false;
     hybrid-sleep.enable = false;
   };
-
-  # Naming
-  networking.hostName = "server-home-1";
+  # networking.hostName is set by flake-parts/hosts.nix from the directory name.
 }

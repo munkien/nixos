@@ -292,6 +292,38 @@
   hmUser = inputs.self.nixosConfigurations.pc-anders.config.home-manager.users.munkien;
 
   repoChecks = pkgs: {
+    # The health gate's interface is `my.healthCheck.checks`. Defaults are
+    # covered by the per-host invariants above, but nothing proved a check
+    # *contributed* by another module actually reaches the script. This renders
+    # a sentinel check through the same function the module uses. Evaluating a
+    # throwaway nixosSystem here would recurse (it references this flake), so the
+    # renderer is called directly.
+    "fleet-assertions-health-check-contribution" = let
+      healthChecks = import ../lib/health-checks.nix {inherit lib;};
+      rendered = healthChecks.renderBody [
+        {
+          name = "contributed-sentinel";
+          command = "true";
+          message = "sentinel failed";
+        }
+      ];
+    in
+      mkAssertionCheck pkgs "health-check-contribution" [
+        (assertTrue "contributed-check-reaches-the-script" (
+            lib.hasInfix "contributed-sentinel" rendered
+          ) ''
+            A contributed check did not reach the rendered script.
+          '')
+        (assertTrue "contributed-command-is-rendered" (lib.hasInfix "if true 2>/dev/null" rendered) ''
+          The contributed check's command was not rendered into the script, so
+          appending a check would add a log line without running anything.
+        '')
+        (assertTrue "contributed-failure-message-is-rendered" (lib.hasInfix "FAIL: sentinel failed" rendered) ''
+          The contributed check's failure message was not rendered, so a failing
+          check would withhold blessing without saying why.
+        '')
+      ];
+
     # colmena was removed deliberately (no hive config ever existed).
     "fleet-assertions-no-colmena" = mkAssertionCheck pkgs "no-colmena" [
       (assertTrue "no-colmena-input" (!(inputs ? colmena)) ''

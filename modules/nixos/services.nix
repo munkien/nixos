@@ -68,6 +68,19 @@ in {
   };
 
   config = {
+    # A vhost with nothing to proxy to used to die on `head []` with no
+    # explanation. Fail at evaluation with a message that names the service.
+    assertions =
+      lib.mapAttrsToList (name: s: {
+        assertion = s.hostname == null || s.proxyPort != null || s.ports != [];
+        message = ''
+          my.services.${name}.hostname is set but there is no port to proxy to.
+          Set `proxyPort` (if the container publishes a different host port) or
+          `ports` (if it uses network_mode = "host").
+        '';
+      })
+      cfg;
+
     networking.firewall.allowedTCPPorts =
       lib.concatMap (s: s.ports) (lib.attrValues cfg);
 

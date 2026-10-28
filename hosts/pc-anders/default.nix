@@ -53,7 +53,7 @@
     };
   };
 
-  networking.hostName = "pc-anders";
+  # networking.hostName is set by flake-parts/hosts.nix from the directory name.
   age.rekey.hostPubkey = lib.strings.trim (builtins.readFile ./hostPubkey.pub);
 
   systemd.services.systemd-machine-id-commit.enable = false;

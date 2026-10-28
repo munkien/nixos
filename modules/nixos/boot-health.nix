@@ -58,41 +58,16 @@
   # of its default, so appending to the option and reading it back agree.
   inherit (cfg) checks;
 
-  renderCheck = check: ''
-    # ${check.name}
-    if ${check.command} 2>/dev/null; then
-      printf 'ok: ${check.name}\n'
-    else
-      report "FAIL: ${check.message}"
-      failures=$((failures + 1))
-    fi
-  '';
+  # Rendering lives in lib/ so it can be tested without evaluating a NixOS
+  # system; see flake-parts/tests.nix.
+  healthChecks = import ../../lib/health-checks.nix {inherit lib;};
 
   checkScript = pkgs.writeShellApplication {
     name = "fleet-health-check";
     # iproute2 provides `ip`, used by the default-route check. Without it the
     # check cannot run and the gate would fail on every boot.
     runtimeInputs = with pkgs; [coreutils iproute2 systemd];
-    text = ''
-      set -uo pipefail
-
-      failures=0
-
-      report() {
-        printf 'fleet-health-check: %s\n' "$1" >&2
-        logger -t fleet-health-check -p daemon.err -- "$1" || true
-      }
-
-      ${lib.concatMapStringsSep "\n" renderCheck checks}
-
-      if [ "$failures" -eq 0 ]; then
-        printf 'fleet-health-check: all checks passed\n'
-        exit 0
-      fi
-
-      report "$failures check(s) failed; withholding boot blessing so the generation can be rolled back"
-      exit 1
-    '';
+    text = healthChecks.renderBody checks;
   };
 in {
   options.my.healthCheck = {
