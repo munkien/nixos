@@ -15,7 +15,6 @@ lib.mkIf (osConfig.my.desktop.enable && config.my.user.developer.enable) {
     kdePackages.kate
     nixd
     direnv
-    nil
     gh
     inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs
     code-cursor
